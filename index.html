@@ -247,6 +247,7 @@ tr:hover td{background:#fafafa}
       <div class="ns">Comercial</div>
       <div class="ni" id="nav-dashboard"><span>📊</span>Dashboard</div>
       <div class="ni hidden" id="nav-metas"><span>🎯</span>Metas</div>
+      <div class="ni" id="nav-leads"><span>📋</span>Leads</div>
       <div class="ni" id="nav-seguimiento"><span>🔥</span>Seguimiento</div>
       <div class="ns">Administración</div>
       <div class="ni hidden" id="nav-usuarios"><span>👥</span>Usuarios</div>
@@ -556,6 +557,69 @@ tr:hover td{background:#fafafa}
 
       </div>
 
+      <div class="pg" id="page-leads">
+        <div class="pt">Leads comerciales</div>
+        <div class="ps">Base de datos de prospectos — cargue masivo desde Excel o registro individual</div>
+
+        <!-- STATS -->
+        <div class="sg" id="leadsGrid"></div>
+
+        <!-- ACCIONES Y FILTROS -->
+        <div class="card">
+          <div class="ct">📋 Gestión de leads
+            <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn btns btnsm" onclick="document.getElementById('leadsXlFile').click()">📥 Cargar Excel masivo</button>
+              <input type="file" id="leadsXlFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="importLeadsXL(this)">
+              <button class="btn btns btnsm" onclick="exportLeadsXL()">📤 Exportar Excel</button>
+              <button class="btn btnp btnsm" id="btnNewLead">+ Nuevo lead</button>
+            </div>
+          </div>
+
+          <!-- PLANTILLA INFO -->
+          <div class="ib ibi" style="margin-bottom:1rem">
+            ℹ️ <div>Para carga masiva, el Excel debe tener las columnas: <strong>Nombre, Celular, Cédula, Correo, Vehículo, Color, Tipo, Forma de Pago, Entidad, Fuente, Asesor (correo), Fecha Primer Contacto, Observaciones</strong>
+            <br><button class="btn btns btnsm" style="margin-top:4px" onclick="descargarPlantilla()">📄 Descargar plantilla</button></div>
+          </div>
+
+          <div class="sb2">
+            <input type="text" id="leadsSearch" placeholder="Buscar por nombre, cédula, celular...">
+            <select id="leadsFiltAsesor"><option value="">Todos los asesores</option></select>
+            <select id="leadsFiltEstado">
+              <option value="">Todos los estados</option>
+              <option value="Nuevo">🆕 Nuevo</option>
+              <option value="Contactado">📞 Contactado</option>
+              <option value="Interesado">⭐ Interesado</option>
+              <option value="Cita agendada">📅 Cita agendada</option>
+              <option value="En negociación">🤝 En negociación</option>
+              <option value="Convertido">✅ Convertido</option>
+              <option value="Desistido">❌ Desistido</option>
+            </select>
+            <select id="leadsFiltFuente">
+              <option value="">Todas las fuentes</option>
+              <option>Referido</option>
+              <option>Redes sociales</option>
+              <option>Sala de ventas</option>
+              <option>Llamada entrante</option>
+              <option>Página web</option>
+              <option>Evento / Feria</option>
+              <option>Base de datos</option>
+              <option>WhatsApp</option>
+              <option>Email marketing</option>
+            </select>
+            <select id="leadsFiltVeh"><option value="">Todos los vehículos</option></select>
+          </div>
+
+          <div class="tw"><table>
+            <thead><tr>
+              <th>Asesor</th><th>Nombre</th><th>Celular</th><th>Cédula</th>
+              <th>Vehículo</th><th>Fuente</th><th>1er Contacto</th>
+              <th>Estado</th><th>Últ. gestión</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="leadsTb"></tbody>
+          </table></div>
+        </div>
+      </div>
+
       <div class="pg" id="page-seguimiento">
         <div class="pt">Seguimiento de clientes</div>
         <div class="ps">Clientes calientes por asesor — actualizado en tiempo real</div>
@@ -588,7 +652,7 @@ tr:hover td{background:#fafafa}
               <th>Asesor</th><th>Cliente</th><th>Celular</th><th>Cédula</th>
               <th>VIN</th><th>Vehículo</th><th>Color</th><th>Pago</th><th>Entidad</th>
               <th>Temperatura</th><th>Próx. Contacto</th><th>Estado</th>
-              <th>Fechas</th><th>Acciones</th>
+              <th>Precio / Saldo</th><th>Fechas</th><th>Acciones</th>
             </tr></thead>
             <tbody id="segTb"></tbody>
           </table></div>
@@ -670,6 +734,141 @@ tr:hover td{background:#fafafa}
   <div class="fr"><div class="ff"><label>Contraseña</label><input type="password" id="uP"></div><div class="ff"><label>Rol</label><select id="uR"><option value="gerente">Gerente</option><option value="admin_sede">Asistente Comercial</option><option value="asesor">Asesor</option></select></div></div>
   <div class="ff hidden" id="uSF"><label>Sede</label><select id="uS"><option>Ciudad Jardín</option><option>Avenida 3ra Norte</option></select></div>
   <div class="mf"><button class="btn btns" id="btnCancelAddU">Cancelar</button><button class="btn btnp" id="btnSaveUsr">Crear usuario</button></div>
+</div></div>
+
+<!-- MODAL NUEVO / EDITAR LEAD -->
+<div class="mo" id="mNewLead"><div class="mdl" style="width:620px">
+  <div class="mt" id="mLeadTitle">📋 Nuevo lead</div>
+  <input type="hidden" id="leadEditId">
+
+  <div class="fr">
+    <div class="ff"><label>Asesor comercial</label><select id="leadAsesor"></select></div>
+    <div class="ff"><label>Estado actual</label>
+      <select id="leadEstado" onchange="toggleLeadFields()">
+        <option value="Nuevo">🆕 Nuevo</option>
+        <option value="Contactado">📞 Contactado</option>
+        <option value="Interesado">⭐ Interesado</option>
+        <option value="Cita agendada">📅 Cita agendada</option>
+        <option value="En negociación">🤝 En negociación</option>
+        <option value="Convertido">✅ Convertido</option>
+        <option value="Desistido">❌ Desistido</option>
+      </select>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Nombre completo</label><input type="text" id="leadNombre" placeholder="Nombre del prospecto"></div>
+    <div class="ff"><label>Número de cédula</label><input type="text" id="leadCedula" placeholder="Cédula"></div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Celular</label><input type="text" id="leadCelular" placeholder="Celular"></div>
+    <div class="ff"><label>Correo electrónico</label><input type="email" id="leadCorreo" placeholder="correo@email.com"></div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Fuente de prospección</label>
+      <select id="leadFuente">
+        <option value="">Selecciona fuente</option>
+        <option>Referido</option>
+        <option>Redes sociales</option>
+        <option>Sala de ventas</option>
+        <option>Llamada entrante</option>
+        <option>Página web</option>
+        <option>Evento / Feria</option>
+        <option>Base de datos</option>
+        <option>WhatsApp</option>
+        <option>Email marketing</option>
+      </select>
+    </div>
+    <div class="ff"><label>📅 Fecha primer contacto</label><input type="date" id="leadFechaPrimer"></div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Vehículo de interés</label>
+      <select id="leadVehiculo">
+        <option value="">Selecciona vehículo</option>
+        <option>CITY 4D X-TYLE</option><option>CITY 4D PRESTIGE</option>
+        <option>CITY 5D PRESTIGE</option><option>WR-V X-TYLE</option>
+        <option>WR-V PRESTIGE</option><option>HR-V X-TYLE</option>
+        <option>HR-V PRESTIGE</option><option>ZR-V X-TYLE</option>
+        <option>ZR-V PRESTIGE</option><option>CR-V PRESTIGE</option>
+        <option>CR-V TOURING</option><option>PILOT TOURING</option>
+      </select>
+    </div>
+    <div class="ff"><label>Color de interés</label><input type="text" id="leadColor" placeholder="Color deseado"></div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Tipo de cliente</label>
+      <select id="leadTipo">
+        <option value="Vehículo nuevo">Vehículo nuevo</option>
+        <option value="Empleado">Empleado</option>
+      </select>
+    </div>
+    <div class="ff"><label>Forma de pago</label>
+      <select id="leadPago">
+        <option value="">Selecciona forma de pago</option>
+        <option>Crédito + Contado</option><option>Crédito 100%</option>
+        <option>Retoma + Crédito</option><option>Retoma + Contado</option>
+        <option>Contado</option><option>Renting</option><option>Leasing</option>
+      </select>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Entidad financiera</label>
+      <select id="leadEntidad">
+        <option value="">Selecciona entidad</option>
+        <option>Finandina</option><option>Sufi</option>
+        <option>Banco de Occidente</option><option>Banco Santander</option>
+        <option>Finanzauto</option><option>Vehigrupo</option>
+        <option>Finesa</option><option>Renting Total</option>
+      </select>
+    </div>
+    <div class="ff"><label>📅 Fecha próximo contacto</label><input type="date" id="leadProxContacto"></div>
+  </div>
+
+  <!-- Desistido fields -->
+  <div id="leadDesistidoField" style="display:none">
+    <div class="ff"><label>Motivo de desistimiento</label>
+      <select id="leadMotivo">
+        <option value="">Selecciona motivo</option>
+        <option>No contesta</option>
+        <option>No interesado</option>
+        <option>Perfil no viable</option>
+        <option>Compró otra marca</option>
+        <option>Crédito negado</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Convertido field -->
+  <div id="leadConvertidoField" style="display:none">
+    <div class="ib ibs">✅ Este lead será marcado como convertido. Puedes agregarlo al módulo de Seguimiento para continuar su proceso.</div>
+  </div>
+
+  <div class="ff"><label>Observaciones / Notas de gestión</label>
+    <textarea id="leadObs" placeholder="Resultado del contacto, próximos pasos, observaciones..."></textarea>
+  </div>
+
+  <div class="mf">
+    <button class="btn btns" id="btnCancelLead">Cancelar</button>
+    <button class="btn btns" id="btnLeadToSeg" style="display:none" onclick="convertirLeadASeg()">➡️ Pasar a Seguimiento</button>
+    <button class="btn btnp" id="btnSaveLead">Guardar lead</button>
+  </div>
+</div></div>
+
+<!-- MODAL DETALLE LEAD -->
+<div class="mo" id="mDetLead"><div class="mdl" style="width:560px">
+  <div class="mt" id="detLeadTit"></div>
+  <div id="detLeadBody"></div>
+  <div class="mf">
+    <button class="btn btns" id="btnCancelDetLead">Cerrar</button>
+    <button class="btn btns" id="btnEditLead">✏️ Editar</button>
+    <button class="btn btnp" id="btnLeadToSegDet">➡️ Pasar a Seguimiento</button>
+  </div>
+</div></div>
+
+<!-- MODAL CARGA MASIVA RESULTADO -->
+<div class="mo" id="mImportResult"><div class="mdl" style="width:480px">
+  <div class="mt">📥 Resultado de carga masiva</div>
+  <div id="importResultBody"></div>
+  <div class="mf"><button class="btn btnp" id="btnCloseImport">Entendido</button></div>
 </div></div>
 
 <!-- MODAL NUEVO SEGUIMIENTO -->
@@ -795,6 +994,32 @@ tr:hover td{background:#fafafa}
     <div class="fr">
       <div class="ff"><label>Fecha de matrícula</label><input type="date" id="segFechaMat"></div>
       <div class="ff"></div>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="ff">
+      <label>💰 Precio de facturación</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#aaa;font-size:13px;pointer-events:none">$</span>
+        <input type="number" id="segPrecio" placeholder="0" min="0" step="1000000"
+          style="padding-left:22px;width:100%;padding-top:9px;padding-bottom:9px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;outline:none"
+          oninput="calcularSaldo()">
+      </div>
+    </div>
+    <div class="ff">
+      <label>💳 Abonos recibidos</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#aaa;font-size:13px;pointer-events:none">$</span>
+        <input type="number" id="segAbonos" placeholder="0" min="0" step="100000"
+          style="padding-left:22px;width:100%;padding-top:9px;padding-bottom:9px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;outline:none"
+          oninput="calcularSaldo()">
+      </div>
+    </div>
+  </div>
+  <div id="segSaldoWrap" style="display:none;margin-bottom:.75rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;background:#f8f8f8;border-radius:9px;padding:.75rem 1rem;border:1px solid #ebebeb">
+      <span style="font-size:12px;color:#888;font-weight:600">Saldo pendiente:</span>
+      <span id="segSaldoVal" style="font-size:16px;font-weight:800;color:#CC0001">$ 0</span>
     </div>
   </div>
   <div id="segVinAlert" style="display:none;margin-bottom:.5rem"></div>
@@ -926,6 +1151,10 @@ function startListeners(){
   unsubArr.push(db.collection('demos').onSnapshot(s=>{DEMOS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderDemos();renderCal();}));
   unsubArr.push(db.collection('pruebas').orderBy('fecha').orderBy('hora').onSnapshot(s=>{PRUEBAS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderCal();}));
   unsubArr.push(db.collection('procesos').onSnapshot(s=>{PROCS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderEnts();}));
+  unsubArr.push(db.collection('leads').orderBy('createdAt','desc').onSnapshot(s=>{LEADS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderLeads();},err=>{
+    // Fallback without orderBy if index not ready
+    db.collection('leads').onSnapshot(s=>{LEADS=s.docs.map(d=>{return{...d.data(),_id:d.id}});LEADS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderLeads();});
+  }));
   unsubArr.push(db.collection('seguimiento').onSnapshot(s=>{SEGS=s.docs.map(d=>{return{...d.data(),_id:d.id}});SEGS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderSeg();renderInv();if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();}));
 }
 
@@ -976,6 +1205,7 @@ function showPage(p){
   if(p==='entregas') renderEnts();
   if(p==='dashboard'){renderDashboard();}
   if(p==='metas'){cargarMetas();}
+  if(p==='leads') renderLeads();
   if(p==='seguimiento') renderSeg();
   if(p==='usuarios') renderUsrs();
 }
@@ -1581,6 +1811,9 @@ function renderDashboard(){
     <div class="kpi-card" style="--kc:#2d6011"><div class="kpi-num">${matriculados}</div><div class="kpi-label">✅ Matriculados</div><div class="kpi-sub">Entregados</div></div>
     <div class="kpi-card" style="--kc:#888"><div class="kpi-num">${desistidos}</div><div class="kpi-label">❌ Desistidos</div><div class="kpi-sub">${prospectos>0?Math.round((desistidos/prospectos)*100):0}% del total</div></div>
     <div class="kpi-card" style="--kc:#3a2e8f"><div class="kpi-num">${convRate}%</div><div class="kpi-label">📈 Conversión total</div><div class="kpi-sub">Prospectos→Facturas</div></div>
+    <div class="kpi-card" style="--kc:#CC0001"><div class="kpi-num">${fmtMillones(data.reduce((a,s)=>a+(s.precio||0),0))}</div><div class="kpi-label">💰 Facturación total</div><div class="kpi-sub">Suma precios fact.</div></div>
+    <div class="kpi-card" style="--kc:#9b2020"><div class="kpi-num">${fmtMillones(data.filter(s=>s.precio&&(s.precio-(s.abonos||0))>0).reduce((a,s)=>a+(s.precio-(s.abonos||0)),0))}</div><div class="kpi-label">💳 Cartera pendiente</div><div class="kpi-sub">Saldos sin pagar</div></div>
+    <div class="kpi-card" style="--kc:#1457a0"><div class="kpi-num">${(CU.rol==='asesor'?LEADS.filter(l=>l.asesorId===CU.id):LEADS).length}</div><div class="kpi-label">📋 Total leads</div><div class="kpi-sub">Conv: ${LEADS.length>0?Math.round(((CU.rol==='asesor'?LEADS.filter(l=>l.asesorId===CU.id&&l.estado==='Convertido'):LEADS.filter(l=>l.estado==='Convertido')).length/Math.max((CU.rol==='asesor'?LEADS.filter(l=>l.asesorId===CU.id):LEADS).length,1))*100):0}%</div></div>
   `;
 
   // ── VELOCÍMETRO ──
@@ -1840,6 +2073,398 @@ function renderDashboard(){
   });
 }
 
+// ══════════════════════════════════════════
+// LEADS MODULE
+// ══════════════════════════════════════════
+let LEADS=[];
+let curLeadId=null;
+
+function getLeadEstadoBadge(e){
+  const map={
+    'Nuevo':           '<span class="b bb" style="background:#f0f8ff;color:#1457a0">🆕 Nuevo</span>',
+    'Contactado':      '<span class="b bgy">📞 Contactado</span>',
+    'Interesado':      '<span class="b ba">⭐ Interesado</span>',
+    'Cita agendada':   '<span class="b bp">📅 Cita agendada</span>',
+    'En negociación':  '<span class="b ba" style="background:#fff8e8;color:#7a4a0a">🤝 Negociación</span>',
+    'Convertido':      '<span class="b bg">✅ Convertido</span>',
+    'Desistido':       '<span class="b br">❌ Desistido</span>'
+  };
+  return map[e]||`<span class="b bgy">${e||'—'}</span>`;
+}
+
+function toggleLeadFields(){
+  const estado=$('leadEstado').value;
+  $('leadDesistidoField').style.display=estado==='Desistido'?'block':'none';
+  $('leadConvertidoField').style.display=estado==='Convertido'?'block':'none';
+  $('btnLeadToSeg').style.display=estado==='Convertido'?'inline-flex':'none';
+}
+
+function renderLeads(){
+  if(!CU) return;
+
+  // Fill filters
+  const selA=$('leadsFiltAsesor');
+  if(selA){
+    const prev=selA.value;
+    const asesores=CU.rol==='asesor'?USERS.filter(u=>u.id===CU.id):USERS.filter(u=>u.rol==='asesor'&&u.activo);
+    selA.innerHTML='<option value="">Todos los asesores</option>'+asesores.map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+    selA.value=prev;
+  }
+  const selV=$('leadsFiltVeh');
+  if(selV){
+    const prev=selV.value;
+    selV.innerHTML='<option value="">Todos los vehículos</option>'+VEHICULOS_SEG.map(v=>`<option value="${v}">${v}</option>`).join('');
+    selV.value=prev;
+  }
+
+  const q=($('leadsSearch').value||'').toLowerCase();
+  const fA=$('leadsFiltAsesor').value;
+  const fE=$('leadsFiltEstado').value;
+  const fF=$('leadsFiltFuente').value;
+  const fV=$('leadsFiltVeh').value;
+
+  let data=[...LEADS];
+  if(CU.rol==='asesor') data=data.filter(l=>l.asesorId===CU.id);
+  if(q) data=data.filter(l=>[l.nombre,l.cedula,l.celular,l.correo].join(' ').toLowerCase().includes(q));
+  if(fA) data=data.filter(l=>l.asesorId===fA);
+  if(fE) data=data.filter(l=>l.estado===fE);
+  if(fF) data=data.filter(l=>l.fuente===fF);
+  if(fV) data=data.filter(l=>l.vehiculo===fV);
+
+  // Stats
+  const tot=LEADS.length;
+  const nuevos=LEADS.filter(l=>l.estado==='Nuevo').length;
+  const contactados=LEADS.filter(l=>l.estado==='Contactado').length;
+  const interesados=LEADS.filter(l=>l.estado==='Interesado'||l.estado==='Cita agendada'||l.estado==='En negociación').length;
+  const convertidos=LEADS.filter(l=>l.estado==='Convertido').length;
+  const desistidos=LEADS.filter(l=>l.estado==='Desistido').length;
+  const convRate=tot>0?Math.round((convertidos/tot)*100):0;
+  const proxVencidos=LEADS.filter(l=>l.proxContacto&&l.proxContacto<today()&&l.estado!=='Convertido'&&l.estado!=='Desistido').length;
+
+  $('leadsGrid').innerHTML=`
+    <div class="sc"><div class="sn">${tot}</div><div class="sl">Total leads</div></div>
+    <div class="sc"><div class="sn" style="color:#1457a0">${nuevos}</div><div class="sl">🆕 Nuevos</div></div>
+    <div class="sc"><div class="sn" style="color:#7a4a0a">${contactados}</div><div class="sl">📞 Contactados</div></div>
+    <div class="sc"><div class="sn" style="color:#3a2e8f">${interesados}</div><div class="sl">⭐ Interesados</div></div>
+    <div class="sc"><div class="sn" style="color:#2d6011">${convertidos}</div><div class="sl">✅ Convertidos</div></div>
+    <div class="sc"><div class="sn" style="color:#777">${desistidos}</div><div class="sl">❌ Desistidos</div></div>
+    <div class="sc"><div class="sn" style="color:#CC0001">${convRate}%</div><div class="sl">Tasa conversión</div></div>
+    <div class="sc"><div class="sn" style="color:#9b2020">${proxVencidos}</div><div class="sl">⚠️ Contacto vencido</div></div>`;
+
+  const tb=$('leadsTb');
+  if(!data.length){
+    tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#ccc;padding:2rem">No hay leads registrados. Carga un Excel masivo o agrega uno manualmente.</td></tr>';
+    return;
+  }
+
+  tb.innerHTML=data.map(l=>{
+    const as=USERS.find(u=>u.id===l.asesorId);
+    const vencido=l.proxContacto&&l.proxContacto<today()&&l.estado!=='Convertido'&&l.estado!=='Desistido';
+    const desistInfo=l.estado==='Desistido'&&l.motivo?`<br><span style="font-size:10px;color:#9b2020">${l.motivo}</span>`:'';
+    return `<tr>
+      <td style="font-size:12px">${as?as.nombre.split(' ').slice(0,2).join(' '):'—'}</td>
+      <td>
+        <strong style="font-size:12px">${l.nombre||'—'}</strong>
+        ${l.correo?`<br><span style="font-size:10px;color:#aaa">${l.correo}</span>`:''}
+      </td>
+      <td class="mono">${l.celular||'—'}</td>
+      <td class="mono">${l.cedula||'—'}</td>
+      <td style="font-size:11px;font-weight:600">${l.vehiculo||'—'}</td>
+      <td><span class="b bgy" style="font-size:10px">${l.fuente||'—'}</span></td>
+      <td style="font-size:11px">${l.fechaPrimer||'—'}</td>
+      <td>${getLeadEstadoBadge(l.estado)}${desistInfo}</td>
+      <td style="font-size:11px;color:${vencido?'#9b2020':'#888'};font-weight:${vencido?'700':'400'}">${l.proxContacto||(l.updatedAt||'—')}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btns btnsm" onclick="verDetLead('${l._id}')">Ver</button>
+        <button class="btn btnp btnsm" onclick="editLead('${l._id}')" style="margin-top:3px">Editar</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openNewLead(){
+  $('leadEditId').value='';
+  $('mLeadTitle').textContent='📋 Nuevo lead';
+  $('leadAsesor').innerHTML=USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+  if(CU.rol==='asesor') $('leadAsesor').value=CU.id;
+  ['leadNombre','leadCedula','leadCelular','leadCorreo','leadColor','leadObs','leadFechaPrimer','leadProxContacto'].forEach(id=>$(id).value='');
+  $('leadEstado').value='Nuevo';
+  $('leadVehiculo').value='';
+  $('leadFuente').value='';
+  $('leadPago').value='';
+  $('leadEntidad').value='';
+  $('leadTipo').value='Vehículo nuevo';
+  $('leadMotivo').value='';
+  $('leadDesistidoField').style.display='none';
+  $('leadConvertidoField').style.display='none';
+  $('btnLeadToSeg').style.display='none';
+  // Set today as primer contacto
+  $('leadFechaPrimer').value=today();
+  om('mNewLead');
+}
+
+function editLead(id){
+  const l=LEADS.find(x=>x._id===id);if(!l)return;
+  curLeadId=id;
+  $('leadEditId').value=id;
+  $('mLeadTitle').textContent='✏️ Editar lead';
+  $('leadAsesor').innerHTML=USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+  $('leadAsesor').value=l.asesorId||'';
+  $('leadNombre').value=l.nombre||'';
+  $('leadCedula').value=l.cedula||'';
+  $('leadCelular').value=l.celular||'';
+  $('leadCorreo').value=l.correo||'';
+  $('leadColor').value=l.color||'';
+  $('leadObs').value=l.obs||'';
+  $('leadFechaPrimer').value=l.fechaPrimer||'';
+  $('leadProxContacto').value=l.proxContacto||'';
+  $('leadEstado').value=l.estado||'Nuevo';
+  $('leadVehiculo').value=l.vehiculo||'';
+  $('leadFuente').value=l.fuente||'';
+  $('leadPago').value=l.pago||'';
+  $('leadEntidad').value=l.entidad||'';
+  $('leadTipo').value=l.tipo||'Vehículo nuevo';
+  $('leadMotivo').value=l.motivo||'';
+  $('leadDesistidoField').style.display=l.estado==='Desistido'?'block':'none';
+  $('leadConvertidoField').style.display=l.estado==='Convertido'?'block':'none';
+  $('btnLeadToSeg').style.display=l.estado==='Convertido'?'inline-flex':'none';
+  cm('mDetLead');
+  om('mNewLead');
+}
+
+async function guardarLead(){
+  const nombre=$('leadNombre').value.trim();
+  if(!nombre){toast('⚠️ El nombre es requerido');return;}
+  const estado=$('leadEstado').value;
+  const data={
+    asesorId:$('leadAsesor').value,
+    nombre,
+    cedula:$('leadCedula').value.trim(),
+    celular:$('leadCelular').value.trim(),
+    correo:$('leadCorreo').value.trim(),
+    vehiculo:$('leadVehiculo').value||'',
+    color:$('leadColor').value.trim(),
+    tipo:$('leadTipo').value,
+    pago:$('leadPago').value||'',
+    entidad:$('leadEntidad').value||'',
+    fuente:$('leadFuente').value||'',
+    fechaPrimer:$('leadFechaPrimer').value||today(),
+    proxContacto:$('leadProxContacto').value||null,
+    estado,
+    motivo:estado==='Desistido'?$('leadMotivo').value:'',
+    obs:$('leadObs').value.trim(),
+    updatedAt:today()
+  };
+  const editId=$('leadEditId').value;
+  if(editId){
+    await db.collection('leads').doc(editId).update(data);
+    toast('✅ Lead actualizado');
+  } else {
+    data.createdAt=today();
+    await db.collection('leads').add(data);
+    toast('✅ Lead registrado');
+  }
+  cm('mNewLead');
+}
+
+function verDetLead(id){
+  const l=LEADS.find(x=>x._id===id);if(!l)return;
+  curLeadId=id;
+  const as=USERS.find(u=>u.id===l.asesorId);
+  $('detLeadTit').textContent=l.nombre;
+  let html=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:1rem">
+    <div><strong>Asesor:</strong> ${as?as.nombre:'—'}</div>
+    <div><strong>Estado:</strong> ${getLeadEstadoBadge(l.estado)}</div>
+    <div><strong>Celular:</strong> <a href="tel:${l.celular}" style="color:#CC0001;font-weight:600">${l.celular||'—'}</a></div>
+    <div><strong>Cédula:</strong> ${l.cedula||'—'}</div>
+    <div><strong>Correo:</strong> ${l.correo?`<a href="mailto:${l.correo}" style="color:#1457a0">${l.correo}</a>`:'—'}</div>
+    <div><strong>Fuente:</strong> <span class="b bgy">${l.fuente||'—'}</span></div>
+    <div><strong>Vehículo:</strong> ${l.vehiculo||'—'}</div>
+    <div><strong>Color:</strong> ${l.color||'—'}</div>
+    <div><strong>Tipo:</strong> ${l.tipo||'—'}</div>
+    <div><strong>Forma de pago:</strong> ${l.pago||'—'}</div>
+    <div><strong>Entidad:</strong> ${l.entidad||'—'}</div>
+    <div><strong>1er Contacto:</strong> ${l.fechaPrimer||'—'}</div>
+    <div><strong>Próx. Contacto:</strong> <span style="color:${l.proxContacto&&l.proxContacto<today()?'#9b2020':'#333'};font-weight:600">${l.proxContacto||'—'}</span></div>
+    ${l.motivo?`<div><strong>Motivo:</strong> <span style="color:#9b2020">${l.motivo}</span></div>`:''}
+  </div>`;
+  if(l.obs) html+=`<div style="background:#fafafa;border-radius:9px;padding:.85rem 1rem;font-size:13px;color:#555;border:1px solid #eee;margin-bottom:.75rem">
+    <div style="font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.5rem">Observaciones</div>${l.obs}</div>`;
+  html+=`<div style="font-size:10px;color:#ccc;text-align:right">Creado: ${l.createdAt||'—'} · Actualizado: ${l.updatedAt||'—'}</div>`;
+  $('detLeadBody').innerHTML=html;
+  // Show/hide pasar a seguimiento button
+  $('btnLeadToSegDet').style.display=(l.estado==='Convertido'||l.estado==='Interesado'||l.estado==='En negociación')?'inline-flex':'none';
+  om('mDetLead');
+}
+
+async function convertirLeadASeg(){
+  const id=curLeadId||$('leadEditId').value;
+  if(!id){toast('⚠️ Selecciona un lead primero');return;}
+  const l=LEADS.find(x=>x._id===id);if(!l)return;
+
+  // Check if already in seguimiento
+  const existing=SEGS.find(s=>s.cedula===l.cedula&&l.cedula);
+  if(existing){toast('⚠️ Este cliente ya existe en Seguimiento');return;}
+
+  // Create in seguimiento
+  const segData={
+    asesorId:l.asesorId,
+    nombre:l.nombre,
+    cedula:l.cedula||'',
+    celular:l.celular||'',
+    correo:l.correo||'',
+    vehiculo:l.vehiculo||'',
+    color:l.color||'',
+    tipo:l.tipo||'Vehículo nuevo',
+    pago:l.pago||'',
+    entidad:l.entidad||'',
+    temperatura:'Este mes',
+    proxContacto:l.proxContacto||null,
+    estado:'Caliente',
+    motivo:'',
+    fechaSep:null,fechaFact:null,fechaMat:null,
+    precio:null,abonos:null,
+    obs:(l.obs?l.obs+'
+':'')+'[Convertido desde Leads el '+today()+']',
+    fromLeadId:id,
+    createdAt:today(),updatedAt:today()
+  };
+  await db.collection('seguimiento').add(segData);
+
+  // Mark lead as Convertido
+  await db.collection('leads').doc(id).update({estado:'Convertido',updatedAt:today()});
+
+  cm('mNewLead');cm('mDetLead');
+  toast('🎉 Lead convertido y agregado a Seguimiento');
+}
+
+// ── IMPORT EXCEL MASIVO ──
+async function importLeadsXL(inp){
+  const file=inp.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      let added=0,skipped=0,errors=[];
+
+      for(const r of rows){
+        const nombre=(r['Nombre']||r['nombre']||r['NOMBRE']||'').toString().trim();
+        if(!nombre){skipped++;continue;}
+
+        // Find asesor by email
+        const asesorEmail=(r['Asesor']||r['asesor']||r['Correo Asesor']||'').toString().trim().toLowerCase();
+        const asesor=USERS.find(u=>u.email.toLowerCase()===asesorEmail&&u.rol==='asesor');
+
+        // Format date
+        const fechaRaw=(r['Fecha Primer Contacto']||r['Fecha']||r['fecha']||'').toString().trim();
+        let fechaPrimer=today();
+        if(fechaRaw){
+          // Try to parse various formats
+          const d=new Date(fechaRaw);
+          if(!isNaN(d)) fechaPrimer=d.toISOString().split('T')[0];
+        }
+
+        const leadData={
+          asesorId:asesor?asesor.id:(CU.rol==='asesor'?CU.id:''),
+          nombre,
+          cedula:(r['Cédula']||r['Cedula']||r['cedula']||'').toString().trim(),
+          celular:(r['Celular']||r['celular']||r['Teléfono']||r['Telefono']||'').toString().trim(),
+          correo:(r['Correo']||r['correo']||r['Email']||r['email']||'').toString().trim(),
+          vehiculo:(r['Vehículo']||r['Vehiculo']||r['vehiculo']||r['Modelo']||'').toString().trim(),
+          color:(r['Color']||r['color']||'').toString().trim(),
+          tipo:(r['Tipo']||r['tipo']||'Vehículo nuevo').toString().trim(),
+          pago:(r['Forma de Pago']||r['Pago']||r['pago']||'').toString().trim(),
+          entidad:(r['Entidad']||r['entidad']||'').toString().trim(),
+          fuente:(r['Fuente']||r['fuente']||'Base de datos').toString().trim(),
+          fechaPrimer,
+          proxContacto:null,
+          estado:'Nuevo',
+          motivo:'',
+          obs:(r['Observaciones']||r['observaciones']||'').toString().trim(),
+          createdAt:today(),updatedAt:today()
+        };
+
+        await db.collection('leads').add(leadData);
+        added++;
+      }
+
+      $('importResultBody').innerHTML=`
+        <div class="ib ibs" style="margin-bottom:.75rem">✅ Carga completada</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
+          <div class="sc"><div class="sn" style="color:#2d6011">${added}</div><div class="sl">Leads importados</div></div>
+          <div class="sc"><div class="sn" style="color:#888">${skipped}</div><div class="sl">Registros omitidos</div></div>
+        </div>
+        <p style="font-size:12px;color:#888;margin-top:1rem">Los registros sin nombre fueron omitidos. Los asesores se asignan por correo electrónico.</p>`;
+      om('mImportResult');
+    }catch(err){
+      toast('❌ Error al leer el archivo: '+err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  inp.value='';
+}
+
+// ── EXPORT EXCEL ──
+function exportLeadsXL(){
+  if(!LEADS.length){toast('⚠️ No hay leads para exportar');return;}
+  const rows=LEADS.map(l=>{
+    const as=USERS.find(u=>u.id===l.asesorId);
+    return{
+      'Nombre':l.nombre||'',
+      'Cédula':l.cedula||'',
+      'Celular':l.celular||'',
+      'Correo':l.correo||'',
+      'Vehículo':l.vehiculo||'',
+      'Color':l.color||'',
+      'Tipo':l.tipo||'',
+      'Forma de Pago':l.pago||'',
+      'Entidad':l.entidad||'',
+      'Fuente':l.fuente||'',
+      'Fecha Primer Contacto':l.fechaPrimer||'',
+      'Próximo Contacto':l.proxContacto||'',
+      'Estado':l.estado||'',
+      'Motivo Desistimiento':l.motivo||'',
+      'Asesor':as?as.nombre:'—',
+      'Correo Asesor':as?as.email:'—',
+      'Observaciones':l.obs||'',
+      'Fecha Registro':l.createdAt||''
+    };
+  });
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,'Leads',ws);
+  XLSX.writeFile(wb,'Leads_AutoCeiba_'+today()+'.xlsx');
+  toast('✅ Excel exportado correctamente');
+}
+
+// ── DESCARGAR PLANTILLA ──
+function descargarPlantilla(){
+  const plantilla=[{
+    'Nombre':'Ejemplo: Carlos Pérez',
+    'Cédula':'12345678',
+    'Celular':'3001234567',
+    'Correo':'cliente@email.com',
+    'Vehículo':'HR-V PRESTIGE',
+    'Color':'Rojo Supernova',
+    'Tipo':'Vehículo nuevo',
+    'Forma de Pago':'Crédito 100%',
+    'Entidad':'Finandina',
+    'Fuente':'Redes sociales',
+    'Fecha Primer Contacto':'2026-05-07',
+    'Asesor (correo)':'aframirez@autoceiba.com.co',
+    'Observaciones':'Cliente interesado, espera cupo de crédito'
+  }];
+  const ws=XLSX.utils.json_to_sheet(plantilla);
+  // Set column widths
+  ws['!cols']=[{wch:25},{wch:15},{wch:15},{wch:25},{wch:20},{wch:18},{wch:15},{wch:20},{wch:15},{wch:18},{wch:22},{wch:30},{wch:40}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,'Leads',ws);
+  XLSX.writeFile(wb,'Plantilla_Leads_AutoCeiba.xlsx');
+  toast('✅ Plantilla descargada');
+}
+
 // ── SEGUIMIENTO DATA ──
 const VEHICULOS_SEG=['CITY 4D X-TYLE','CITY 4D PRESTIGE','CITY 5D PRESTIGE','WR-V X-TYLE','WR-V PRESTIGE','HR-V X-TYLE','HR-V PRESTIGE','ZR-V X-TYLE','ZR-V PRESTIGE','CR-V PRESTIGE','CR-V TOURING','PILOT TOURING'];
 let SEGS=[];
@@ -1933,6 +2558,7 @@ function renderSeg(){
       <td style="font-size:11px">${s.color||'—'}</td>
       <td><span class="b bgy" style="font-size:10px">${s.tipo||'—'}</span></td>
       <td>${getEstadoBadge(s.estado)}${desistidoInfo}</td>
+      <td>${s.precio?`<div style="font-size:11px;font-weight:700;color:#333">${fmtCOP(s.precio)}</div>${s.abonos?`<div style="font-size:10px;color:${(s.precio-(s.abonos||0))<=0?'#2d6011':'#CC0001'}">${(s.precio-(s.abonos||0))<=0?'✅ Pagado':'Saldo: '+fmtCOP(s.precio-s.abonos)}</div>`:''}`:'<span style="color:#ddd;font-size:11px">—</span>'}</td>
       <td>${fechas}</td>
       <td style="font-size:11px">${s.pago||'—'}</td>
       <td style="font-size:11px">${s.entidad||'—'}</td>
@@ -1952,6 +2578,35 @@ function toggleSegFields(){
   const estado=$('segEstado').value;
   $('segDesistidoField').style.display=estado==='Desistido'?'block':'none';
   checkVinConflict();
+}
+
+function calcularSaldo(){
+  const precio=parseFloat($('segPrecio').value)||0;
+  const abonos=parseFloat($('segAbonos').value)||0;
+  const wrap=$('segSaldoWrap');
+  const val=$('segSaldoVal');
+  if(precio>0){
+    wrap.style.display='block';
+    const saldo=precio-abonos;
+    val.textContent='$ '+saldo.toLocaleString('es-CO');
+    val.style.color=saldo<=0?'#2d6011':'#CC0001';
+    val.textContent=(saldo<=0?'✅ Pagado · $ ':'$ ')+Math.abs(saldo).toLocaleString('es-CO');
+  } else {
+    wrap.style.display='none';
+  }
+}
+
+function fmtCOP(v){
+  if(!v||isNaN(v)) return '—';
+  return '$ '+parseFloat(v).toLocaleString('es-CO');
+}
+
+function fmtMillones(v){
+  if(!v||isNaN(v)||v===0) return '$0';
+  if(v>=1000000000) return '$'+Math.round(v/1000000000*10)/10+'B';
+  if(v>=1000000) return '$'+Math.round(v/1000000*10)/10+'M';
+  if(v>=1000) return '$'+Math.round(v/1000)+'K';
+  return '$'+v;
 }
 
 function fillVinSelect(){
@@ -2086,7 +2741,8 @@ function openNewSeg(){
   $('segAsesor').innerHTML=USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
   // If current user is asesor, preselect
   if(CU.rol==='asesor') $('segAsesor').value=CU.id;
-  ['segNombre','segCedula','segCelular','segColor','segObs','segFechaSep','segFechaFact','segFechaMat','segProxContacto'].forEach(id=>$(id).value='');
+  ['segNombre','segCedula','segCelular','segColor','segObs','segFechaSep','segFechaFact','segFechaMat','segProxContacto','segPrecio','segAbonos'].forEach(id=>$(id).value='');
+  if($('segSaldoWrap')) $('segSaldoWrap').style.display='none';
   $('segEstado').value='Caliente';
   $('segTipo').value='Vehículo nuevo';
   $('segVehiculo').value='CITY 4D X-TYLE';
@@ -2119,6 +2775,9 @@ function editSeg(id){
   $('segEntidad').value=s.entidad||'';
   $('segTemp').value=s.temperatura||'Sin definir';
   $('segProxContacto').value=s.proxContacto||'';
+  $('segPrecio').value=s.precio||'';
+  $('segAbonos').value=s.abonos||'';
+  calcularSaldo();
   $('segFechaSep').value=s.fechaSep||'';
   $('segFechaFact').value=s.fechaFact||'';
   $('segFechaMat').value=s.fechaMat||'';
@@ -2154,6 +2813,8 @@ async function guardarSeg(){
     fechaSep:$('segFechaSep').value||null,
     fechaFact:$('segFechaFact').value||null,
     fechaMat:$('segFechaMat').value||null,
+    precio:parseFloat($('segPrecio').value)||null,
+    abonos:parseFloat($('segAbonos').value)||null,
     obs:$('segObs').value.trim(),
     updatedAt:today()
   };
@@ -2201,6 +2862,9 @@ function verDetSeg(id){
       <div><strong>Tipo:</strong> ${s.tipo||'—'}</div>
       <div><strong>Forma de pago:</strong> ${s.pago||'—'}</div>
       <div><strong>Entidad financiera:</strong> ${s.entidad||'—'}</div>
+      <div><strong>Precio facturación:</strong> <span style="font-weight:700;color:#CC0001">${fmtCOP(s.precio)}</span></div>
+      <div><strong>Abonos recibidos:</strong> <span style="font-weight:700;color:#2d6011">${fmtCOP(s.abonos)}</span></div>
+      ${s.precio?`<div><strong>Saldo pendiente:</strong> <span style="font-weight:700;color:${(s.precio-(s.abonos||0))<=0?'#2d6011':'#CC0001'}">${(s.precio-(s.abonos||0))<=0?'✅ Pagado':fmtCOP(s.precio-(s.abonos||0))}</span></div>`:''}
       <div><strong>Temperatura:</strong> ${getTempBadge(s.temperatura)}</div>
       <div><strong>Próx. contacto:</strong> <span style="font-weight:600;color:${s.proxContacto&&s.proxContacto<today()?'#9b2020':'#333'}">${s.proxContacto||'—'}</span></div>
       ${s.motivo?`<div><strong>Motivo desistimiento:</strong> <span style="color:#9b2020">${s.motivo}</span></div>`:''}
@@ -2277,6 +2941,23 @@ document.addEventListener('DOMContentLoaded', function() {
   // Dashboard & Metas
   $('nav-dashboard').addEventListener('click', ()=>showPage('dashboard'));
   $('nav-metas').addEventListener('click', ()=>showPage('metas'));
+
+  // Leads
+  $('nav-leads').addEventListener('click', ()=>showPage('leads'));
+  $('btnNewLead').addEventListener('click', openNewLead);
+  $('btnCancelLead').addEventListener('click', ()=>cm('mNewLead'));
+  $('btnSaveLead').addEventListener('click', guardarLead);
+  $('leadEstado').addEventListener('change', toggleLeadFields);
+  $('leadsSearch').addEventListener('input', renderLeads);
+  $('leadsFiltAsesor').addEventListener('change', renderLeads);
+  $('leadsFiltEstado').addEventListener('change', renderLeads);
+  $('leadsFiltFuente').addEventListener('change', renderLeads);
+  $('leadsFiltVeh').addEventListener('change', renderLeads);
+  $('btnCancelDetLead').addEventListener('click', ()=>cm('mDetLead'));
+  $('btnEditLead').addEventListener('click', ()=>{if(curLeadId)editLead(curLeadId);});
+  $('btnLeadToSegDet').addEventListener('click', convertirLeadASeg);
+  $('btnLeadToSeg').addEventListener('click', convertirLeadASeg);
+  $('btnCloseImport').addEventListener('click', ()=>cm('mImportResult'));
 
   // Seguimiento
   $('nav-seguimiento').addEventListener('click', ()=>showPage('seguimiento'));
