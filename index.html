@@ -169,6 +169,8 @@ tr:hover td{background:#fafafa}
       <div class="ni" id="nav-demos"><span>📍</span>Ubicación Demos</div>
       <div class="ni" id="nav-cronograma"><span>📅</span>Pruebas de Ruta</div>
       <div class="ni" id="nav-entregas"><span>📦</span>Proceso Entrega</div>
+      <div class="ns">Comercial</div>
+      <div class="ni" id="nav-seguimiento"><span>🔥</span>Seguimiento</div>
       <div class="ns">Administración</div>
       <div class="ni hidden" id="nav-usuarios"><span>👥</span>Usuarios</div>
     </div>
@@ -246,6 +248,44 @@ tr:hover td{background:#fafafa}
           </table></div>
         </div>
       </div>
+      <div class="pg" id="page-seguimiento">
+        <div class="pt">Seguimiento de clientes</div>
+        <div class="ps">Clientes calientes por asesor — actualizado en tiempo real</div>
+
+        <!-- STATS -->
+        <div class="sg" id="segGrid"></div>
+
+        <!-- FILTROS -->
+        <div class="cd">
+          <div class="ct">🔥 Clientes en seguimiento
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <button class="btn btnp btnsm" id="btnNewSeg">+ Nuevo cliente</button>
+            </div>
+          </div>
+          <div class="sb2">
+            <input type="text" id="segSearch" placeholder="Buscar por nombre, cédula, celular...">
+            <select id="segFiltAsesor"><option value="">Todos los asesores</option></select>
+            <select id="segFiltEstado">
+              <option value="">Todos los estados</option>
+              <option value="Caliente">🔥 Caliente</option>
+              <option value="Separado">🔒 Separado</option>
+              <option value="Facturado">📄 Facturado</option>
+              <option value="Matriculado">✅ Matriculado</option>
+              <option value="Desistido">❌ Desistido</option>
+            </select>
+            <select id="segFiltVeh"><option value="">Todos los vehículos</option></select>
+          </div>
+          <div class="tw"><table>
+            <thead><tr>
+              <th>Asesor</th><th>Cliente</th><th>Celular</th><th>Cédula</th>
+              <th>Vehículo</th><th>Color</th><th>Tipo</th><th>Estado</th>
+              <th>Fechas</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="segTb"></tbody>
+          </table></div>
+        </div>
+      </div>
+
       <div class="pg" id="page-usuarios">
         <div class="pt">Gestión de usuarios</div>
         <div class="ps">Administra accesos y perfiles</div>
@@ -321,6 +361,98 @@ tr:hover td{background:#fafafa}
   <div class="fr"><div class="ff"><label>Contraseña</label><input type="password" id="uP"></div><div class="ff"><label>Rol</label><select id="uR"><option value="gerente">Gerente</option><option value="admin_sede">Asistente Comercial</option><option value="asesor">Asesor</option></select></div></div>
   <div class="ff hidden" id="uSF"><label>Sede</label><select id="uS"><option>Ciudad Jardín</option><option>Avenida 3ra Norte</option></select></div>
   <div class="mf"><button class="btn btns" id="btnCancelAddU">Cancelar</button><button class="btn btnp" id="btnSaveUsr">Crear usuario</button></div>
+</div></div>
+
+<!-- MODAL NUEVO SEGUIMIENTO -->
+<div class="mo" id="mNewSeg"><div class="mdl" style="width:600px">
+  <div class="mt" id="mSegTitle">🔥 Nuevo cliente en seguimiento</div>
+  <input type="hidden" id="segEditId">
+  <div class="fr">
+    <div class="ff"><label>Asesor comercial</label><select id="segAsesor"></select></div>
+    <div class="ff"><label>Estado</label>
+      <select id="segEstado" onchange="toggleSegFields()">
+        <option value="Caliente">🔥 Caliente</option>
+        <option value="Separado">🔒 Separado</option>
+        <option value="Facturado">📄 Facturado</option>
+        <option value="Matriculado">✅ Matriculado</option>
+        <option value="Desistido">❌ Desistido</option>
+      </select>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Nombre del cliente</label><input type="text" id="segNombre" placeholder="Nombre completo"></div>
+    <div class="ff"><label>Número de cédula</label><input type="text" id="segCedula" placeholder="Cédula"></div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Número de celular</label><input type="text" id="segCelular" placeholder="Celular"></div>
+    <div class="ff"><label>Tipo de cliente</label>
+      <select id="segTipo">
+        <option value="Vehículo nuevo">Vehículo nuevo</option>
+        <option value="Empleado">Empleado</option>
+      </select>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Vehículo de interés</label>
+      <select id="segVehiculo">
+        <option>CITY 4D X-TYLE</option>
+        <option>CITY 4D PRESTIGE</option>
+        <option>CITY 5D PRESTIGE</option>
+        <option>WR-V X-TYLE</option>
+        <option>WR-V PRESTIGE</option>
+        <option>HR-V X-TYLE</option>
+        <option>HR-V PRESTIGE</option>
+        <option>ZR-V X-TYLE</option>
+        <option>ZR-V PRESTIGE</option>
+        <option>CR-V PRESTIGE</option>
+        <option>CR-V TOURING</option>
+        <option>PILOT TOURING</option>
+      </select>
+    </div>
+    <div class="ff"><label>Color de interés</label><input type="text" id="segColor" placeholder="Ej: Rojo Supernova"></div>
+  </div>
+
+  <!-- Campos condicionales según estado -->
+  <div id="segDesistidoField" style="display:none">
+    <div class="ff"><label>Motivo de desistimiento</label>
+      <select id="segMotivo">
+        <option value="">Selecciona un motivo</option>
+        <option>Crédito negado</option>
+        <option>Capacidad de pago</option>
+        <option>Compró otra marca</option>
+        <option>Compró vehículo HEV o EV</option>
+        <option>Aplaza compra</option>
+      </select>
+    </div>
+  </div>
+  <div id="segFechasField">
+    <div class="fr">
+      <div class="ff"><label>Fecha de separación</label><input type="date" id="segFechaSep"></div>
+      <div class="ff"><label>Fecha de factura</label><input type="date" id="segFechaFact"></div>
+    </div>
+    <div class="fr">
+      <div class="ff"><label>Fecha de matrícula</label><input type="date" id="segFechaMat"></div>
+      <div class="ff"></div>
+    </div>
+  </div>
+  <div class="ff"><label>Observaciones / Seguimiento</label>
+    <textarea id="segObs" placeholder="Notas del seguimiento, próximos pasos..."></textarea>
+  </div>
+
+  <div class="mf">
+    <button class="btn btns" id="btnCancelSeg">Cancelar</button>
+    <button class="btn btnp" id="btnSaveSeg">Guardar</button>
+  </div>
+</div></div>
+
+<!-- MODAL DETALLE SEGUIMIENTO -->
+<div class="mo" id="mDetSeg"><div class="mdl" style="width:580px">
+  <div class="mt" id="detSegTit"></div>
+  <div id="detSegBody"></div>
+  <div class="mf">
+    <button class="btn btns" id="btnCancelDetSeg">Cerrar</button>
+    <button class="btn btnp" id="btnEditSeg">✏️ Editar</button>
+  </div>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -430,6 +562,7 @@ function startListeners(){
   unsubArr.push(db.collection('demos').onSnapshot(s=>{DEMOS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderDemos();renderCal();}));
   unsubArr.push(db.collection('pruebas').orderBy('fecha').orderBy('hora').onSnapshot(s=>{PRUEBAS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderCal();}));
   unsubArr.push(db.collection('procesos').onSnapshot(s=>{PROCS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderEnts();}));
+  unsubArr.push(db.collection('seguimiento').onSnapshot(s=>{SEGS=s.docs.map(d=>{return{...d.data(),_id:d.id}});SEGS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderSeg();}));
 }
 
 // ── AUTH ──
@@ -476,6 +609,7 @@ function showPage(p){
   if(p==='demos') renderDemos();
   if(p==='cronograma') renderCal();
   if(p==='entregas') renderEnts();
+  if(p==='seguimiento') renderSeg();
   if(p==='usuarios') renderUsrs();
 }
 
@@ -655,6 +789,207 @@ function guardarUsr(){
   cm('mAddU');renderUsrs();toast('✅ Usuario creado');
 }
 
+// ── SEGUIMIENTO DATA ──
+const VEHICULOS_SEG=['CITY 4D X-TYLE','CITY 4D PRESTIGE','CITY 5D PRESTIGE','WR-V X-TYLE','WR-V PRESTIGE','HR-V X-TYLE','HR-V PRESTIGE','ZR-V X-TYLE','ZR-V PRESTIGE','CR-V PRESTIGE','CR-V TOURING','PILOT TOURING'];
+let SEGS=[];
+let curSegId=null;
+
+function getEstadoBadge(e){
+  const map={
+    'Caliente':'<span class="b br" style="background:#fff0e8;color:#b84c00">🔥 Caliente</span>',
+    'Separado':'<span class="b ba">🔒 Separado</span>',
+    'Facturado':'<span class="b bb">📄 Facturado</span>',
+    'Matriculado':'<span class="b bg">✅ Matriculado</span>',
+    'Desistido':'<span class="b bgy">❌ Desistido</span>'
+  };
+  return map[e]||`<span class="b bgy">${e}</span>`;
+}
+
+function renderSeg(){
+  if(!CU) return;
+  // Fill asesor filter
+  const selF=$('segFiltAsesor');
+  const prevF=selF.value;
+  selF.innerHTML='<option value="">Todos los asesores</option>'+USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+  selF.value=prevF;
+
+  // Fill veh filter
+  const selV=$('segFiltVeh');
+  const prevV=selV.value;
+  selV.innerHTML='<option value="">Todos los vehículos</option>'+VEHICULOS_SEG.map(v=>`<option value="${v}">${v}</option>`).join('');
+  selV.value=prevV;
+
+  const q=($('segSearch').value||'').toLowerCase();
+  const fA=$('segFiltAsesor').value;
+  const fE=$('segFiltEstado').value;
+  const fV=$('segFiltVeh').value;
+
+  let data=[...SEGS];
+  if(CU.rol==='asesor') data=data.filter(s=>s.asesorId===CU.id);
+  if(q) data=data.filter(s=>[s.nombre,s.cedula,s.celular].join(' ').toLowerCase().includes(q));
+  if(fA) data=data.filter(s=>s.asesorId===fA);
+  if(fE) data=data.filter(s=>s.estado===fE);
+  if(fV) data=data.filter(s=>s.vehiculo===fV);
+
+  // Stats
+  const total=SEGS.length;
+  const calientes=SEGS.filter(s=>s.estado==='Caliente').length;
+  const separados=SEGS.filter(s=>s.estado==='Separado').length;
+  const facturados=SEGS.filter(s=>s.estado==='Facturado').length;
+  const matriculados=SEGS.filter(s=>s.estado==='Matriculado').length;
+  const desistidos=SEGS.filter(s=>s.estado==='Desistido').length;
+  $('segGrid').innerHTML=`
+    <div class="sc"><div class="sn">${total}</div><div class="sl">Total clientes</div></div>
+    <div class="sc"><div class="sn" style="color:#b84c00">${calientes}</div><div class="sl">🔥 Calientes</div></div>
+    <div class="sc"><div class="sn" style="color:#7a4a0a">${separados}</div><div class="sl">🔒 Separados</div></div>
+    <div class="sc"><div class="sn" style="color:#1457a0">${facturados}</div><div class="sl">📄 Facturados</div></div>
+    <div class="sc"><div class="sn" style="color:#2d6011">${matriculados}</div><div class="sl">✅ Matriculados</div></div>
+    <div class="sc"><div class="sn" style="color:#777">${desistidos}</div><div class="sl">❌ Desistidos</div></div>`;
+
+  const tb=$('segTb');
+  if(!data.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#ccc;padding:2rem">No hay clientes registrados</td></tr>';return;}
+
+  tb.innerHTML=data.map(s=>{
+    const as=USERS.find(u=>u.id===s.asesorId);
+    let fechas='<span style="color:#ccc;font-size:11px">—</span>';
+    const fs=[];
+    if(s.fechaSep) fs.push(`Sep: ${s.fechaSep}`);
+    if(s.fechaFact) fs.push(`Fact: ${s.fechaFact}`);
+    if(s.fechaMat) fs.push(`Mat: ${s.fechaMat}`);
+    if(fs.length) fechas=`<div style="font-size:10px;color:#888;line-height:1.7">${fs.join('<br>')}</div>`;
+    const desistidoInfo=s.estado==='Desistido'&&s.motivo?`<br><span style="font-size:10px;color:#9b2020">${s.motivo}</span>`:'';
+    return `<tr>
+      <td style="font-size:12px">${as?as.nombre.split(' ')[0]+' '+as.nombre.split(' ')[1]:'—'}</td>
+      <td><strong style="font-size:12px">${s.nombre}</strong></td>
+      <td class="mono">${s.celular||'—'}</td>
+      <td class="mono">${s.cedula||'—'}</td>
+      <td style="font-size:11px;font-weight:600">${s.vehiculo||'—'}</td>
+      <td style="font-size:11px">${s.color||'—'}</td>
+      <td><span class="b bgy" style="font-size:10px">${s.tipo||'—'}</span></td>
+      <td>${getEstadoBadge(s.estado)}${desistidoInfo}</td>
+      <td>${fechas}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btns btnsm" onclick="verDetSeg('${s._id}')">Ver</button>
+        ${isAdm()||s.asesorId===CU.id?`<button class="btn btnp btnsm" onclick="editSeg('${s._id}')" style="margin-top:3px">Editar</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleSegFields(){
+  const estado=$('segEstado').value;
+  $('segDesistidoField').style.display=estado==='Desistido'?'block':'none';
+}
+
+function openNewSeg(){
+  $('segEditId').value='';
+  $('mSegTitle').textContent='🔥 Nuevo cliente en seguimiento';
+  // Fill asesor select
+  $('segAsesor').innerHTML=USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+  // If current user is asesor, preselect
+  if(CU.rol==='asesor') $('segAsesor').value=CU.id;
+  ['segNombre','segCedula','segCelular','segColor','segObs','segFechaSep','segFechaFact','segFechaMat'].forEach(id=>$(id).value='');
+  $('segEstado').value='Caliente';
+  $('segTipo').value='Vehículo nuevo';
+  $('segVehiculo').value='CITY 4D X-TYLE';
+  $('segMotivo').value='';
+  $('segDesistidoField').style.display='none';
+  om('mNewSeg');
+}
+
+function editSeg(id){
+  const s=SEGS.find(x=>x._id===id);if(!s)return;
+  curSegId=id;
+  $('segEditId').value=id;
+  $('mSegTitle').textContent='✏️ Editar seguimiento';
+  $('segAsesor').innerHTML=USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+  $('segAsesor').value=s.asesorId||'';
+  $('segNombre').value=s.nombre||'';
+  $('segCedula').value=s.cedula||'';
+  $('segCelular').value=s.celular||'';
+  $('segColor').value=s.color||'';
+  $('segObs').value=s.obs||'';
+  $('segEstado').value=s.estado||'Caliente';
+  $('segTipo').value=s.tipo||'Vehículo nuevo';
+  $('segVehiculo').value=s.vehiculo||'CITY 4D X-TYLE';
+  $('segMotivo').value=s.motivo||'';
+  $('segFechaSep').value=s.fechaSep||'';
+  $('segFechaFact').value=s.fechaFact||'';
+  $('segFechaMat').value=s.fechaMat||'';
+  $('segDesistidoField').style.display=s.estado==='Desistido'?'block':'none';
+  cm('mDetSeg');
+  om('mNewSeg');
+}
+
+async function guardarSeg(){
+  const nombre=$('segNombre').value.trim();
+  if(!nombre){toast('⚠️ El nombre es requerido');return;}
+  const data={
+    asesorId:$('segAsesor').value,
+    nombre,
+    cedula:$('segCedula').value.trim(),
+    celular:$('segCelular').value.trim(),
+    vehiculo:$('segVehiculo').value,
+    color:$('segColor').value.trim(),
+    tipo:$('segTipo').value,
+    estado:$('segEstado').value,
+    motivo:$('segEstado').value==='Desistido'?$('segMotivo').value:'',
+    fechaSep:$('segFechaSep').value||null,
+    fechaFact:$('segFechaFact').value||null,
+    fechaMat:$('segFechaMat').value||null,
+    obs:$('segObs').value.trim(),
+    updatedAt:today()
+  };
+  const editId=$('segEditId').value;
+  if(editId){
+    await db.collection('seguimiento').doc(editId).update(data);
+    toast('✅ Seguimiento actualizado');
+  } else {
+    data.createdAt=today();
+    await db.collection('seguimiento').add(data);
+    toast('✅ Cliente agregado al seguimiento');
+  }
+  cm('mNewSeg');
+}
+
+function verDetSeg(id){
+  const s=SEGS.find(x=>x._id===id);if(!s)return;
+  curSegId=id;
+  const as=USERS.find(u=>u.id===s.asesorId);
+  $('detSegTit').textContent=s.nombre;
+  const estadoB=getEstadoBadge(s.estado);
+  let html=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:1rem">
+      <div><strong>Asesor:</strong> ${as?as.nombre:'—'}</div>
+      <div><strong>Estado:</strong> ${estadoB}</div>
+      <div><strong>Celular:</strong> <a href="tel:${s.celular}" style="color:#CC0001">${s.celular||'—'}</a></div>
+      <div><strong>Cédula:</strong> ${s.cedula||'—'}</div>
+      <div><strong>Vehículo:</strong> ${s.vehiculo||'—'}</div>
+      <div><strong>Color:</strong> ${s.color||'—'}</div>
+      <div><strong>Tipo:</strong> ${s.tipo||'—'}</div>
+      ${s.motivo?`<div><strong>Motivo desistimiento:</strong> <span style="color:#9b2020">${s.motivo}</span></div>`:''}
+    </div>`;
+  if(s.fechaSep||s.fechaFact||s.fechaMat){
+    html+=`<div style="background:#f8f8f8;border-radius:9px;padding:0.85rem 1rem;margin-bottom:1rem;font-size:13px">
+      <div style="font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.4px;margin-bottom:0.5rem">Fechas clave</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+        <div><div style="font-size:10px;color:#aaa">Separación</div><div style="font-weight:600">${s.fechaSep||'—'}</div></div>
+        <div><div style="font-size:10px;color:#aaa">Factura</div><div style="font-weight:600">${s.fechaFact||'—'}</div></div>
+        <div><div style="font-size:10px;color:#aaa">Matrícula</div><div style="font-weight:600">${s.fechaMat||'—'}</div></div>
+      </div>
+    </div>`;
+  }
+  if(s.obs){
+    html+=`<div style="background:#fafafa;border-radius:9px;padding:0.85rem 1rem;font-size:13px;color:#555;border:1px solid #eee">
+      <div style="font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.4px;margin-bottom:0.5rem">Observaciones</div>
+      ${s.obs}
+    </div>`;
+  }
+  html+=`<div style="font-size:10px;color:#ccc;margin-top:0.75rem;text-align:right">Registrado: ${s.createdAt||'—'} · Actualizado: ${s.updatedAt||'—'}</div>`;
+  $('detSegBody').innerHTML=html;
+  om('mDetSeg');
+}
+
 // ── EVENT LISTENERS (todos aquí, sin onclick en HTML) ──
 document.addEventListener('DOMContentLoaded', function() {
   // Login
@@ -702,6 +1037,19 @@ document.addEventListener('DOMContentLoaded', function() {
   $('btnCancelDet').addEventListener('click', ()=>cm('mDet'));
   $('btnCancelPE').addEventListener('click', ()=>cm('mPE'));
   $('btnConfEnt').addEventListener('click', confirmarEnt);
+
+  // Seguimiento
+  $('nav-seguimiento').addEventListener('click', ()=>showPage('seguimiento'));
+  $('btnNewSeg').addEventListener('click', openNewSeg);
+  $('btnCancelSeg').addEventListener('click', ()=>cm('mNewSeg'));
+  $('btnSaveSeg').addEventListener('click', guardarSeg);
+  $('segEstado').addEventListener('change', toggleSegFields);
+  $('segSearch').addEventListener('input', renderSeg);
+  $('segFiltAsesor').addEventListener('change', renderSeg);
+  $('segFiltEstado').addEventListener('change', renderSeg);
+  $('segFiltVeh').addEventListener('change', renderSeg);
+  $('btnCancelDetSeg').addEventListener('click', ()=>cm('mDetSeg'));
+  $('btnEditSeg').addEventListener('click', ()=>{if(curSegId) editSeg(curSegId);});
 
   // Usuarios
   $('btnAddUsr').addEventListener('click', openAddUsr);
