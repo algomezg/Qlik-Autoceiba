@@ -2324,8 +2324,7 @@ async function convertirLeadASeg(){
     motivo:'',
     fechaSep:null,fechaFact:null,fechaMat:null,
     precio:null,abonos:null,
-    obs:(l.obs?l.obs+'
-':'')+'[Convertido desde Leads el '+today()+']',
+    obs:(l.obs?l.obs+'\n':'')+'[Convertido desde Leads el '+today()+']',
     fromLeadId:id,
     createdAt:today(),updatedAt:today()
   };
