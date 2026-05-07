@@ -145,12 +145,14 @@ tr:hover td{background:#fafafa}
 .dash-section::after{content:'';flex:1;height:1px;background:#ebebeb}
 
 /* VELOCÍMETRO */
-.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:.5rem 0}
-.gauge-num{font-size:36px;font-weight:800;color:#CC0001;line-height:1;margin-top:.5rem}
-.gauge-label{font-size:12px;color:#888;margin-top:4px}
-.gauge-meta{display:flex;gap:1.5rem;margin-top:1rem;text-align:center}
-.gauge-meta-item{font-size:11px;color:#aaa}
-.gauge-meta-item strong{display:block;font-size:16px;font-weight:700;color:#333}
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:0}
+.gauge-canvas-wrap{position:relative;width:200px;height:110px;margin:0 auto}
+.gauge-overlay{position:absolute;bottom:0;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none}
+.gauge-num{font-size:28px;font-weight:800;color:#CC0001;line-height:1}
+.gauge-label{font-size:10px;color:#888;margin-top:2px;white-space:nowrap}
+.gauge-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:.75rem;width:100%}
+.gauge-meta-item{font-size:10px;color:#aaa;text-align:center;background:#f8f8f8;border-radius:7px;padding:5px 4px}
+.gauge-meta-item strong{display:block;font-size:15px;font-weight:700;color:#333;line-height:1.2}
 
 /* TABLA RANKING */
 .rank-table{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -177,6 +179,12 @@ tr:hover td{background:#fafafa}
 .meta-input-wrap input{width:120px;padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;outline:none}
 .meta-input-wrap input:focus{border-color:#CC0001}
 .meta-input-wrap button{padding:7px 14px;background:#CC0001;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer}
+
+/* METAS */
+.meta-input{width:80px;padding:6px 8px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;font-weight:600;outline:none;text-align:center}
+.meta-input:focus{border-color:#CC0001}
+.mini-gauge{height:8px;border-radius:10px;background:#f0f0f0;overflow:hidden;min-width:80px}
+.mini-gauge-fill{height:100%;border-radius:10px;transition:width .4s}
 
 /* ── ENTREGADOS ── */
 .entregado-row td{opacity:0.5;text-decoration:none;background:#fafaf8!important}
@@ -238,6 +246,7 @@ tr:hover td{background:#fafafa}
       <div class="ni" id="nav-entregas"><span>📦</span>Proceso Entrega</div>
       <div class="ns">Comercial</div>
       <div class="ni" id="nav-dashboard"><span>📊</span>Dashboard</div>
+      <div class="ni hidden" id="nav-metas"><span>🎯</span>Metas</div>
       <div class="ni" id="nav-seguimiento"><span>🔥</span>Seguimiento</div>
       <div class="ns">Administración</div>
       <div class="ni hidden" id="nav-usuarios"><span>👥</span>Usuarios</div>
@@ -316,6 +325,83 @@ tr:hover td{background:#fafafa}
           </table></div>
         </div>
       </div>
+      <div class="pg" id="page-metas">
+        <div class="pt">Gestión de metas comerciales</div>
+        <div class="ps">Asigna metas por asesor y por mes — la suma define la meta total del período</div>
+
+        <!-- SELECTOR MES -->
+        <div class="card" style="margin-bottom:1rem">
+          <div class="ct">📅 Selecciona el mes a configurar
+            <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+              <select id="metasMes" style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;outline:none">
+                <option value="2026-01">Enero 2026</option>
+                <option value="2026-02">Febrero 2026</option>
+                <option value="2026-03">Marzo 2026</option>
+                <option value="2026-04">Abril 2026</option>
+                <option value="2026-05" selected>Mayo 2026</option>
+                <option value="2026-06">Junio 2026</option>
+                <option value="2026-07">Julio 2026</option>
+                <option value="2026-08">Agosto 2026</option>
+                <option value="2026-09">Septiembre 2026</option>
+                <option value="2026-10">Octubre 2026</option>
+                <option value="2026-11">Noviembre 2026</option>
+                <option value="2026-12">Diciembre 2026</option>
+              </select>
+              <button class="btn btnp btnsm" onclick="cargarMetas()">Cargar metas</button>
+            </div>
+          </div>
+
+          <!-- RESUMEN TOTALES -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1rem" id="metasResumen">
+            <div class="sc"><div class="sn" id="metaTotalMes" style="color:#CC0001">0</div><div class="sl">Meta total del mes</div></div>
+            <div class="sc"><div class="sn" id="metaAsignada" style="color:#2d6011">0</div><div class="sl">Asignada a asesores</div></div>
+            <div class="sc"><div class="sn" id="metaPendiente" style="color:#7a4a0a">0</div><div class="sl">Sin asignar</div></div>
+            <div class="sc"><div class="sn" id="metaLograda" style="color:#1457a0">0</div><div class="sl">Lograda hasta hoy</div></div>
+          </div>
+        </div>
+
+        <!-- TABLA ASESORES -->
+        <div class="card">
+          <div class="ct">👤 Metas por asesor
+            <button class="btn btnp btnsm" style="margin-left:auto" onclick="guardarTodasMetas()">💾 Guardar todas las metas</button>
+          </div>
+          <div class="tw">
+            <table>
+              <thead>
+                <tr>
+                  <th>Asesor</th>
+                  <th>Vitrina</th>
+                  <th>Meta del mes</th>
+                  <th>Facturados</th>
+                  <th>Pendientes</th>
+                  <th>Cumplimiento</th>
+                  <th>Velocímetro</th>
+                </tr>
+              </thead>
+              <tbody id="metasAsesorTb"></tbody>
+            </table>
+          </div>
+          <div style="padding:.75rem 0 0;border-top:1px solid #f0f0f0;margin-top:.5rem;display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;color:#888">Meta total automática:</span>
+            <strong id="metaTotalAuto" style="font-size:16px;color:#CC0001">0</strong>
+            <span style="font-size:12px;color:#aaa">unidades (suma de todas las metas)</span>
+            <button class="btn btns btnsm" style="margin-left:auto" onclick="usarMetaAuto()">Usar como meta global</button>
+          </div>
+        </div>
+
+        <!-- HISTÓRICO POR MES -->
+        <div class="card">
+          <div class="ct">📊 Histórico de metas y cumplimiento</div>
+          <div class="tw">
+            <table>
+              <thead><tr><th>Mes</th><th>Asesor</th><th>Vitrina</th><th>Meta</th><th>Logrado</th><th>Cumplimiento</th></tr></thead>
+              <tbody id="metasHistTb"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
       <div class="pg" id="page-dashboard">
         <div class="pt">Dashboard comercial</div>
         <div class="ps" id="dashSubtitle">Desempeño del equipo — actualizado en tiempo real</div>
@@ -355,24 +441,28 @@ tr:hover td{background:#fafafa}
 
         <!-- VELOCÍMETRO META -->
         <div class="chart-grid">
-          <div class="chart-card">
-            <div class="chart-title">🎯 Velocímetro de cumplimiento
+          <div class="chart-card" style="max-height:320px;overflow:hidden">
+            <div class="chart-title" style="margin-bottom:.5rem">🎯 Velocímetro de cumplimiento
               <div style="margin-left:auto">
                 <div class="meta-input-wrap">
-                  <input type="number" id="metaMensual" placeholder="Meta unidades" min="1" max="200">
-                  <button onclick="guardarMeta()">Guardar meta</button>
+                  <input type="number" id="metaMensual" placeholder="Meta uds." min="1" max="200" style="width:90px">
+                  <button onclick="guardarMeta()">Guardar</button>
                 </div>
               </div>
             </div>
             <div class="gauge-wrap">
-              <canvas id="gaugeChart" width="300" height="180"></canvas>
-              <div class="gauge-num" id="gaugeNum">0%</div>
-              <div class="gauge-label" id="gaugeLabel">0 de 0 unidades facturadas</div>
+              <div class="gauge-canvas-wrap">
+                <canvas id="gaugeChart" width="200" height="110"></canvas>
+                <div class="gauge-overlay">
+                  <div class="gauge-num" id="gaugeNum">0%</div>
+                  <div class="gauge-label" id="gaugeLabel">0 de 0 uds.</div>
+                </div>
+              </div>
               <div class="gauge-meta">
                 <div class="gauge-meta-item"><strong id="gFacturadas">0</strong>Facturadas</div>
                 <div class="gauge-meta-item"><strong id="gMeta">0</strong>Meta</div>
                 <div class="gauge-meta-item"><strong id="gFaltantes">0</strong>Faltan</div>
-                <div class="gauge-meta-item"><strong id="gDiasRestantes">0</strong>Días restantes</div>
+                <div class="gauge-meta-item"><strong id="gDiasRestantes">0</strong>Días</div>
               </div>
             </div>
           </div>
@@ -871,6 +961,7 @@ function doLogout(){
 // ── NAV ──
 function setupNav(){
   $('nav-usuarios').classList.toggle('hidden',!isGer());
+  $('nav-metas').classList.toggle('hidden',!isGer());
   $('adminBtns').style.display=isAdm()?'flex':'none';
   $('btnNP').classList.toggle('hidden',!isAdm());
 }
@@ -884,6 +975,7 @@ function showPage(p){
   if(p==='cronograma') renderCal();
   if(p==='entregas') renderEnts();
   if(p==='dashboard'){renderDashboard();}
+  if(p==='metas'){cargarMetas();}
   if(p==='seguimiento') renderSeg();
   if(p==='usuarios') renderUsrs();
 }
@@ -1249,6 +1341,152 @@ function guardarUsr(){
   cm('mAddU');renderUsrs();toast('✅ Usuario creado');
 }
 
+// ── METAS ──
+let METAS={}; // {mes: {asesorId: metaUnidades}}
+
+async function cargarMetas(){
+  const mes=$('metasMes').value;
+  if(!mes||!db) return;
+  try{
+    const snap=await db.collection('metas').doc(mes).get();
+    METAS[mes]=snap.exists?snap.data():{};
+  }catch(e){ METAS[mes]={}; }
+  renderMetas();
+}
+
+async function guardarTodasMetas(){
+  const mes=$('metasMes').value;
+  if(!mes||!db){toast('⚠️ Selecciona un mes');return;}
+  const asesores=USERS.filter(u=>u.rol==='asesor'&&u.activo);
+  const data={};
+  asesores.forEach(u=>{
+    const inp=document.getElementById('meta_'+u.id);
+    const val=inp?parseInt(inp.value)||0:0;
+    data[u.id]=val;
+  });
+  METAS[mes]=data;
+  await db.collection('metas').doc(mes).set(data);
+  // Update global metaUnidades with total
+  metaUnidades=Object.values(data).reduce((a,b)=>a+b,0)||10;
+  renderMetas();
+  toast('✅ Metas guardadas para '+getMesLabel(mes));
+}
+
+function usarMetaAuto(){
+  const mes=$('metasMes').value;
+  if(!METAS[mes]) return;
+  metaUnidades=Object.values(METAS[mes]).reduce((a,b)=>a+b,0)||10;
+  $('metaMensual').value=metaUnidades;
+  toast('✅ Meta global actualizada: '+metaUnidades+' unidades');
+  if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+}
+
+function getMesLabel(mes){
+  const map={'2026-01':'Enero','2026-02':'Febrero','2026-03':'Marzo','2026-04':'Abril','2026-05':'Mayo','2026-06':'Junio','2026-07':'Julio','2026-08':'Agosto','2026-09':'Septiembre','2026-10':'Octubre','2026-11':'Noviembre','2026-12':'Diciembre'};
+  const p=mes.split('-');
+  return (map[mes]||mes)+' '+(p[0]||'');
+}
+
+function renderMetas(){
+  const mes=$('metasMes').value;
+  const metasMes=METAS[mes]||{};
+  const asesores=USERS.filter(u=>u.rol==='asesor'&&u.activo);
+
+  // Calc facturados for this mes
+  const facturadosMes=SEGS.filter(s=>{
+    const f=s.fechaFact||s.createdAt||'';
+    return f.startsWith(mes)&&(s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact);
+  });
+
+  const totalMeta=Object.values(metasMes).reduce((a,b)=>a+b,0);
+  const totalAsignada=asesores.reduce((a,u)=>a+(metasMes[u.id]||0),0);
+  const totalLograda=facturadosMes.length;
+
+  $('metaTotalMes').textContent=totalMeta;
+  $('metaAsignada').textContent=totalAsignada;
+  $('metaPendiente').textContent=Math.max(0,totalMeta-totalAsignada);
+  $('metaLograda').textContent=totalLograda;
+
+  // Table
+  const tb=$('metasAsesorTb');
+  let autoTotal=0;
+  tb.innerHTML=asesores.map(u=>{
+    const meta=metasMes[u.id]||0;
+    autoTotal+=meta;
+    const fact=facturadosMes.filter(s=>s.asesorId===u.id).length;
+    const pend=Math.max(0,meta-fact);
+    const pct=meta>0?Math.round((fact/meta)*100):0;
+    const barColor=pct>=100?'#2d6011':pct>=70?'#7a4a0a':pct>=50?'#CC0001':'#9b2020';
+    return `<tr>
+      <td><strong style="font-size:12px">${u.nombre}</strong></td>
+      <td><span class="b bgy" style="font-size:10px">${u.sede||'—'}</span></td>
+      <td><input class="meta-input" id="meta_${u.id}" type="number" min="0" max="100"
+        value="${meta}" placeholder="0"
+        oninput="actualizarTotalAuto()"></td>
+      <td style="text-align:center;font-weight:700;color:#CC0001">${fact}</td>
+      <td style="text-align:center;color:${pend>0?'#7a4a0a':'#2d6011'};font-weight:600">${pend}</td>
+      <td style="text-align:center"><span class="b ${pct>=100?'bg':pct>=70?'ba':'br'}">${pct}%</span></td>
+      <td style="min-width:120px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="mini-gauge" style="flex:1">
+            <div class="mini-gauge-fill" style="width:${Math.min(pct,100)}%;background:${barColor}"></div>
+          </div>
+          <span style="font-size:10px;color:#aaa;white-space:nowrap">${fact}/${meta}</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  if($('metaTotalAuto')) $('metaTotalAuto').textContent=autoTotal;
+
+  // Histórico
+  renderMetasHist();
+}
+
+function actualizarTotalAuto(){
+  const asesores=USERS.filter(u=>u.rol==='asesor'&&u.activo);
+  const total=asesores.reduce((a,u)=>{
+    const inp=document.getElementById('meta_'+u.id);
+    return a+(inp?parseInt(inp.value)||0:0);
+  },0);
+  if($('metaTotalAuto')) $('metaTotalAuto').textContent=total;
+}
+
+function renderMetasHist(){
+  const mesesList=['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'];
+  const asesores=USERS.filter(u=>u.rol==='asesor'&&u.activo);
+  const tb=$('metasHistTb');
+  const rows=[];
+  mesesList.forEach(mes=>{
+    const metasMes=METAS[mes]||{};
+    asesores.forEach(u=>{
+      const meta=metasMes[u.id]||0;
+      if(meta===0) return; // Skip empty
+      const fact=SEGS.filter(s=>{
+        const f=s.fechaFact||s.createdAt||'';
+        return f.startsWith(mes)&&s.asesorId===u.id&&(s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact);
+      }).length;
+      const pct=meta>0?Math.round((fact/meta)*100):0;
+      const barColor=pct>=100?'#2d6011':pct>=70?'#7a4a0a':pct>=50?'#CC0001':'#9b2020';
+      rows.push(`<tr>
+        <td style="font-weight:600">${getMesLabel(mes)}</td>
+        <td>${u.nombre.split(' ').slice(0,2).join(' ')}</td>
+        <td><span class="b bgy" style="font-size:10px">${u.sede||'—'}</span></td>
+        <td style="text-align:center;font-weight:700">${meta}</td>
+        <td style="text-align:center;font-weight:700;color:#CC0001">${fact}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="mini-gauge" style="width:80px">
+              <div class="mini-gauge-fill" style="width:${Math.min(pct,100)}%;background:${barColor}"></div>
+            </div>
+            <span class="b ${pct>=100?'bg':pct>=70?'ba':'br'}" style="font-size:10px">${pct}%</span>
+          </div>
+        </td>
+      </tr>`);
+    });
+  });
+  tb.innerHTML=rows.length?rows.join(''):'<tr><td colspan="6" style="text-align:center;color:#ccc;padding:1.5rem">No hay metas configuradas aún. Asigna metas arriba y guárdalas.</td></tr>';
+}
+
 // ── DASHBOARD ──
 let dashCharts={};
 let metaUnidades=10;
@@ -1364,14 +1602,14 @@ function renderDashboard(){
     type:'doughnut',
     data:{
       datasets:[{
-        data:[pct,100-pct],
+        data:[Math.max(pct,0),Math.max(100-pct,0)],
         backgroundColor:[gColor,'#f0f0f0'],
         borderWidth:0,
         circumference:180,
         rotation:270
       }]
     },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},cutout:'75%'}
+    options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},cutout:'72%'}
   });
 
   // ── FORECAST ──
@@ -2036,8 +2274,9 @@ document.addEventListener('DOMContentLoaded', function() {
   $('btnCancelPE').addEventListener('click', ()=>cm('mPE'));
   $('btnConfEnt').addEventListener('click', confirmarEnt);
 
-  // Dashboard
+  // Dashboard & Metas
   $('nav-dashboard').addEventListener('click', ()=>showPage('dashboard'));
+  $('nav-metas').addEventListener('click', ()=>showPage('metas'));
 
   // Seguimiento
   $('nav-seguimiento').addEventListener('click', ()=>showPage('seguimiento'));
