@@ -120,6 +120,73 @@ tr:hover td{background:#fafafa}
 .pe{background:#eaf3de;border:1px solid #b5d880;border-radius:9px;padding:.85rem 1rem;font-size:13px;color:#1e5009;margin-top:.75rem;display:flex;align-items:center;gap:8px;cursor:pointer}
 .sd{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:4px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── DASHBOARD ── */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
+.kpi-card{background:#fff;border-radius:13px;border:1px solid #e8e8e8;padding:1.1rem 1.25rem;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--kc,#CC0001);border-radius:4px 0 0 4px}
+.kpi-num{font-size:32px;font-weight:800;color:var(--kc,#CC0001);line-height:1}
+.kpi-label{font-size:11px;color:#aaa;margin-top:5px;font-weight:500}
+.kpi-sub{font-size:11px;color:#888;margin-top:3px}
+.kpi-trend{font-size:11px;font-weight:700;margin-top:4px}
+.kpi-up{color:#2d6011}.kpi-dn{color:#9b2020}.kpi-eq{color:#aaa}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.5rem}
+.chart-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:1.5rem}
+.chart-card{background:#fff;border-radius:13px;border:1px solid #e8e8e8;padding:1.25rem}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-size:13px;font-weight:700;color:#333;margin-bottom:1rem;display:flex;align-items:center;gap:6px}
+.chart-wrap{position:relative;height:220px}
+.chart-wrap-sm{position:relative;height:180px}
+.dash-filters{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center;background:#fff;border-radius:10px;border:1px solid #e8e8e8;padding:.75rem 1rem}
+.dash-filters label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.dash-filters select,.dash-filters input{padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none;background:#fff}
+.dash-filters select:focus,.dash-filters input:focus{border-color:#CC0001}
+.dash-section{font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;margin:1.5rem 0 .75rem;display:flex;align-items:center;gap:8px}
+.dash-section::after{content:'';flex:1;height:1px;background:#ebebeb}
+
+/* VELOCÍMETRO */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:.5rem 0}
+.gauge-num{font-size:36px;font-weight:800;color:#CC0001;line-height:1;margin-top:.5rem}
+.gauge-label{font-size:12px;color:#888;margin-top:4px}
+.gauge-meta{display:flex;gap:1.5rem;margin-top:1rem;text-align:center}
+.gauge-meta-item{font-size:11px;color:#aaa}
+.gauge-meta-item strong{display:block;font-size:16px;font-weight:700;color:#333}
+
+/* TABLA RANKING */
+.rank-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.rank-table th{font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;padding:7px 10px;border-bottom:1px solid #f0f0f0;text-align:left}
+.rank-table td{padding:9px 10px;border-bottom:1px solid #f8f8f8;vertical-align:middle}
+.rank-table tr:last-child td{border:none}
+.rank-bar-wrap{background:#f5f5f5;border-radius:20px;height:8px;flex:1;overflow:hidden}
+.rank-bar{height:100%;border-radius:20px;background:#CC0001;transition:width .5s}
+.rank-pos{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.pos-1{background:#FFD700;color:#7a5800}
+.pos-2{background:#C0C0C0;color:#555}
+.pos-3{background:#CD7F32;color:#fff}
+.pos-n{background:#f1efe8;color:#888}
+
+/* FORECAST */
+.forecast-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:1rem}
+.fc-card{background:#f8f8f8;border-radius:10px;padding:.85rem 1rem;border:1px solid #ebebeb}
+.fc-num{font-size:22px;font-weight:800;color:#CC0001}
+.fc-label{font-size:11px;color:#888;margin-top:3px}
+.fc-detail{font-size:11px;color:#aaa;margin-top:2px}
+
+/* META INPUT */
+.meta-input-wrap{display:flex;align-items:center;gap:8px;margin-top:.5rem}
+.meta-input-wrap input{width:120px;padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;outline:none}
+.meta-input-wrap input:focus{border-color:#CC0001}
+.meta-input-wrap button{padding:7px 14px;background:#CC0001;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer}
+
+/* ── ENTREGADOS ── */
+.entregado-row td{opacity:0.5;text-decoration:none;background:#fafaf8!important}
+.entregado-row:hover td{opacity:0.7!important}
+.entregados-header{display:flex;align-items:center;gap:10px;padding:.75rem 1rem;background:#f5f5f0;border-radius:9px;cursor:pointer;margin:1rem 0 .5rem;font-size:13px;font-weight:600;color:#888;border:1px solid #ebebeb;user-select:none}
+.entregados-header:hover{background:#eeeee8}
+.toggle-icon{transition:transform .25s;display:inline-block}
+.toggle-icon.open{transform:rotate(90deg)}
+.entrega-check{width:18px;height:18px;cursor:pointer;accent-color:#2d6011}
+.entregado-badge{display:inline-flex;align-items:center;gap:5px;background:#eaf3de;color:#2d6011;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700}
 </style>
 </head>
 <body>
@@ -170,6 +237,7 @@ tr:hover td{background:#fafafa}
       <div class="ni" id="nav-cronograma"><span>📅</span>Pruebas de Ruta</div>
       <div class="ni" id="nav-entregas"><span>📦</span>Proceso Entrega</div>
       <div class="ns">Comercial</div>
+      <div class="ni" id="nav-dashboard"><span>📊</span>Dashboard</div>
       <div class="ni" id="nav-seguimiento"><span>🔥</span>Seguimiento</div>
       <div class="ns">Administración</div>
       <div class="ni hidden" id="nav-usuarios"><span>👥</span>Usuarios</div>
@@ -248,6 +316,156 @@ tr:hover td{background:#fafafa}
           </table></div>
         </div>
       </div>
+      <div class="pg" id="page-dashboard">
+        <div class="pt">Dashboard comercial</div>
+        <div class="ps" id="dashSubtitle">Desempeño del equipo — actualizado en tiempo real</div>
+
+        <!-- FILTROS -->
+        <div class="dash-filters">
+          <label>Filtrar por:</label>
+          <select id="dashFiltMes">
+            <option value="">Todos los meses</option>
+            <option value="2026-01">Enero 2026</option>
+            <option value="2026-02">Febrero 2026</option>
+            <option value="2026-03">Marzo 2026</option>
+            <option value="2026-04">Abril 2026</option>
+            <option value="2026-05">Mayo 2026</option>
+            <option value="2026-06">Junio 2026</option>
+            <option value="2026-07">Julio 2026</option>
+            <option value="2026-08">Agosto 2026</option>
+            <option value="2026-09">Septiembre 2026</option>
+            <option value="2026-10">Octubre 2026</option>
+            <option value="2026-11">Noviembre 2026</option>
+            <option value="2026-12">Diciembre 2026</option>
+          </select>
+          <select id="dashFiltAsesor2"><option value="">Todos los asesores</option></select>
+          <select id="dashFiltVeh2"><option value="">Todos los vehículos</option></select>
+          <select id="dashFiltVitrina">
+            <option value="">Todas las vitrinas</option>
+            <option value="Ciudad Jardín">Ciudad Jardín</option>
+            <option value="Avenida 3ra Norte">Avenida 3ra Norte</option>
+          </select>
+          <button class="btn btnp btnsm" onclick="renderDashboard()">Aplicar</button>
+          <button class="btn btns btnsm" onclick="resetDashFilters()">Limpiar</button>
+        </div>
+
+        <!-- KPIs PRINCIPALES -->
+        <div class="dash-section">📈 KPIs principales</div>
+        <div class="dash-grid" id="dashKpis"></div>
+
+        <!-- VELOCÍMETRO META -->
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">🎯 Velocímetro de cumplimiento
+              <div style="margin-left:auto">
+                <div class="meta-input-wrap">
+                  <input type="number" id="metaMensual" placeholder="Meta unidades" min="1" max="200">
+                  <button onclick="guardarMeta()">Guardar meta</button>
+                </div>
+              </div>
+            </div>
+            <div class="gauge-wrap">
+              <canvas id="gaugeChart" width="300" height="180"></canvas>
+              <div class="gauge-num" id="gaugeNum">0%</div>
+              <div class="gauge-label" id="gaugeLabel">0 de 0 unidades facturadas</div>
+              <div class="gauge-meta">
+                <div class="gauge-meta-item"><strong id="gFacturadas">0</strong>Facturadas</div>
+                <div class="gauge-meta-item"><strong id="gMeta">0</strong>Meta</div>
+                <div class="gauge-meta-item"><strong id="gFaltantes">0</strong>Faltan</div>
+                <div class="gauge-meta-item"><strong id="gDiasRestantes">0</strong>Días restantes</div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">📅 Forecast y proyección del mes</div>
+            <div class="forecast-grid" id="forecastGrid"></div>
+            <div style="font-size:11px;color:#aaa;margin-top:.5rem;border-top:1px solid #f0f0f0;padding-top:.75rem" id="forecastNote"></div>
+          </div>
+        </div>
+
+        <!-- EMBUDO DE VENTAS -->
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">🔽 Embudo de conversión</div>
+            <div class="chart-wrap"><canvas id="funnelChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">📊 Estado del pipeline</div>
+            <div class="chart-wrap"><canvas id="pipelineChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- RENDIMIENTO POR ASESOR -->
+        <div class="dash-section">👤 Rendimiento por asesor</div>
+        <div class="chart-grid">
+          <div class="chart-card full">
+            <div class="chart-title">🏆 Ranking de asesores — Unidades facturadas</div>
+            <table class="rank-table" id="rankingTable">
+              <thead><tr><th>#</th><th>Asesor</th><th>Vitrina</th><th>Prospectos</th><th>Separados</th><th>Facturados</th><th>Matriculados</th><th>Conv. %</th><th>Progreso</th></tr></thead>
+              <tbody id="rankingBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">📊 Facturación por asesor</div>
+            <div class="chart-wrap"><canvas id="asesorChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">🔥 Prospectos calientes por asesor</div>
+            <div class="chart-wrap"><canvas id="calientesChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- POR VEHÍCULO -->
+        <div class="dash-section">🚗 Rendimiento por vehículo</div>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">📊 Demanda por modelo</div>
+            <div class="chart-wrap"><canvas id="vehiculoChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">🎨 Mix de colores solicitados</div>
+            <div class="chart-wrap"><canvas id="colorChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- POR VITRINA -->
+        <div class="dash-section">🏪 Rendimiento por vitrina</div>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">🏪 Facturación por vitrina</div>
+            <div class="chart-wrap-sm"><canvas id="vitrinaChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">💳 Forma de pago más usada</div>
+            <div class="chart-wrap-sm"><canvas id="pagoChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- POR MES -->
+        <div class="dash-section">📅 Tendencia mensual</div>
+        <div class="chart-grid">
+          <div class="chart-card full">
+            <div class="chart-title">📈 Evolución mensual — Prospectos → Separados → Facturados → Matriculados</div>
+            <div class="chart-wrap" style="height:260px"><canvas id="tendenciaChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- MOTIVOS DESISTIMIENTO -->
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">❌ Motivos de desistimiento</div>
+            <div class="chart-wrap-sm"><canvas id="desistChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">🌡️ Temperatura del pipeline</div>
+            <div class="chart-wrap-sm"><canvas id="tempChart"></canvas></div>
+          </div>
+        </div>
+
+      </div>
+
       <div class="pg" id="page-seguimiento">
         <div class="pt">Seguimiento de clientes</div>
         <div class="ps">Clientes calientes por asesor — actualizado en tiempo real</div>
@@ -278,7 +496,8 @@ tr:hover td{background:#fafafa}
           <div class="tw"><table>
             <thead><tr>
               <th>Asesor</th><th>Cliente</th><th>Celular</th><th>Cédula</th>
-              <th>Vehículo</th><th>Color</th><th>Tipo</th><th>Estado</th>
+              <th>VIN</th><th>Vehículo</th><th>Color</th><th>Pago</th><th>Entidad</th>
+              <th>Temperatura</th><th>Próx. Contacto</th><th>Estado</th>
               <th>Fechas</th><th>Acciones</th>
             </tr></thead>
             <tbody id="segTb"></tbody>
@@ -393,6 +612,59 @@ tr:hover td{background:#fafafa}
     </div>
   </div>
   <div class="fr">
+    <div class="ff"><label>Forma de pago</label>
+      <select id="segPago">
+        <option value="">Selecciona forma de pago</option>
+        <option>Crédito + Contado</option>
+        <option>Crédito 100%</option>
+        <option>Retoma + Crédito</option>
+        <option>Retoma + Contado</option>
+        <option>Contado</option>
+        <option>Renting</option>
+        <option>Leasing</option>
+      </select>
+    </div>
+    <div class="ff"><label>Entidad financiera</label>
+      <select id="segEntidad">
+        <option value="">Selecciona entidad</option>
+        <option>Finandina</option>
+        <option>Sufi</option>
+        <option>Banco de Occidente</option>
+        <option>Banco Santander</option>
+        <option>Finanzauto</option>
+        <option>Vehigrupo</option>
+        <option>Finesa</option>
+        <option>Renting Total</option>
+      </select>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>🌡️ Temperatura del cierre</label>
+      <select id="segTemp">
+        <option value="">Sin definir</option>
+        <option value="Esta semana">🔴 Esta semana</option>
+        <option value="Este mes">🟡 Este mes</option>
+        <option value="Próximo mes">🟢 Próximo mes</option>
+        <option value="Sin definir">⚪ Sin definir</option>
+      </select>
+    </div>
+    <div class="ff"><label>📅 Fecha próximo contacto</label>
+      <input type="date" id="segProxContacto">
+    </div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>VIN del vehículo (opcional)</label>
+      <select id="segVin">
+        <option value="">Sin VIN asignado</option>
+      </select>
+    </div>
+    <div class="ff"><label>Estado del VIN</label>
+      <div id="segVinEstado" style="padding:9px 11px;border:1.5px solid #ebebeb;border-radius:7px;font-size:12px;color:#aaa;background:#fafafa;min-height:38px">
+        Selecciona un VIN para ver su estado
+      </div>
+    </div>
+  </div>
+  <div class="fr">
     <div class="ff"><label>Vehículo de interés</label>
       <select id="segVehiculo">
         <option>CITY 4D X-TYLE</option>
@@ -435,6 +707,7 @@ tr:hover td{background:#fafafa}
       <div class="ff"></div>
     </div>
   </div>
+  <div id="segVinAlert" style="display:none;margin-bottom:.5rem"></div>
   <div class="ff"><label>Observaciones / Seguimiento</label>
     <textarea id="segObs" placeholder="Notas del seguimiento, próximos pasos..."></textarea>
   </div>
@@ -460,6 +733,7 @@ tr:hover td{background:#fafafa}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
 <script>
 // ═══════════════════════════════════════════
@@ -558,11 +832,11 @@ async function seedData(){
 // ── LISTENERS ──
 function startListeners(){
   unsubArr.forEach(u=>u());unsubArr=[];
-  unsubArr.push(db.collection('inventario').onSnapshot(s=>{INV=s.docs.map(d=>{return{...d.data(),_id:d.id}});fillPF();renderInv();}));
+  unsubArr.push(db.collection('inventario').onSnapshot(s=>{INV=s.docs.map(d=>{return{...d.data(),_id:d.id}});fillPF();renderInv();if($('segVin'))fillVinSelect();}));
   unsubArr.push(db.collection('demos').onSnapshot(s=>{DEMOS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderDemos();renderCal();}));
   unsubArr.push(db.collection('pruebas').orderBy('fecha').orderBy('hora').onSnapshot(s=>{PRUEBAS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderCal();}));
   unsubArr.push(db.collection('procesos').onSnapshot(s=>{PROCS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderEnts();}));
-  unsubArr.push(db.collection('seguimiento').onSnapshot(s=>{SEGS=s.docs.map(d=>{return{...d.data(),_id:d.id}});SEGS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderSeg();}));
+  unsubArr.push(db.collection('seguimiento').onSnapshot(s=>{SEGS=s.docs.map(d=>{return{...d.data(),_id:d.id}});SEGS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderSeg();renderInv();if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();}));
 }
 
 // ── AUTH ──
@@ -609,6 +883,7 @@ function showPage(p){
   if(p==='demos') renderDemos();
   if(p==='cronograma') renderCal();
   if(p==='entregas') renderEnts();
+  if(p==='dashboard'){renderDashboard();}
   if(p==='seguimiento') renderSeg();
   if(p==='usuarios') renderUsrs();
 }
@@ -643,8 +918,11 @@ function renderInv(){
     const estB=v.estado==='DISPONIBLE'?'<span class="b bg">Disponible</span>':`<span class="b ba">Separado<span class="dbadge">${dias}d</span></span>`;
     const unoeB=v.estadoUNOE==='Disponible'?'<span class="b bt">Disponible</span>':'<span class="b br">Comprometido</span>';
     let acc='';
-    if(isAdm()){acc=v.estado==='DISPONIBLE'?`<button class="btn btnd btnsm" onclick="openSep('${v.vin}')">Separar</button>`:`<div class="si">${as?as.nombre:'—'}<br>${v.sepFecha||''}</div><button class="btn btnok btnsm" onclick="libVeh('${v.vin}')" style="margin-top:3px">Liberar</button>`;}
-    else{acc=(v.estado==='SEPARADO'&&v.sepAsesorId===CU.id)?`<span class="b ba">Tuyo·${dias}d</span>`:'<span style="color:#ddd">—</span>';}
+    // Check if linked to seguimiento
+    const segLink=SEGS.find(s=>s.vin===v.vin);
+    const segBadge=segLink?`<br><span style="font-size:9px;color:#1457a0">🔥 ${segLink.nombre}</span>`:'';
+    if(isAdm()){acc=v.estado==='DISPONIBLE'?`<button class="btn btnd btnsm" onclick="openSep('${v.vin}')">Separar</button>`:`<div class="si">${as?as.nombre:'—'}<br>${v.sepFecha||''}</div>${segBadge}<button class="btn btnok btnsm" onclick="libVeh('${v.vin}')" style="margin-top:3px">Liberar</button>`;}
+    else{acc=(v.estado==='SEPARADO'&&v.sepAsesorId===CU.id)?`<span class="b ba">Tuyo·${dias}d</span>${segBadge}`:'<span style="color:#ddd">—</span>';}
     return `<tr><td><strong style="font-size:12px">${v.producto}</strong></td><td>${v.mod}</td><td style="font-size:12px">${v.color}</td><td class="mono">${v.chasis}</td><td class="mono">${v.vin}</td><td><span class="b bb" style="font-size:10px">${v.ubicacion}</span></td><td style="text-align:center;font-weight:700;font-size:12px;color:${dc}">${v.diasInv}d</td><td>${unoeB}</td><td>${estB}</td><td>${acc}</td></tr>`;
   }).join('');
 }
@@ -720,21 +998,195 @@ async function confirmarPrueba(){
 async function delPrueba(id){await db.collection('pruebas').doc(id).delete();toast('🗑️ Cancelada');}
 
 // ── ENTREGAS ──
+function toggleEntregados(){
+  const sec=$('entregadosSection');
+  const icon=$('entToggleIcon');
+  const open=sec.style.display==='none';
+  sec.style.display=open?'block':'none';
+  icon.classList.toggle('open',open);
+}
+
 function renderEnts(){
-  if(!CU)return;
-  const sv=$('epVin');if(sv)sv.innerHTML=INV.filter(v=>v.estado==='SEPARADO').map(v=>`<option value="${v.vin}">${v.vin} · ${v.producto}</option>`).join('');
-  const sa=$('epAs');if(sa)sa.innerHTML=USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+  if(!CU) return;
+
+  // Fill selects
+  const sv=$('epVin');
+  if(sv) sv.innerHTML=INV.filter(v=>v.estado==='SEPARADO').map(v=>`<option value="${v.vin}">${v.vin} · ${v.producto}</option>`).join('');
+  const sa=$('epAs');
+  if(sa) sa.innerHTML=USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+
   let data=CU.rol==='asesor'?PROCS.filter(p=>p.asesorId===CU.id):[...PROCS];
-  $('entTb').innerHTML=data.length?data.map(p=>{
-    const as=USERS.find(u=>u.id===p.asesorId);const done=p.etapas.filter(e=>e.done).length;const listo=p.etapas.every(e=>e.done);const veh=INV.find(v=>v.vin===p.vin);
-    return `<tr><td>${p.cliente}</td><td class="mono">${p.cedula}</td><td style="font-size:11px"><strong>${veh?veh.producto:p.vin}</strong><br><span class="mono">${p.vin}</span></td><td style="font-size:12px">${as?as.nombre:'—'}</td><td><span class="b bb" style="font-size:10px">${p.sede}</span></td><td><span class="b bgy" style="font-size:10px">Etapa ${done}/${ETAPAS.length}</span></td><td>${listo?'<span class="b bg">✅ Listo</span>':'<span class="b bgy">En proceso</span>'}${p.entregaProg?`<br><span style="font-size:10px;color:#2d6011">📅 ${p.entregaProg.fecha} ${p.entregaProg.hora}</span>`:''}</td><td><button class="btn btns btnsm" onclick="verDet('${p._id}')">Ver</button>${listo&&!p.entregaProg&&isAdm()?`<br><button class="btn btnp btnsm" onclick="openPE('${p._id}')" style="margin-top:3px">Entrega</button>`:''}</td></tr>`;
-  }).join(''):'<tr><td colspan="8" style="text-align:center;color:#ccc;padding:1.5rem">No hay procesos activos</td></tr>';
+
+  // Split activos vs entregados
+  const activos=data.filter(p=>!p.entregado);
+  const entregados=data.filter(p=>p.entregado);
+
+  // Sort activos: con entrega programada primero, luego por etapa avanzada
+  activos.sort((a,b)=>{
+    if(a.entregaProg&&!b.entregaProg) return -1;
+    if(!a.entregaProg&&b.entregaProg) return 1;
+    const da=a.etapas?a.etapas.filter(e=>e.done).length:0;
+    const db2=b.etapas?b.etapas.filter(e=>e.done).length:0;
+    return db2-da;
+  });
+
+  // Update badges
+  if($('entActivosBadge')) $('entActivosBadge').textContent=activos.length;
+  if($('entregadosBadge')) $('entregadosBadge').textContent=entregados.length;
+
+  // ── TABLA ACTIVOS ──
+  const tb=$('entTb');
+  if(!activos.length){
+    tb.innerHTML='<tr><td colspan="9" style="text-align:center;color:#ccc;padding:1.5rem">No hay procesos activos</td></tr>';
+  } else {
+    tb.innerHTML=activos.map(p=>{
+      const as=USERS.find(u=>u.id===p.asesorId);
+      const done=p.etapas?p.etapas.filter(e=>e.done).length:0;
+      const listo=p.etapas?p.etapas.every(e=>e.done):false;
+      const veh=INV.find(v=>v.vin===p.vin);
+      const etapaActual=p.etapas?p.etapas.find(e=>!e.done):null;
+
+      // Progress bar
+      const pct=Math.round((done/ETAPAS.length)*100);
+      const barColor=pct===100?'#2d6011':pct>=70?'#7a4a0a':'#CC0001';
+      const progBar=`<div style="display:flex;align-items:center;gap:6px;margin-top:3px">
+        <div style="flex:1;background:#f0f0f0;border-radius:10px;height:5px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${barColor};border-radius:10px;transition:width .3s"></div>
+        </div>
+        <span style="font-size:10px;color:#aaa;white-space:nowrap">${done}/${ETAPAS.length}</span>
+      </div>`;
+
+      const entregaInfo=p.entregaProg
+        ?`<div style="font-size:11px;color:#2d6011;font-weight:600">📅 ${p.entregaProg.fecha}<br>${p.entregaProg.hora}</div>`
+        :(listo?'<span class="b bg" style="font-size:10px">✅ Listo para programar</span>':'<span style="color:#ccc;font-size:11px">—</span>');
+
+      // Checkbox marcar entregado — solo admins y solo si tiene entrega programada
+      const chkEntregado=isAdm()&&p.entregaProg
+        ?`<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+            <input type="checkbox" class="entrega-check" id="chk_${p._id}"
+              onchange="marcarEntregado('${p._id}',this.checked)"
+              title="Marcar como entregado">
+            <label for="chk_${p._id}" style="font-size:11px;color:#2d6011;cursor:pointer;font-weight:600">Marcar entregado</label>
+          </div>`:'';
+
+      return `<tr>
+        <td style="width:32px">${isAdm()&&p.entregaProg?`<input type="checkbox" class="entrega-check" onchange="marcarEntregado('${p._id}',this.checked)" title="Marcar como entregado">`:''}</td>
+        <td><strong style="font-size:12px">${p.cliente}</strong></td>
+        <td class="mono">${p.cedula}</td>
+        <td style="font-size:11px">
+          <strong>${veh?veh.producto:(p.vin||'—')}</strong>
+          ${p.vin?`<br><span class="mono" style="color:#1457a0">${p.vin}</span>`:''}
+        </td>
+        <td style="font-size:12px">${as?as.nombre:'—'}</td>
+        <td><span class="b bb" style="font-size:10px">${p.sede}</span></td>
+        <td>
+          <div style="font-size:11px;font-weight:600;color:#333">${etapaActual?etapaActual.nombre:(listo?'✅ Completo':'—')}</div>
+          ${progBar}
+        </td>
+        <td>${entregaInfo}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btns btnsm" onclick="verDet('${p._id}')">Ver etapas</button>
+          ${listo&&!p.entregaProg&&isAdm()?`<br><button class="btn btnp btnsm" onclick="openPE('${p._id}')" style="margin-top:3px">Prog. entrega</button>`:''}
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── TABLA ENTREGADOS ──
+  const etb=$('entregadosTb');
+  if(etb){
+    if(!entregados.length){
+      etb.innerHTML='<tr><td colspan="8" style="text-align:center;color:#ccc;padding:1.5rem">Aún no hay vehículos entregados</td></tr>';
+    } else {
+      // Sort entregados by fecha entrega desc
+      entregados.sort((a,b)=>(b.fechaEntregaReal||'').localeCompare(a.fechaEntregaReal||''));
+      etb.innerHTML=entregados.map(p=>{
+        const as=USERS.find(u=>u.id===p.asesorId);
+        const veh=INV.find(v=>v.vin===p.vin);
+        return `<tr class="entregado-row">
+          <td><strong style="font-size:12px">${p.cliente}</strong></td>
+          <td class="mono">${p.cedula}</td>
+          <td style="font-size:11px">
+            <strong>${veh?veh.producto:(p.vin||'—')}</strong>
+            ${p.vin?`<br><span class="mono" style="color:#1457a0;font-size:10px">${p.vin}</span>`:''}
+          </td>
+          <td style="font-size:12px">${as?as.nombre:'—'}</td>
+          <td><span class="b bb" style="font-size:10px">${p.sede}</span></td>
+          <td style="font-size:12px;font-weight:600;color:#2d6011">${p.fechaEntregaReal||p.entregaProg?.fecha||'—'}</td>
+          <td style="font-size:12px">${p.horaEntregaReal||p.entregaProg?.hora||'—'}</td>
+          <td>
+            <span class="entregado-badge">✅ Entregado</span>
+            ${isAdm()?`<br><button class="btn btns btnsm" onclick="revertirEntrega('${p._id}')" style="margin-top:4px;font-size:10px">Revertir</button>`:''}
+          </td>
+        </tr>`;
+      }).join('');
+    }
+  }
+}
+
+async function marcarEntregado(pid, checked){
+  if(!checked) return;
+  if(!confirm('¿Confirmas que el vehículo fue entregado al cliente? Esta acción lo moverá a la sección de entregados.')) {
+    // Uncheck the checkbox
+    const chk=document.querySelector(`input[onchange*="${pid}"]`);
+    if(chk) chk.checked=false;
+    return;
+  }
+  const p=PROCS.find(x=>x._id===pid);
+  if(!p) return;
+
+  const updates={
+    entregado: true,
+    fechaEntregaReal: p.entregaProg?.fecha || today(),
+    horaEntregaReal: p.entregaProg?.hora || '',
+    fechaEntregadoAt: today()
+  };
+
+  // Also mark ALL etapas as done
+  const etapas=p.etapas.map(e=>({...e,done:true,fecha:e.fecha||today()}));
+  updates.etapas=etapas;
+
+  await db.collection('procesos').doc(pid).update(updates);
+
+  // Update seguimiento estado to Matriculado if linked
+  if(p.vin){
+    const seg=SEGS.find(s=>s.vin===p.vin&&s.estado!=='Desistido');
+    if(seg){
+      await db.collection('seguimiento').doc(seg._id).update({
+        estado:'Matriculado',
+        fechaMat:today(),
+        updatedAt:today()
+      });
+    }
+    // Also update inventario — mark as delivered (keep separado but note delivered)
+    await db.collection('inventario').doc(p.vin).update({
+      sepObs:'ENTREGADO el '+today()
+    });
+  }
+
+  toast('🎉 ¡Vehículo marcado como entregado! El cliente '+p.cliente+' ya tiene su Honda.');
+}
+
+async function revertirEntrega(pid){
+  if(!isAdm()) return;
+  await db.collection('procesos').doc(pid).update({
+    entregado:false,
+    fechaEntregaReal:null,
+    horaEntregaReal:null,
+    fechaEntregadoAt:null
+  });
+  toast('↩️ Proceso revertido a activo');
 }
 function buscarProc(){
-  const q=($('busEnt').value||'').trim().toLowerCase();const div=$('entResult');
+  const q=($('busEnt').value||'').trim().toLowerCase();
+  const div=$('entResult');
   if(!q){div.innerHTML='';return;}
-  const p=PROCS.find(x=>x.cedula.toLowerCase().includes(q)||x.vin.toLowerCase().includes(q));
-  if(!p){div.innerHTML='<div class="ib ibw">⚠️ No se encontró ningún proceso.</div>';return;}
+  const p=PROCS.find(x=>
+    (x.cedula||'').toLowerCase().includes(q)||
+    (x.vin||'').toLowerCase().includes(q)||
+    (x.cliente||'').toLowerCase().includes(q)
+  );
+  if(!p){div.innerHTML='<div class="ib ibw">⚠️ No se encontró ningún proceso con esa cédula, VIN o nombre.</div>';return;}
   verDet(p._id);
 }
 function verDet(id){
@@ -744,8 +1196,16 @@ function verDet(id){
   let html=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;font-size:13px"><div><strong>Cliente:</strong> ${p.cliente}</div><div><strong>Cédula:</strong> ${p.cedula}</div><div><strong>VIN:</strong> <span class="mono">${p.vin}</span></div><div><strong>Asesor:</strong> ${as?as.nombre:'—'}</div><div><strong>Sede:</strong> ${p.sede}</div>${veh?`<div><strong>Color:</strong> ${veh.color}</div>`:''}</div><div style="font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.5rem">Etapas de alistamiento</div><div class="etl">`;
   p.etapas.forEach((e,i)=>{const prev=i===0||p.etapas[i-1].done;const cls=e.done?'done':prev?'cur':'';const ec=e.done?'ecd':prev?'ecc':'ecp';const icon=e.done?'✓':prev?'⏳':'○';html+=`<div class="er ${cls}"><div class="ec ${ec}">${icon}</div><div class="ei"><div class="en">${e.nombre}</div><div class="ef">${e.fecha?'Completado: '+e.fecha:prev&&!e.done?'En proceso…':'Pendiente'}</div></div>${isAdm()&&!e.done&&prev?`<button class="btn btnok btnsm" onclick="markEt('${id}',${i})">Marcar ✓</button>`:''}</div>`;});
   html+='</div>';
-  if(listo&&p.entregaProg)html+=`<div class="pe">🎉 Entrega: ${p.entregaProg.fecha} a las ${p.entregaProg.hora}</div>`;
-  else if(listo&&!p.entregaProg&&isAdm())html+=`<div class="pe" onclick="openPE('${id}');cm('mDet')">🎉 Listo — Pulsa para programar la entrega ›</div>`;
+  if(p.entregado){
+    html+=`<div style="background:#eaf3de;border:1px solid #b5d880;border-radius:9px;padding:.85rem 1rem;font-size:13px;color:#1e5009;margin-top:.75rem;display:flex;align-items:center;gap:8px">
+      🎉 <strong>Vehículo entregado</strong> el ${p.fechaEntregaReal||'—'} a las ${p.horaEntregaReal||'—'}
+    </div>`;
+  } else if(listo&&p.entregaProg){
+    html+=`<div class="pe">🎉 Entrega programada: ${p.entregaProg.fecha} a las ${p.entregaProg.hora}</div>`;
+    if(isAdm()) html+=`<div style="margin-top:.5rem"><button class="btn btnp" onclick="marcarEntregado('${id}',true);cm('mDet')">✅ Marcar como entregado</button></div>`;
+  } else if(listo&&!p.entregaProg&&isAdm()){
+    html+=`<div class="pe" onclick="openPE('${id}');cm('mDet')">🎉 Listo — Pulsa para programar la entrega ›</div>`;
+  }
   $('detBody').innerHTML=html;om('mDet');
 }
 async function markEt(pid,idx){
@@ -789,10 +1249,373 @@ function guardarUsr(){
   cm('mAddU');renderUsrs();toast('✅ Usuario creado');
 }
 
+// ── DASHBOARD ──
+let dashCharts={};
+let metaUnidades=10;
+
+function resetDashFilters(){
+  $('dashFiltMes').value='';
+  $('dashFiltAsesor2').value='';
+  $('dashFiltVeh2').value='';
+  $('dashFiltVitrina').value='';
+  renderDashboard();
+}
+
+function guardarMeta(){
+  const v=parseInt($('metaMensual').value);
+  if(v&&v>0){metaUnidades=v;toast('✅ Meta actualizada: '+v+' unidades');renderDashboard();}
+  else toast('⚠️ Ingresa una meta válida');
+}
+
+function getAsesoresPorSede(sede){
+  return USERS.filter(u=>u.rol==='asesor'&&u.activo&&(sede===''||u.sede===sede));
+}
+
+function filtrarSegs(){
+  const fMes=$('dashFiltMes')?$('dashFiltMes').value:'';
+  const fAs=$('dashFiltAsesor2')?$('dashFiltAsesor2').value:'';
+  const fVeh=$('dashFiltVeh2')?$('dashFiltVeh2').value:'';
+  const fVit=$('dashFiltVitrina')?$('dashFiltVitrina').value:'';
+
+  let data=[...SEGS];
+
+  // Si es asesor, solo sus datos
+  if(CU&&CU.rol==='asesor') data=data.filter(s=>s.asesorId===CU.id);
+
+  if(fMes) data=data.filter(s=>{
+    const fechaRef=s.fechaFact||s.fechaSep||s.createdAt||'';
+    return fechaRef.startsWith(fMes);
+  });
+  if(fAs) data=data.filter(s=>s.asesorId===fAs);
+  if(fVeh) data=data.filter(s=>s.vehiculo===fVeh);
+  if(fVit){
+    const asIds=USERS.filter(u=>u.sede===fVit&&u.rol==='asesor').map(u=>u.id);
+    data=data.filter(s=>asIds.includes(s.asesorId));
+  }
+  return data;
+}
+
+function destroyChart(id){
+  if(dashCharts[id]){dashCharts[id].destroy();delete dashCharts[id];}
+}
+
+const CHART_COLORS=['#CC0001','#1457a0','#2d6011','#7a4a0a','#3a2e8f','#0d6048','#b84c00','#555','#9b2020','#185FA5','#854F0B','#3B6D11'];
+
+function renderDashboard(){
+  if(!CU||!db) return;
+
+  // Fill filter selects
+  const sa=$('dashFiltAsesor2');
+  if(sa){
+    const prev=sa.value;
+    const asesores=CU.rol==='asesor'?USERS.filter(u=>u.id===CU.id):USERS.filter(u=>u.rol==='asesor'&&u.activo);
+    sa.innerHTML='<option value="">Todos los asesores</option>'+asesores.map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+    sa.value=prev;
+  }
+  const sv=$('dashFiltVeh2');
+  if(sv){
+    const prev=sv.value;
+    sv.innerHTML='<option value="">Todos los vehículos</option>'+VEHICULOS_SEG.map(v=>`<option value="${v}">${v}</option>`).join('');
+    sv.value=prev;
+  }
+
+  const data=filtrarSegs();
+  const fMes=$('dashFiltMes')?$('dashFiltMes').value:'';
+
+  const prospectos=data.length;
+  const calientes=data.filter(s=>s.estado==='Caliente').length;
+  const separados=data.filter(s=>s.estado==='Separado'||s.fechaSep).length;
+  const facturados=data.filter(s=>s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact).length;
+  const matriculados=data.filter(s=>s.estado==='Matriculado'||s.fechaMat).length;
+  const desistidos=data.filter(s=>s.estado==='Desistido').length;
+  const estaSemana=data.filter(s=>s.temperatura==='Esta semana').length;
+
+  const convRate=prospectos>0?Math.round((facturados/prospectos)*100):0;
+  const sepRate=prospectos>0?Math.round((separados/prospectos)*100):0;
+
+  // ── KPIs ──
+  $('dashKpis').innerHTML=`
+    <div class="kpi-card" style="--kc:#CC0001"><div class="kpi-num">${prospectos}</div><div class="kpi-label">Total prospectos</div><div class="kpi-sub">En el período</div></div>
+    <div class="kpi-card" style="--kc:#b84c00"><div class="kpi-num">${calientes}</div><div class="kpi-label">🔥 Calientes</div><div class="kpi-sub">Activos sin cerrar</div></div>
+    <div class="kpi-card" style="--kc:#7a4a0a"><div class="kpi-num">${estaSemana}</div><div class="kpi-label">🔴 Cierran esta semana</div><div class="kpi-sub">Temperatura alta</div></div>
+    <div class="kpi-card" style="--kc:#1457a0"><div class="kpi-num">${separados}</div><div class="kpi-label">🔒 Separaciones</div><div class="kpi-sub">Tasa: ${sepRate}%</div></div>
+    <div class="kpi-card" style="--kc:#CC0001"><div class="kpi-num">${facturados}</div><div class="kpi-label">📄 Facturados</div><div class="kpi-sub">Conv: ${convRate}%</div></div>
+    <div class="kpi-card" style="--kc:#2d6011"><div class="kpi-num">${matriculados}</div><div class="kpi-label">✅ Matriculados</div><div class="kpi-sub">Entregados</div></div>
+    <div class="kpi-card" style="--kc:#888"><div class="kpi-num">${desistidos}</div><div class="kpi-label">❌ Desistidos</div><div class="kpi-sub">${prospectos>0?Math.round((desistidos/prospectos)*100):0}% del total</div></div>
+    <div class="kpi-card" style="--kc:#3a2e8f"><div class="kpi-num">${convRate}%</div><div class="kpi-label">📈 Conversión total</div><div class="kpi-sub">Prospectos→Facturas</div></div>
+  `;
+
+  // ── VELOCÍMETRO ──
+  const pct=Math.min(Math.round((facturados/metaUnidades)*100),100);
+  $('gaugeNum').textContent=pct+'%';
+  $('gaugeLabel').textContent=`${facturados} de ${metaUnidades} unidades facturadas`;
+  $('gFacturadas').textContent=facturados;
+  $('gMeta').textContent=metaUnidades;
+  $('gFaltantes').textContent=Math.max(0,metaUnidades-facturados);
+  const hoy=new Date();
+  const diasMes=new Date(hoy.getFullYear(),hoy.getMonth()+1,0).getDate();
+  const diasRest=diasMes-hoy.getDate();
+  $('gDiasRestantes').textContent=diasRest;
+
+  destroyChart('gauge');
+  const gCtx=$('gaugeChart').getContext('2d');
+  const gColor=pct>=100?'#2d6011':pct>=70?'#7a4a0a':pct>=40?'#CC0001':'#9b2020';
+  dashCharts['gauge']=new Chart(gCtx,{
+    type:'doughnut',
+    data:{
+      datasets:[{
+        data:[pct,100-pct],
+        backgroundColor:[gColor,'#f0f0f0'],
+        borderWidth:0,
+        circumference:180,
+        rotation:270
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},cutout:'75%'}
+  });
+
+  // ── FORECAST ──
+  const ritmoActual=diasMes>0?facturados/Math.max(1,hoy.getDate()):0;
+  const proyeccionMes=Math.round(ritmoActual*diasMes);
+  const faltaForecast=Math.max(0,metaUnidades-facturados);
+  const ritmoNecesario=diasRest>0?Math.round(faltaForecast/diasRest*10)/10:0;
+  $('forecastGrid').innerHTML=`
+    <div class="fc-card"><div class="fc-num" style="color:#CC0001">${proyeccionMes}</div><div class="fc-label">Proyección fin de mes</div><div class="fc-detail">Al ritmo actual</div></div>
+    <div class="fc-card"><div class="fc-num" style="color:#1457a0">${ritmoNecesario}</div><div class="fc-label">Unidades/día necesarias</div><div class="fc-detail">Para alcanzar la meta</div></div>
+    <div class="fc-card"><div class="fc-num" style="color:#2d6011">${diasRest}</div><div class="fc-label">Días restantes</div><div class="fc-detail">Del mes en curso</div></div>
+    <div class="fc-card"><div class="fc-num" style="color:${proyeccionMes>=metaUnidades?'#2d6011':'#9b2020'}">${proyeccionMes>=metaUnidades?'✅':'⚠️'}</div><div class="fc-label">${proyeccionMes>=metaUnidades?'Meta alcanzable':'Meta en riesgo'}</div><div class="fc-detail">${proyeccionMes>=metaUnidades?'Al ritmo actual':'Acelerar ventas'}</div></div>
+  `;
+  $('forecastNote').textContent=`Ritmo actual: ${Math.round(ritmoActual*10)/10} unidades/día. Proyección basada en el avance del mes.`;
+
+  // ── EMBUDO ──
+  destroyChart('funnel');
+  const fCtx=$('funnelChart').getContext('2d');
+  dashCharts['funnel']=new Chart(fCtx,{
+    type:'bar',
+    data:{
+      labels:['Prospectos','Calientes','Separados','Facturados','Matriculados'],
+      datasets:[{
+        data:[prospectos,calientes,separados,facturados,matriculados],
+        backgroundColor:['#e6f1fb','#fff0e8','#faeeda','#CC0001','#2d6011'],
+        borderColor:['#1457a0','#b84c00','#7a4a0a','#a30001','#1e5009'],
+        borderWidth:2,borderRadius:6
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}
+  });
+
+  // ── PIPELINE DOUGHNUT ──
+  destroyChart('pipeline');
+  const pCtx=$('pipelineChart').getContext('2d');
+  dashCharts['pipeline']=new Chart(pCtx,{
+    type:'doughnut',
+    data:{
+      labels:['🔥 Caliente','🔒 Separado','📄 Facturado','✅ Matriculado','❌ Desistido'],
+      datasets:[{
+        data:[calientes,
+          data.filter(s=>s.estado==='Separado').length,
+          data.filter(s=>s.estado==='Facturado').length,
+          data.filter(s=>s.estado==='Matriculado').length,
+          desistidos],
+        backgroundColor:['#FF6B35','#fac775','#CC0001','#2d6011','#ddd'],
+        borderWidth:2,borderColor:'#fff'
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}
+  });
+
+  // ── RANKING ASESORES ──
+  const asesoresFiltro=CU.rol==='asesor'?USERS.filter(u=>u.id===CU.id):USERS.filter(u=>u.rol==='asesor'&&u.activo);
+  const rankData=asesoresFiltro.map(u=>{
+    const aSegs=data.filter(s=>s.asesorId===u.id);
+    const aFact=aSegs.filter(s=>s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact).length;
+    const aProsp=aSegs.length;
+    const aSep=aSegs.filter(s=>s.estado==='Separado'||s.fechaSep).length;
+    const aMat=aSegs.filter(s=>s.estado==='Matriculado'||s.fechaMat).length;
+    const aCal=aSegs.filter(s=>s.estado==='Caliente').length;
+    const aConv=aProsp>0?Math.round((aFact/aProsp)*100):0;
+    return{u,aProsp,aSep,aFact,aMat,aCal,aConv};
+  }).sort((a,b)=>b.aFact-a.aFact);
+
+  const maxFact=rankData.length?Math.max(...rankData.map(r=>r.aFact),1):1;
+  $('rankingBody').innerHTML=rankData.map((r,i)=>{
+    const pos=i+1;
+    const posCls=pos===1?'pos-1':pos===2?'pos-2':pos===3?'pos-3':'pos-n';
+    const barW=Math.round((r.aFact/maxFact)*100);
+    const nombre=r.u.nombre.split(' ').slice(0,2).join(' ');
+    return `<tr>
+      <td><div class="rank-pos ${posCls}">${pos}</div></td>
+      <td><strong style="font-size:12px">${nombre}</strong></td>
+      <td><span class="b bgy" style="font-size:10px">${r.u.sede||'—'}</span></td>
+      <td style="text-align:center">${r.aProsp}</td>
+      <td style="text-align:center">${r.aSep}</td>
+      <td style="text-align:center;font-weight:700;color:#CC0001">${r.aFact}</td>
+      <td style="text-align:center;color:#2d6011;font-weight:700">${r.aMat}</td>
+      <td style="text-align:center"><span class="b ${r.aConv>=30?'bg':r.aConv>=15?'ba':'br'}">${r.aConv}%</span></td>
+      <td style="min-width:100px"><div style="display:flex;align-items:center;gap:6px"><div class="rank-bar-wrap"><div class="rank-bar" style="width:${barW}%"></div></div><span style="font-size:10px;color:#aaa;white-space:nowrap">${r.aFact}/${metaUnidades}</span></div></td>
+    </tr>`;
+  }).join('');
+
+  // ── BAR ASESOR FACTURADOS ──
+  destroyChart('asesor');
+  const aCtx=$('asesorChart').getContext('2d');
+  dashCharts['asesor']=new Chart(aCtx,{
+    type:'bar',
+    data:{
+      labels:rankData.map(r=>r.u.nombre.split(' ')[0]+' '+r.u.nombre.split(' ')[1]),
+      datasets:[
+        {label:'Facturados',data:rankData.map(r=>r.aFact),backgroundColor:'#CC0001',borderRadius:5},
+        {label:'Separados',data:rankData.map(r=>r.aSep),backgroundColor:'#fac775',borderRadius:5},
+        {label:'Matriculados',data:rankData.map(r=>r.aMat),backgroundColor:'#2d6011',borderRadius:5}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}
+  });
+
+  // ── CALIENTES POR ASESOR ──
+  destroyChart('calientes');
+  const cCtx=$('calientesChart').getContext('2d');
+  dashCharts['calientes']=new Chart(cCtx,{
+    type:'bar',
+    data:{
+      labels:rankData.map(r=>r.u.nombre.split(' ')[0]+' '+r.u.nombre.split(' ')[1]),
+      datasets:[{label:'Calientes',data:rankData.map(r=>r.aCal),backgroundColor:'#FF6B35',borderRadius:5}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}
+  });
+
+  // ── VEHÍCULOS ──
+  const vehCount={};
+  data.forEach(s=>{if(s.vehiculo)vehCount[s.vehiculo]=(vehCount[s.vehiculo]||0)+1;});
+  const vehSorted=Object.entries(vehCount).sort((a,b)=>b[1]-a[1]);
+  destroyChart('vehiculo');
+  const vCtx=$('vehiculoChart').getContext('2d');
+  dashCharts['vehiculo']=new Chart(vCtx,{
+    type:'bar',
+    data:{
+      labels:vehSorted.map(v=>v[0]),
+      datasets:[{label:'Prospectos',data:vehSorted.map(v=>v[1]),backgroundColor:CHART_COLORS,borderRadius:5}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#f5f5f5'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+
+  // ── COLORES ──
+  const colCount={};
+  data.forEach(s=>{if(s.color){const c=s.color.trim().toUpperCase();colCount[c]=(colCount[c]||0)+1;}});
+  const colSorted=Object.entries(colCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  destroyChart('color');
+  const coCtx=$('colorChart').getContext('2d');
+  dashCharts['color']=new Chart(coCtx,{
+    type:'doughnut',
+    data:{
+      labels:colSorted.map(c=>c[0]),
+      datasets:[{data:colSorted.map(c=>c[1]),backgroundColor:CHART_COLORS,borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10}}}}
+  });
+
+  // ── VITRINA ──
+  const vitrinaData=USERS.filter(u=>u.rol==='asesor'&&u.activo).reduce((acc,u)=>{
+    const sede=u.sede||'Sin sede';
+    if(!acc[sede]) acc[sede]=0;
+    acc[sede]+=data.filter(s=>s.asesorId===u.id&&(s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact)).length;
+    return acc;
+  },{});
+  destroyChart('vitrina');
+  const viCtx=$('vitrinaChart').getContext('2d');
+  dashCharts['vitrina']=new Chart(viCtx,{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(vitrinaData),
+      datasets:[{data:Object.values(vitrinaData),backgroundColor:['#CC0001','#1457a0','#2d6011'],borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}}}
+  });
+
+  // ── FORMA DE PAGO ──
+  const pagoCount={};
+  data.forEach(s=>{if(s.pago)pagoCount[s.pago]=(pagoCount[s.pago]||0)+1;});
+  destroyChart('pago');
+  const pgCtx=$('pagoChart').getContext('2d');
+  dashCharts['pago']=new Chart(pgCtx,{
+    type:'pie',
+    data:{
+      labels:Object.keys(pagoCount),
+      datasets:[{data:Object.values(pagoCount),backgroundColor:CHART_COLORS,borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}}}
+  });
+
+  // ── TENDENCIA MENSUAL ──
+  const mesesLabels=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const tendData={prosp:new Array(12).fill(0),sep:new Array(12).fill(0),fact:new Array(12).fill(0),mat:new Array(12).fill(0)};
+  SEGS.filter(s=>CU.rol==='asesor'?s.asesorId===CU.id:true).forEach(s=>{
+    const fecha=s.createdAt||'';if(!fecha)return;
+    const mes=parseInt(fecha.split('-')[1])-1;if(mes<0||mes>11)return;
+    tendData.prosp[mes]++;
+    if(s.estado==='Separado'||s.fechaSep)tendData.sep[mes]++;
+    if(s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact)tendData.fact[mes]++;
+    if(s.estado==='Matriculado'||s.fechaMat)tendData.mat[mes]++;
+  });
+  destroyChart('tendencia');
+  const tCtx=$('tendenciaChart').getContext('2d');
+  dashCharts['tendencia']=new Chart(tCtx,{
+    type:'line',
+    data:{
+      labels:mesesLabels,
+      datasets:[
+        {label:'Prospectos',data:tendData.prosp,borderColor:'#1457a0',backgroundColor:'rgba(20,87,160,0.08)',tension:.4,fill:true,pointRadius:4},
+        {label:'Separados', data:tendData.sep, borderColor:'#fac775',backgroundColor:'rgba(250,199,117,0.08)',tension:.4,fill:true,pointRadius:4},
+        {label:'Facturados',data:tendData.fact,borderColor:'#CC0001',backgroundColor:'rgba(204,0,1,0.08)',tension:.4,fill:true,pointRadius:4},
+        {label:'Matriculados',data:tendData.mat,borderColor:'#2d6011',backgroundColor:'rgba(45,96,17,0.08)',tension:.4,fill:true,pointRadius:4}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}
+  });
+
+  // ── DESISTIMIENTO ──
+  const desCount={};
+  data.filter(s=>s.estado==='Desistido'&&s.motivo).forEach(s=>{desCount[s.motivo]=(desCount[s.motivo]||0)+1;});
+  destroyChart('desist');
+  const dCtx=$('desistChart').getContext('2d');
+  dashCharts['desist']=new Chart(dCtx,{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(desCount).length?Object.keys(desCount):['Sin datos'],
+      datasets:[{data:Object.keys(desCount).length?Object.values(desCount):[1],backgroundColor:Object.keys(desCount).length?CHART_COLORS:['#eee'],borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}}}
+  });
+
+  // ── TEMPERATURA ──
+  const tempCount={'Esta semana':0,'Este mes':0,'Próximo mes':0,'Sin definir':0};
+  data.filter(s=>s.estado==='Caliente').forEach(s=>{const t=s.temperatura||'Sin definir';if(tempCount[t]!==undefined)tempCount[t]++;else tempCount['Sin definir']++;});
+  destroyChart('temp');
+  const tmpCtx=$('tempChart').getContext('2d');
+  dashCharts['temp']=new Chart(tmpCtx,{
+    type:'doughnut',
+    data:{
+      labels:['🔴 Esta semana','🟡 Este mes','🟢 Próximo mes','⚪ Sin definir'],
+      datasets:[{data:Object.values(tempCount),backgroundColor:['#9b2020','#fac775','#2d6011','#ddd'],borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}}}
+  });
+}
+
 // ── SEGUIMIENTO DATA ──
 const VEHICULOS_SEG=['CITY 4D X-TYLE','CITY 4D PRESTIGE','CITY 5D PRESTIGE','WR-V X-TYLE','WR-V PRESTIGE','HR-V X-TYLE','HR-V PRESTIGE','ZR-V X-TYLE','ZR-V PRESTIGE','CR-V PRESTIGE','CR-V TOURING','PILOT TOURING'];
 let SEGS=[];
 let curSegId=null;
+
+function getTempBadge(t){
+  const map={
+    'Esta semana':'<span class="b br" style="background:#fff0f0;color:#9b2020">🔴 Esta semana</span>',
+    'Este mes':'<span class="b ba" style="background:#fffbf0;color:#7a4a0a">🟡 Este mes</span>',
+    'Próximo mes':'<span class="b bg" style="background:#f0fbf0;color:#2d6011">🟢 Próx. mes</span>',
+    'Sin definir':'<span class="b bgy">⚪ Sin definir</span>'
+  };
+  return map[t]||'<span class="b bgy">⚪ Sin definir</span>';
+}
 
 function getEstadoBadge(e){
   const map={
@@ -838,13 +1661,17 @@ function renderSeg(){
   const facturados=SEGS.filter(s=>s.estado==='Facturado').length;
   const matriculados=SEGS.filter(s=>s.estado==='Matriculado').length;
   const desistidos=SEGS.filter(s=>s.estado==='Desistido').length;
+  const estaSemana=SEGS.filter(s=>s.temperatura==='Esta semana').length;
+  const proxContactoVencido=SEGS.filter(s=>s.proxContacto&&s.proxContacto<today()&&s.estado==='Caliente').length;
   $('segGrid').innerHTML=`
     <div class="sc"><div class="sn">${total}</div><div class="sl">Total clientes</div></div>
     <div class="sc"><div class="sn" style="color:#b84c00">${calientes}</div><div class="sl">🔥 Calientes</div></div>
+    <div class="sc"><div class="sn" style="color:#9b2020">${estaSemana}</div><div class="sl">🔴 Esta semana</div></div>
     <div class="sc"><div class="sn" style="color:#7a4a0a">${separados}</div><div class="sl">🔒 Separados</div></div>
     <div class="sc"><div class="sn" style="color:#1457a0">${facturados}</div><div class="sl">📄 Facturados</div></div>
     <div class="sc"><div class="sn" style="color:#2d6011">${matriculados}</div><div class="sl">✅ Matriculados</div></div>
-    <div class="sc"><div class="sn" style="color:#777">${desistidos}</div><div class="sl">❌ Desistidos</div></div>`;
+    <div class="sc"><div class="sn" style="color:#777">${desistidos}</div><div class="sl">❌ Desistidos</div></div>
+    <div class="sc"><div class="sn" style="color:#9b2020">${proxContactoVencido}</div><div class="sl">⚠️ Contacto vencido</div></div>`;
 
   const tb=$('segTb');
   if(!data.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#ccc;padding:2rem">No hay clientes registrados</td></tr>';return;}
@@ -863,9 +1690,16 @@ function renderSeg(){
       <td><strong style="font-size:12px">${s.nombre}</strong></td>
       <td class="mono">${s.celular||'—'}</td>
       <td class="mono">${s.cedula||'—'}</td>
+      <td>${s.vin?`<span class="mono" style="font-size:10px;color:#1457a0">${s.vin}</span><br><span style="font-size:9px;color:#aaa">${(INV.find(v=>v.vin===s.vin)||{}).estado||''}</span>`:'<span style="color:#ddd;font-size:11px">Sin VIN</span>'}</td>
       <td style="font-size:11px;font-weight:600">${s.vehiculo||'—'}</td>
       <td style="font-size:11px">${s.color||'—'}</td>
       <td><span class="b bgy" style="font-size:10px">${s.tipo||'—'}</span></td>
+      <td>${getEstadoBadge(s.estado)}${desistidoInfo}</td>
+      <td>${fechas}</td>
+      <td style="font-size:11px">${s.pago||'—'}</td>
+      <td style="font-size:11px">${s.entidad||'—'}</td>
+      <td>${getTempBadge(s.temperatura)}</td>
+      <td style="font-size:11px;font-weight:600;color:${s.proxContacto&&s.proxContacto<today()?'#9b2020':'#333'}">${s.proxContacto||'—'}</td>
       <td>${getEstadoBadge(s.estado)}${desistidoInfo}</td>
       <td>${fechas}</td>
       <td style="white-space:nowrap">
@@ -879,6 +1713,132 @@ function renderSeg(){
 function toggleSegFields(){
   const estado=$('segEstado').value;
   $('segDesistidoField').style.display=estado==='Desistido'?'block':'none';
+  checkVinConflict();
+}
+
+function fillVinSelect(){
+  const sel=$('segVin');
+  if(!sel) return;
+  const prev=sel.value;
+  sel.innerHTML='<option value="">Sin VIN asignado</option>';
+  // Show available inventory + already assigned VINs
+  INV.forEach(v=>{
+    const opt=document.createElement('option');
+    opt.value=v.vin;
+    opt.textContent=`${v.vin} · ${v.producto} · ${v.color} · ${v.ubicacion}`;
+    if(v.estado==='SEPARADO'||v.estado==='FACTURADO'||v.estado==='MATRICULADO'){
+      opt.textContent+=' ['+v.estado+']';
+    }
+    sel.appendChild(opt);
+  });
+  if(prev) sel.value=prev;
+  updateVinStatus();
+}
+
+function updateVinStatus(){
+  const vin=$('segVin')?$('segVin').value:'';
+  const statusEl=$('segVinEstado');
+  if(!statusEl) return;
+  if(!vin){
+    statusEl.innerHTML='<span style="color:#ccc">Selecciona un VIN para ver su estado</span>';
+    return;
+  }
+  const v=INV.find(x=>x.vin===vin);
+  if(!v){statusEl.innerHTML='<span style="color:#9b2020">VIN no encontrado en inventario</span>';return;}
+  const estadoColor=v.estado==='DISPONIBLE'?'#2d6011':v.estado==='SEPARADO'?'#7a4a0a':'#1457a0';
+  statusEl.innerHTML=`<strong>${v.producto}</strong> · ${v.color}<br>
+    <span style="color:${estadoColor};font-weight:600">${v.estado}</span> · ${v.ubicacion}
+    ${v.sepAsesorId?`<span style="color:#aaa;font-size:11px"> · Asesor: ${(USERS.find(u=>u.id===v.sepAsesorId)||{}).nombre||'—'}</span>`:''}`;
+  checkVinConflict();
+}
+
+function checkVinConflict(){
+  const vin=$('segVin')?$('segVin').value:'';
+  const estado=$('segEstado')?$('segEstado').value:'';
+  const alertEl=$('segVinAlert');
+  if(!alertEl) return;
+  if(!vin){alertEl.style.display='none';return;}
+  // Check if another seguimiento already uses this VIN
+  const editId=$('segEditId')?$('segEditId').value:'';
+  const existing=SEGS.find(s=>s.vin===vin&&s._id!==editId);
+  if(existing){
+    const as=USERS.find(u=>u.id===existing.asesorId);
+    alertEl.className='ib ibw';
+    alertEl.innerHTML=`⚠️ Este VIN ya está asociado a <strong>${existing.nombre}</strong> (${as?as.nombre:'—'}) en estado <strong>${existing.estado}</strong>.`;
+    alertEl.style.display='flex';
+    return;
+  }
+  alertEl.style.display='none';
+}
+
+async function syncVinWithInventario(vin, estadoSeg, asesorId){
+  if(!vin||!db) return;
+  const v=INV.find(x=>x.vin===vin);
+  if(!v) return;
+
+  const updates={};
+
+  // Map seguimiento estado to inventario estado
+  if(estadoSeg==='Separado'&&v.estado==='DISPONIBLE'){
+    updates.estado='SEPARADO';
+    updates.sepAsesorId=asesorId;
+    updates.sepFecha=today();
+  } else if((estadoSeg==='Facturado'||estadoSeg==='Matriculado')&&v.estado!=='FACTURADO'&&v.estado!=='MATRICULADO'){
+    updates.estado='SEPARADO'; // Keep as separado in inventory when facturado
+    updates.sepAsesorId=asesorId;
+    if(!v.sepFecha) updates.sepFecha=today();
+  } else if(estadoSeg==='Caliente'&&v.estado==='DISPONIBLE'){
+    // Just note the asesor interest, don't change status
+    return;
+  } else if(estadoSeg==='Desistido'&&v.estado==='SEPARADO'&&v.sepAsesorId===asesorId){
+    // Release vehicle if asesor desists
+    updates.estado='DISPONIBLE';
+    updates.sepAsesorId=null;
+    updates.sepFecha=null;
+    updates.sepObs='';
+  }
+
+  if(Object.keys(updates).length>0){
+    await db.collection('inventario').doc(vin).update(updates);
+  }
+}
+
+async function createEntregaIfFacturado(segData, segId){
+  if(!db) return;
+  if(segData.estado!=='Facturado'&&segData.estado!=='Matriculado') return;
+  if(!segData.vin) return;
+
+  // Check if proceso already exists for this VIN
+  const existing=PROCS.find(p=>p.vin===segData.vin);
+  if(existing) return; // Already created
+
+  const asesor=USERS.find(u=>u.id===segData.asesorId);
+  const veh=INV.find(v=>v.vin===segData.vin);
+
+  // Create proceso de entrega automatically
+  const etapas=[
+    {nombre:'Facturación',done:true,fecha:segData.fechaFact||today()}, // Auto-mark facturación
+    {nombre:'Embellecimiento',done:false,fecha:null},
+    {nombre:'Alistamiento mecánico',done:false,fecha:null},
+    {nombre:'Polarizado',done:false,fecha:null},
+    {nombre:'Instalación de accesorios',done:false,fecha:null},
+    {nombre:'Transporte a vitrina',done:false,fecha:null},
+    {nombre:'Listo para entrega',done:false,fecha:null}
+  ];
+
+  await db.collection('procesos').add({
+    cliente: segData.nombre,
+    cedula: segData.cedula||'—',
+    vin: segData.vin,
+    sede: asesor?asesor.sede:'Ciudad Jardín',
+    asesorId: segData.asesorId,
+    etapas,
+    entregaProg: null,
+    fromSeguimiento: true,
+    segId
+  });
+
+  toast('🚗 Proceso de entrega creado automáticamente para '+segData.nombre);
 }
 
 function openNewSeg(){
@@ -888,12 +1848,16 @@ function openNewSeg(){
   $('segAsesor').innerHTML=USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
   // If current user is asesor, preselect
   if(CU.rol==='asesor') $('segAsesor').value=CU.id;
-  ['segNombre','segCedula','segCelular','segColor','segObs','segFechaSep','segFechaFact','segFechaMat'].forEach(id=>$(id).value='');
+  ['segNombre','segCedula','segCelular','segColor','segObs','segFechaSep','segFechaFact','segFechaMat','segProxContacto'].forEach(id=>$(id).value='');
   $('segEstado').value='Caliente';
   $('segTipo').value='Vehículo nuevo';
   $('segVehiculo').value='CITY 4D X-TYLE';
   $('segMotivo').value='';
+  $('segPago').value='';
+  $('segEntidad').value='';
+  $('segTemp').value='Sin definir';
   $('segDesistidoField').style.display='none';
+  fillVinSelect();
   om('mNewSeg');
 }
 
@@ -913,10 +1877,16 @@ function editSeg(id){
   $('segTipo').value=s.tipo||'Vehículo nuevo';
   $('segVehiculo').value=s.vehiculo||'CITY 4D X-TYLE';
   $('segMotivo').value=s.motivo||'';
+  $('segPago').value=s.pago||'';
+  $('segEntidad').value=s.entidad||'';
+  $('segTemp').value=s.temperatura||'Sin definir';
+  $('segProxContacto').value=s.proxContacto||'';
   $('segFechaSep').value=s.fechaSep||'';
   $('segFechaFact').value=s.fechaFact||'';
   $('segFechaMat').value=s.fechaMat||'';
   $('segDesistidoField').style.display=s.estado==='Desistido'?'block':'none';
+  fillVinSelect();
+  setTimeout(()=>{if($('segVin'))$('segVin').value=s.vin||'';updateVinStatus();},100);
   cm('mDetSeg');
   om('mNewSeg');
 }
@@ -924,31 +1894,54 @@ function editSeg(id){
 async function guardarSeg(){
   const nombre=$('segNombre').value.trim();
   if(!nombre){toast('⚠️ El nombre es requerido');return;}
+  const vin=$('segVin')?$('segVin').value||null:null;
+  const estado=$('segEstado').value;
+  const asesorId=$('segAsesor').value;
+
   const data={
-    asesorId:$('segAsesor').value,
+    asesorId,
     nombre,
     cedula:$('segCedula').value.trim(),
     celular:$('segCelular').value.trim(),
+    vin: vin||null,
     vehiculo:$('segVehiculo').value,
     color:$('segColor').value.trim(),
     tipo:$('segTipo').value,
-    estado:$('segEstado').value,
-    motivo:$('segEstado').value==='Desistido'?$('segMotivo').value:'',
+    pago:$('segPago').value||'',
+    entidad:$('segEntidad').value||'',
+    temperatura:$('segTemp').value||'Sin definir',
+    proxContacto:$('segProxContacto').value||null,
+    estado,
+    motivo:estado==='Desistido'?$('segMotivo').value:'',
     fechaSep:$('segFechaSep').value||null,
     fechaFact:$('segFechaFact').value||null,
     fechaMat:$('segFechaMat').value||null,
     obs:$('segObs').value.trim(),
     updatedAt:today()
   };
+
   const editId=$('segEditId').value;
+  let savedId=editId;
+
   if(editId){
     await db.collection('seguimiento').doc(editId).update(data);
     toast('✅ Seguimiento actualizado');
   } else {
     data.createdAt=today();
-    await db.collection('seguimiento').add(data);
+    const ref=await db.collection('seguimiento').add(data);
+    savedId=ref.id;
     toast('✅ Cliente agregado al seguimiento');
   }
+
+  // ── SINCRONIZACIÓN AUTOMÁTICA ──
+  // 1. Sync VIN status with inventario
+  if(vin) await syncVinWithInventario(vin, estado, asesorId);
+
+  // 2. Auto-create proceso de entrega if Facturado
+  if((estado==='Facturado'||estado==='Matriculado')&&vin){
+    await createEntregaIfFacturado(data, savedId);
+  }
+
   cm('mNewSeg');
 }
 
@@ -965,8 +1958,13 @@ function verDetSeg(id){
       <div><strong>Celular:</strong> <a href="tel:${s.celular}" style="color:#CC0001">${s.celular||'—'}</a></div>
       <div><strong>Cédula:</strong> ${s.cedula||'—'}</div>
       <div><strong>Vehículo:</strong> ${s.vehiculo||'—'}</div>
+      <div><strong>VIN:</strong> ${s.vin?`<span class="mono" style="font-size:11px">${s.vin}</span> <span class="b bb" style="font-size:10px">${(INV.find(v=>v.vin===s.vin)||{}).estado||'—'}</span>`:'<span style="color:#ccc">Sin VIN</span>'}</div>
       <div><strong>Color:</strong> ${s.color||'—'}</div>
       <div><strong>Tipo:</strong> ${s.tipo||'—'}</div>
+      <div><strong>Forma de pago:</strong> ${s.pago||'—'}</div>
+      <div><strong>Entidad financiera:</strong> ${s.entidad||'—'}</div>
+      <div><strong>Temperatura:</strong> ${getTempBadge(s.temperatura)}</div>
+      <div><strong>Próx. contacto:</strong> <span style="font-weight:600;color:${s.proxContacto&&s.proxContacto<today()?'#9b2020':'#333'}">${s.proxContacto||'—'}</span></div>
       ${s.motivo?`<div><strong>Motivo desistimiento:</strong> <span style="color:#9b2020">${s.motivo}</span></div>`:''}
     </div>`;
   if(s.fechaSep||s.fechaFact||s.fechaMat){
@@ -1038,12 +2036,18 @@ document.addEventListener('DOMContentLoaded', function() {
   $('btnCancelPE').addEventListener('click', ()=>cm('mPE'));
   $('btnConfEnt').addEventListener('click', confirmarEnt);
 
+  // Dashboard
+  $('nav-dashboard').addEventListener('click', ()=>showPage('dashboard'));
+
   // Seguimiento
   $('nav-seguimiento').addEventListener('click', ()=>showPage('seguimiento'));
   $('btnNewSeg').addEventListener('click', openNewSeg);
   $('btnCancelSeg').addEventListener('click', ()=>cm('mNewSeg'));
   $('btnSaveSeg').addEventListener('click', guardarSeg);
   $('segEstado').addEventListener('change', toggleSegFields);
+  if($('segVin')){
+    $('segVin').addEventListener('change', updateVinStatus);
+  }
   $('segSearch').addEventListener('input', renderSeg);
   $('segFiltAsesor').addEventListener('change', renderSeg);
   $('segFiltEstado').addEventListener('change', renderSeg);
