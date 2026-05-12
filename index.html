@@ -555,6 +555,29 @@ tr:hover td{background:#fafafa}
           </div>
         </div>
 
+        <!-- COSECHAS -->
+        <div class="dash-section">🌾 Análisis de cosechas</div>
+        <div class="chart-grid">
+          <div class="chart-card full">
+            <div class="chart-title">🌾 Gráfica de cosechas — Tiempo de cierre por mes de creación
+              <span style="font-size:11px;color:#aaa;font-weight:400;margin-left:8px">Eje X: mes creación · Eje Y: matrículas · Barras: N-1 a N-6 meses</span>
+            </div>
+            <div class="chart-wrap" style="height:300px"><canvas id="cosechasChart"></canvas></div>
+          </div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">⏱️ Tiempo promedio de cierre por asesor
+              <span style="font-size:11px;color:#aaa;font-weight:400"> (días prospecto → matrícula)</span>
+            </div>
+            <div class="chart-wrap"><canvas id="tiempoCierreChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">📊 Mix de facturas mes vigente (origen)</div>
+            <div id="mixFacturasGrid" style="padding:.5rem 0"></div>
+          </div>
+        </div>
+
       </div>
 
       <div class="pg" id="page-leads">
@@ -971,6 +994,35 @@ tr:hover td{background:#fafafa}
       </select>
     </div>
     <div class="ff"><label>Color de interés</label><input type="text" id="segColor" placeholder="Ej: Rojo Supernova"></div>
+  </div>
+
+  <!-- NUEVOS CAMPOS ETAPAS COMERCIALES -->
+  <div style="font-size:10.5px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem;margin-top:.25rem">Etapas comerciales</div>
+  <div class="fr">
+    <div class="ff">
+      <label style="display:flex;align-items:center;gap:6px">
+        <input type="checkbox" id="segCotizado" style="accent-color:#CC0001;width:15px;height:15px">
+        📋 Cotizado
+      </label>
+      <input type="date" id="segFechaCotizado" style="margin-top:5px;padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none;width:100%">
+    </div>
+    <div class="ff">
+      <label style="display:flex;align-items:center;gap:6px">
+        <input type="checkbox" id="segPruebaRuta" style="accent-color:#CC0001;width:15px;height:15px">
+        🚗 Prueba de ruta realizada
+      </label>
+      <input type="date" id="segFechaPrueba" style="margin-top:5px;padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none;width:100%">
+    </div>
+  </div>
+  <div class="fr">
+    <div class="ff">
+      <label style="display:flex;align-items:center;gap:6px">
+        <input type="checkbox" id="segCreditoAprobado" style="accent-color:#CC0001;width:15px;height:15px">
+        ✅ Crédito aprobado <span style="font-size:10px;color:#aaa">(si aplica)</span>
+      </label>
+      <input type="date" id="segFechaCredito" style="margin-top:5px;padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none;width:100%">
+    </div>
+    <div class="ff"></div>
   </div>
 
   <!-- Campos condicionales según estado -->
@@ -1596,17 +1648,26 @@ async function guardarTodasMetas(){
   });
   METAS[mes]=data;
   await db.collection('metas').doc(mes).set(data);
-  // Update global metaUnidades with total
-  metaUnidades=Object.values(data).reduce((a,b)=>a+b,0)||10;
+  // Update global metaUnidades with total and persist it
+  const total=Object.values(data).reduce((a,b)=>a+b,0)||0;
+  if(total>0){
+    metaUnidades=total;
+    await db.collection('config').doc('meta_global_'+mes).set({valor:total,updatedAt:today()});
+    if($('metaMensual')) $('metaMensual').value=total;
+  }
   renderMetas();
-  toast('✅ Metas guardadas para '+getMesLabel(mes));
+  if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+  toast('✅ Metas guardadas para '+getMesLabel(mes)+' · Total: '+total+' unidades');
 }
 
-function usarMetaAuto(){
+async function usarMetaAuto(){
   const mes=$('metasMes').value;
-  if(!METAS[mes]) return;
+  if(!METAS[mes]){toast('⚠️ Guarda primero las metas del mes');return;}
   metaUnidades=Object.values(METAS[mes]).reduce((a,b)=>a+b,0)||10;
   $('metaMensual').value=metaUnidades;
+  if(db){
+    try{await db.collection('config').doc('meta_global_'+mes).set({valor:metaUnidades,updatedAt:today()});}catch(e){}
+  }
   toast('✅ Meta global actualizada: '+metaUnidades+' unidades');
   if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
 }
@@ -1729,10 +1790,20 @@ function resetDashFilters(){
   renderDashboard();
 }
 
-function guardarMeta(){
+async function guardarMeta(){
   const v=parseInt($('metaMensual').value);
-  if(v&&v>0){metaUnidades=v;toast('✅ Meta actualizada: '+v+' unidades');renderDashboard();}
-  else toast('⚠️ Ingresa una meta válida');
+  if(!v||v<=0){toast('⚠️ Ingresa una meta válida');return;}
+  metaUnidades=v;
+  // Persist global meta in Firebase
+  if(db){
+    const hoy=new Date();
+    const mesActual=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
+    try{
+      await db.collection('config').doc('meta_global_'+mesActual).set({valor:v,updatedAt:today()});
+    }catch(e){}
+  }
+  toast('✅ Meta global actualizada: '+v+' unidades');
+  renderDashboard();
 }
 
 function getAsesoresPorSede(sede){
@@ -1858,21 +1929,50 @@ function renderDashboard(){
   `;
   $('forecastNote').textContent=`Ritmo actual: ${Math.round(ritmoActual*10)/10} unidades/día. Proyección basada en el avance del mes.`;
 
-  // ── EMBUDO ──
+  // ── EMBUDO COMERCIAL REAL ──
+  // Count each stage using actual fields
+  const eCotizados   = data.filter(s=>s.cotizado).length;
+  const ePrueba      = data.filter(s=>s.pruebaRuta).length;
+  const eCredito     = data.filter(s=>s.creditoAprobado).length;
+  const eSeparados   = data.filter(s=>s.fechaSep).length;
+  const eFacturados  = data.filter(s=>s.fechaFact||s.estado==='Facturado'||s.estado==='Matriculado').length;
+  const eMatriculados= data.filter(s=>s.fechaMat||s.estado==='Matriculado').length;
+
+  const funnelLabels=['📋 Cotizados','🚗 Prueba de ruta','✅ Crédito aprobado','🔒 Separaciones','📄 Facturados','🏆 Matriculados'];
+  const funnelData=[eCotizados,ePrueba,eCredito,eSeparados,eFacturados,eMatriculados];
+  const funnelColors=['#4a90d9','#FF9500','#34C759','#fac775','#CC0001','#2d6011'];
+
   destroyChart('funnel');
   const fCtx=$('funnelChart').getContext('2d');
   dashCharts['funnel']=new Chart(fCtx,{
     type:'bar',
     data:{
-      labels:['Prospectos','Calientes','Separados','Facturados','Matriculados'],
+      labels:funnelLabels,
       datasets:[{
-        data:[prospectos,calientes,separados,facturados,matriculados],
-        backgroundColor:['#e6f1fb','#fff0e8','#faeeda','#CC0001','#2d6011'],
-        borderColor:['#1457a0','#b84c00','#7a4a0a','#a30001','#1e5009'],
-        borderWidth:2,borderRadius:6
+        label:'Clientes',
+        data:funnelData,
+        backgroundColor:funnelColors,
+        borderRadius:6,
+        borderSkipped:false
       }]
     },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      indexAxis:'y',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>{
+          const val=ctx.raw;
+          const base=funnelData[0]||1;
+          const pct=Math.round((val/base)*100);
+          return ` ${val} clientes (${pct}% del total)`;
+        }}}
+      },
+      scales:{
+        x:{beginAtZero:true,grid:{color:'#f5f5f5'},ticks:{font:{size:11}}},
+        y:{grid:{display:false},ticks:{font:{size:11}}}
+      }
+    }
   });
 
   // ── PIPELINE DOUGHNUT ──
@@ -2071,6 +2171,165 @@ function renderDashboard(){
     },
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}}}
   });
+
+  // ── COSECHAS ──
+  renderCosechas(data);
+}
+
+function renderCosechas(data){
+  if(!$('cosechasChart')) return;
+
+  // Build cohorts: for each creation month, how many matriculated in N, N+1, N+2... months
+  const hoy=new Date();
+  const curYear=hoy.getFullYear();
+  const curMonth=hoy.getMonth(); // 0-indexed
+
+  // Get last 6 months as cohort labels
+  const cohortMonths=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(curYear,curMonth-i,1);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    cohortMonths.push({key,label:MESES[d.getMonth()].substring(0,3)+' '+String(d.getFullYear()).substring(2)});
+  }
+
+  // For each cohort month, count how many days to matricula
+  // And count matriculations that came from each creation month
+  const cosechasData=cohortMonths.map(cm=>{
+    const createdInMonth=data.filter(s=>(s.createdAt||'').startsWith(cm.key));
+    const counts={total:createdInMonth.length,matriculados:0,n0:0,n1:0,n2:0,n3:0,n4plus:0};
+    createdInMonth.forEach(s=>{
+      if(!s.fechaMat) return;
+      counts.matriculados++;
+      const cDate=new Date(s.createdAt);
+      const mDate=new Date(s.fechaMat);
+      const diffMonths=Math.round((mDate-cDate)/(1000*60*60*24*30));
+      if(diffMonths<=0)counts.n0++;
+      else if(diffMonths<=1)counts.n1++;
+      else if(diffMonths<=2)counts.n2++;
+      else if(diffMonths<=3)counts.n3++;
+      else counts.n4plus++;
+    });
+    return{...cm,...counts};
+  });
+
+  destroyChart('cosechas');
+  const cosCtx=$('cosechasChart').getContext('2d');
+  dashCharts['cosechas']=new Chart(cosCtx,{
+    type:'bar',
+    data:{
+      labels:cohortMonths.map(m=>m.label),
+      datasets:[
+        {label:'Mismo mes',data:cosechasData.map(c=>c.n0),backgroundColor:'#2d6011',stack:'s'},
+        {label:'1 mes',data:cosechasData.map(c=>c.n1),backgroundColor:'#7abf3c',stack:'s'},
+        {label:'2 meses',data:cosechasData.map(c=>c.n2),backgroundColor:'#fac775',stack:'s'},
+        {label:'3 meses',data:cosechasData.map(c=>c.n3),backgroundColor:'#f97316',stack:'s'},
+        {label:'+4 meses',data:cosechasData.map(c=>c.n4plus),backgroundColor:'#9b2020',stack:'s'},
+        {label:'Sin matricular',data:cosechasData.map(c=>c.total-c.matriculados),backgroundColor:'#f0f0f0',stack:'s'}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'top',labels:{font:{size:10},boxWidth:12}},
+        tooltip:{callbacks:{
+          afterBody:ctx=>{
+            const idx=ctx[0].dataIndex;
+            const c=cosechasData[idx];
+            const pct=c.total>0?Math.round((c.matriculados/c.total)*100):0;
+            return [`Total creados: ${c.total}`,`Matriculados: ${c.matriculados} (${pct}%)`];
+          }
+        }}
+      },
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:11}}},
+        y:{stacked:true,beginAtZero:true,grid:{color:'#f5f5f5'},ticks:{font:{size:11}}}
+      }
+    }
+  });
+
+  // ── TIEMPO PROMEDIO DE CIERRE POR ASESOR ──
+  const asesoresList=USERS.filter(u=>u.rol==='asesor'&&u.activo);
+  const tiempoData=asesoresList.map(u=>{
+    const sCerrados=data.filter(s=>s.asesorId===u.id&&s.createdAt&&s.fechaMat);
+    if(!sCerrados.length) return{nombre:u.nombre.split(' ')[0],dias:0,count:0};
+    const totalDias=sCerrados.reduce((acc,s)=>{
+      const d1=new Date(s.createdAt);const d2=new Date(s.fechaMat);
+      return acc+Math.max(0,Math.round((d2-d1)/(1000*60*60*24)));
+    },0);
+    return{nombre:u.nombre.split(' ').slice(0,2).join(' '),dias:Math.round(totalDias/sCerrados.length),count:sCerrados.length};
+  }).filter(t=>t.dias>0);
+
+  destroyChart('tiempoCierre');
+  if($('tiempoCierreChart')&&tiempoData.length){
+    const tcCtx=$('tiempoCierreChart').getContext('2d');
+    dashCharts['tiempoCierre']=new Chart(tcCtx,{
+      type:'bar',
+      data:{
+        labels:tiempoData.map(t=>t.nombre),
+        datasets:[{
+          label:'Días promedio de cierre',
+          data:tiempoData.map(t=>t.dias),
+          backgroundColor:tiempoData.map(t=>t.dias<=30?'#2d6011':t.dias<=60?'#fac775':'#9b2020'),
+          borderRadius:6
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:ctx=>{
+            const t=tiempoData[ctx.dataIndex];
+            return [` ${ctx.raw} días promedio`,` (${t.count} cierres)`];
+          }}}
+        },
+        scales:{
+          y:{beginAtZero:true,grid:{color:'#f5f5f5'},title:{display:true,text:'Días',font:{size:11}}},
+          x:{grid:{display:false}}
+        }
+      }
+    });
+  } else if($('tiempoCierreChart')){
+    $('tiempoCierreChart').getContext('2d').clearRect(0,0,999,999);
+    const p=document.createElement('p');
+    p.style.cssText='text-align:center;color:#ccc;padding:2rem;font-size:13px';
+    p.textContent='Sin datos de cierre aún';
+    $('tiempoCierreChart').parentNode.appendChild(p);
+  }
+
+  // ── MIX FACTURAS MES VIGENTE ──
+  const mesCur=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
+  const facMes=data.filter(s=>s.fechaMat&&s.fechaMat.startsWith(mesCur));
+  const mixEl=$('mixFacturasGrid');
+  if(mixEl){
+    if(!facMes.length){
+      mixEl.innerHTML='<p style="color:#ccc;font-size:13px;text-align:center;padding:1rem">Sin matrículas en el mes vigente</p>';
+    } else {
+      // Group by creation month (cohort origin)
+      const byOrigin={};
+      facMes.forEach(s=>{
+        const origin=(s.createdAt||mesCur).substring(0,7);
+        if(!byOrigin[origin]) byOrigin[origin]={count:0,label:''};
+        byOrigin[origin].count++;
+        const d=new Date(origin+'-01');
+        byOrigin[origin].label=MESES[d.getMonth()].substring(0,3)+' '+String(d.getFullYear()).substring(2);
+      });
+      const total=facMes.length;
+      const sorted=Object.entries(byOrigin).sort((a,b)=>b[1].count-a[1].count);
+      const colors=['#CC0001','#1457a0','#2d6011','#7a4a0a','#3a2e8f','#0d6048'];
+      mixEl.innerHTML=`
+        <div style="font-size:12px;color:#888;margin-bottom:.75rem">Total matriculados mes vigente: <strong style="color:#CC0001">${total}</strong></div>
+        ${sorted.map((([k,v],i)=>`
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-size:11px;color:#888;min-width:55px">${v.label}</span>
+            <div style="flex:1;background:#f0f0f0;border-radius:10px;height:18px;overflow:hidden">
+              <div style="width:${Math.round((v.count/total)*100)}%;height:100%;background:${colors[i%colors.length]};border-radius:10px;display:flex;align-items:center;padding-left:6px">
+                <span style="font-size:10px;color:#fff;font-weight:700;white-space:nowrap">${v.count}</span>
+              </div>
+            </div>
+            <span style="font-size:11px;font-weight:700;color:#333;min-width:35px">${Math.round((v.count/total)*100)}%</span>
+          </div>`)).join('')}`;
+    }
+  }
 }
 
 // ══════════════════════════════════════════
@@ -2742,6 +3001,8 @@ function openNewSeg(){
   if(CU.rol==='asesor') $('segAsesor').value=CU.id;
   ['segNombre','segCedula','segCelular','segColor','segObs','segFechaSep','segFechaFact','segFechaMat','segProxContacto','segPrecio','segAbonos'].forEach(id=>$(id).value='');
   if($('segSaldoWrap')) $('segSaldoWrap').style.display='none';
+  ['segCotizado','segPruebaRuta','segCreditoAprobado'].forEach(id=>{const el=$(id);if(el)el.checked=false;});
+  ['segFechaCotizado','segFechaPrueba','segFechaCredito'].forEach(id=>{const el=$(id);if(el)el.value='';});
   $('segEstado').value='Caliente';
   $('segTipo').value='Vehículo nuevo';
   $('segVehiculo').value='CITY 4D X-TYLE';
@@ -2777,6 +3038,13 @@ function editSeg(id){
   $('segPrecio').value=s.precio||'';
   $('segAbonos').value=s.abonos||'';
   calcularSaldo();
+  // Etapas comerciales
+  const chkCot=$('segCotizado');if(chkCot)chkCot.checked=!!s.cotizado;
+  const chkPR=$('segPruebaRuta');if(chkPR)chkPR.checked=!!s.pruebaRuta;
+  const chkCA=$('segCreditoAprobado');if(chkCA)chkCA.checked=!!s.creditoAprobado;
+  if($('segFechaCotizado'))$('segFechaCotizado').value=s.fechaCotizado||'';
+  if($('segFechaPrueba'))$('segFechaPrueba').value=s.fechaPrueba||'';
+  if($('segFechaCredito'))$('segFechaCredito').value=s.fechaCredito||'';
   $('segFechaSep').value=s.fechaSep||'';
   $('segFechaFact').value=s.fechaFact||'';
   $('segFechaMat').value=s.fechaMat||'';
@@ -2812,6 +3080,12 @@ async function guardarSeg(){
     fechaSep:$('segFechaSep').value||null,
     fechaFact:$('segFechaFact').value||null,
     fechaMat:$('segFechaMat').value||null,
+    cotizado:$('segCotizado')?$('segCotizado').checked:false,
+    fechaCotizado:$('segFechaCotizado')?$('segFechaCotizado').value||null:null,
+    pruebaRuta:$('segPruebaRuta')?$('segPruebaRuta').checked:false,
+    fechaPrueba:$('segFechaPrueba')?$('segFechaPrueba').value||null:null,
+    creditoAprobado:$('segCreditoAprobado')?$('segCreditoAprobado').checked:false,
+    fechaCredito:$('segFechaCredito')?$('segFechaCredito').value||null:null,
     precio:parseFloat($('segPrecio').value)||null,
     abonos:parseFloat($('segAbonos').value)||null,
     obs:$('segObs').value.trim(),
@@ -2859,6 +3133,9 @@ function verDetSeg(id){
       <div><strong>VIN:</strong> ${s.vin?`<span class="mono" style="font-size:11px">${s.vin}</span> <span class="b bb" style="font-size:10px">${(INV.find(v=>v.vin===s.vin)||{}).estado||'—'}</span>`:'<span style="color:#ccc">Sin VIN</span>'}</div>
       <div><strong>Color:</strong> ${s.color||'—'}</div>
       <div><strong>Tipo:</strong> ${s.tipo||'—'}</div>
+      <div><strong>📋 Cotizado:</strong> ${s.cotizado?`<span class="b bg">✅ Sí ${s.fechaCotizado?'· '+s.fechaCotizado:''}</span>`:'<span class="b bgy">No</span>'}</div>
+      <div><strong>🚗 Prueba de ruta:</strong> ${s.pruebaRuta?`<span class="b bg">✅ Sí ${s.fechaPrueba?'· '+s.fechaPrueba:''}</span>`:'<span class="b bgy">No</span>'}</div>
+      <div><strong>✅ Crédito aprobado:</strong> ${s.creditoAprobado?`<span class="b bg">✅ Sí ${s.fechaCredito?'· '+s.fechaCredito:''}</span>`:'<span class="b bgy">No aplica</span>'}</div>
       <div><strong>Forma de pago:</strong> ${s.pago||'—'}</div>
       <div><strong>Entidad financiera:</strong> ${s.entidad||'—'}</div>
       <div><strong>Precio facturación:</strong> <span style="font-weight:700;color:#CC0001">${fmtCOP(s.precio)}</span></div>
