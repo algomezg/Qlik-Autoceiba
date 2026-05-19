@@ -1142,6 +1142,10 @@ tr:hover td{background:#fafafa}
 // SIN type=module, SIN wrappers, SIN onload
 // ═══════════════════════════════════════════
 
+// ── DECLARACIONES GLOBALES PRIMERO (evita TDZ) ──
+const VEHICULOS_SEG=['CITY 4D X-TYLE','CITY 4D PRESTIGE','CITY 5D PRESTIGE','WR-V X-TYLE','WR-V PRESTIGE','HR-V X-TYLE','HR-V PRESTIGE','ZR-V X-TYLE','ZR-V PRESTIGE','CR-V PRESTIGE','CR-V TOURING','PILOT TOURING'];
+let MODELOS_VEHICULOS=[...VEHICULOS_SEG];
+
 const FBCFG = {
   apiKey:"AIzaSyAvex-9G3T64MzPhhPiCkRC_sB7GmrVCq0",
   authDomain:"qlik-autoceiba.firebaseapp.com",
@@ -2843,7 +2847,7 @@ function descargarPlantilla(){
 // ══════════════════════════════════════════
 // CONFIGURACIÓN — MODELOS
 // ══════════════════════════════════════════
-let MODELOS_VEHICULOS=[...VEHICULOS_SEG]; // Working copy
+// MODELOS_VEHICULOS declared at top of script
 
 async function cargarModelosConfig(){
   if(!db) return;
@@ -2960,7 +2964,7 @@ function resetModelosDefault(){
 }
 
 // ── SEGUIMIENTO DATA ──
-const VEHICULOS_SEG=['CITY 4D X-TYLE','CITY 4D PRESTIGE','CITY 5D PRESTIGE','WR-V X-TYLE','WR-V PRESTIGE','HR-V X-TYLE','HR-V PRESTIGE','ZR-V X-TYLE','ZR-V PRESTIGE','CR-V PRESTIGE','CR-V TOURING','PILOT TOURING'];
+// VEHICULOS_SEG moved to top of script
 let SEGS=[];
 let curSegId=null;
 
