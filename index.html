@@ -250,6 +250,7 @@ tr:hover td{background:#fafafa}
       <div class="ni" id="nav-leads"><span>📋</span>Leads</div>
       <div class="ni" id="nav-seguimiento"><span>🔥</span>Seguimiento</div>
       <div class="ns">Administración</div>
+      <div class="ni hidden" id="nav-config"><span>⚙️</span>Configuración</div>
       <div class="ni hidden" id="nav-usuarios"><span>👥</span>Usuarios</div>
     </div>
     <div class="mn">
@@ -334,7 +335,7 @@ tr:hover td{background:#fafafa}
         <div class="card" style="margin-bottom:1rem">
           <div class="ct">📅 Selecciona el mes a configurar
             <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-              <select id="metasMes" style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;outline:none">
+              <select id="metasMes" style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;outline:none" onchange="cargarMetas()">
                 <option value="2026-01">Enero 2026</option>
                 <option value="2026-02">Febrero 2026</option>
                 <option value="2026-03">Marzo 2026</option>
@@ -348,7 +349,7 @@ tr:hover td{background:#fafafa}
                 <option value="2026-11">Noviembre 2026</option>
                 <option value="2026-12">Diciembre 2026</option>
               </select>
-              <button class="btn btnp btnsm" onclick="cargarMetas()">Cargar metas</button>
+              <button class="btn btns btnsm" onclick="cargarMetas()">🔄 Actualizar</button>
             </div>
           </div>
 
@@ -680,6 +681,39 @@ tr:hover td{background:#fafafa}
             <tbody id="segTb"></tbody>
           </table></div>
         </div>
+      </div>
+
+      <div class="pg" id="page-config">
+        <div class="pt">Configuración del sistema</div>
+        <div class="ps">Administra modelos de vehículos, parámetros y opciones del sistema</div>
+
+        <div class="card">
+          <div class="ct">🚗 Modelos de vehículos disponibles
+            <span style="font-size:11px;color:#aaa;font-weight:400;margin-left:4px">— Se usan en Seguimiento y Leads</span>
+          </div>
+          <p style="font-size:12px;color:#888;margin-bottom:1rem">Agrega, edita o elimina los modelos que aparecen en los listados desplegables de Seguimiento y Leads.</p>
+
+          <div style="display:flex;gap:8px;margin-bottom:1rem">
+            <input type="text" id="nuevoModelo" placeholder="Ej: CIVIC EX-T"
+              style="flex:1;padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:13px;outline:none"
+              onkeydown="if(event.key==='Enter')agregarModelo()">
+            <button class="btn btnp" onclick="agregarModelo()">+ Agregar modelo</button>
+          </div>
+
+          <div id="listaModelos" style="display:flex;flex-direction:column;gap:6px"></div>
+
+          <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f0f0f0;display:flex;gap:8px;align-items:center">
+            <button class="btn btns btnsm" onclick="guardarModelos()">💾 Guardar cambios</button>
+            <button class="btn btns btnsm" onclick="resetModelosDefault()">↩️ Restaurar por defecto</button>
+            <span style="font-size:11px;color:#aaa">Los cambios aplican inmediatamente en todos los módulos</span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:0">
+          <div class="ct">🎨 Vista previa del listado actual</div>
+          <div id="modelosPreview" style="display:flex;flex-wrap:wrap;gap:6px;padding:.5rem 0"></div>
+        </div>
+
       </div>
 
       <div class="pg" id="page-usuarios">
@@ -1208,6 +1242,29 @@ function startListeners(){
     db.collection('leads').onSnapshot(s=>{LEADS=s.docs.map(d=>{return{...d.data(),_id:d.id}});LEADS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderLeads();});
   }));
   unsubArr.push(db.collection('seguimiento').onSnapshot(s=>{SEGS=s.docs.map(d=>{return{...d.data(),_id:d.id}});SEGS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderSeg();renderInv();if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();}));
+
+  // Listener metas en tiempo real
+  unsubArr.push(db.collection('metas').onSnapshot(snap=>{
+    snap.forEach(doc=>{METAS[doc.id]=doc.data();});
+    // Si estoy en módulo metas, re-renderizar
+    if(document.getElementById('page-metas')&&document.getElementById('page-metas').classList.contains('active')){
+      renderMetas();
+    }
+    // Actualizar metaUnidades con mes actual
+    const hoy=new Date();
+    const mesActual=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
+    if(METAS[mesActual]){
+      const total=Object.values(METAS[mesActual]).reduce((a,b)=>a+b,0);
+      if(total>0){
+        metaUnidades=total;
+        if($('metaMensual'))$('metaMensual').value=total;
+      }
+    }
+    // Refresh dashboard gauge if visible
+    if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active')){
+      renderDashboard();
+    }
+  }));
 }
 
 // ── AUTH ──
@@ -1221,6 +1278,35 @@ async function doLogin(){
   try{
     initFirebase();
     await seedData();
+
+    // ── Precargar TODOS los datos de configuración ──
+    try{
+      // 1. Cargar todos los meses de metas de una sola vez
+      const snapAllMetas=await db.collection('metas').get();
+      snapAllMetas.forEach(doc=>{ METAS[doc.id]=doc.data(); });
+
+      // 2. Aplicar meta del mes actual
+      const hoy2=new Date();
+      const mesAct=`${hoy2.getFullYear()}-${String(hoy2.getMonth()+1).padStart(2,'0')}`;
+      if(METAS[mesAct]){
+        const tot=Object.values(METAS[mesAct]).reduce((a,b)=>a+b,0);
+        if(tot>0){ metaUnidades=tot; if($('metaMensual'))$('metaMensual').value=tot; }
+      }
+      // 3. Override con meta global si existe
+      const snapGlobal=await db.collection('config').doc('meta_global_'+mesAct).get();
+      if(snapGlobal.exists&&snapGlobal.data().valor>0){
+        metaUnidades=snapGlobal.data().valor;
+        if($('metaMensual'))$('metaMensual').value=snapGlobal.data().valor;
+      }
+      // 4. Cargar modelos de vehículos
+      const snapMod=await db.collection('config').doc('modelos_vehiculos').get();
+      if(snapMod.exists&&snapMod.data().lista&&snapMod.data().lista.length>0){
+        VEHICULOS_SEG.length=0;
+        snapMod.data().lista.forEach(m=>VEHICULOS_SEG.push(m));
+        MODELOS_VEHICULOS=[...VEHICULOS_SEG];
+      }
+    }catch(ePreload){console.warn('Preload error:',ePreload);}
+
     CU=u;
     $('loginScreen').style.display='none';
     const app=$('appScreen');app.style.display='flex';app.classList.remove('hidden');
@@ -1243,6 +1329,7 @@ function doLogout(){
 function setupNav(){
   $('nav-usuarios').classList.toggle('hidden',!isGer());
   $('nav-metas').classList.toggle('hidden',!isGer());
+  $('nav-config').classList.toggle('hidden',!isGer());
   $('adminBtns').style.display=isAdm()?'flex':'none';
   $('btnNP').classList.toggle('hidden',!isAdm());
 }
@@ -1256,7 +1343,15 @@ function showPage(p){
   if(p==='cronograma') renderCal();
   if(p==='entregas') renderEnts();
   if(p==='dashboard'){renderDashboard();}
-  if(p==='metas'){cargarMetas();}
+  if(p==='metas'){
+    // Auto-select current month always
+    const hoy=new Date();
+    const mesActual=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
+    const selMes=$('metasMes');
+    if(selMes) selMes.value=mesActual;
+    cargarMetas();
+  }
+  if(p==='config'){cargarModelosConfig();}
   if(p==='leads') renderLeads();
   if(p==='seguimiento') renderSeg();
   if(p==='usuarios') renderUsrs();
@@ -1295,7 +1390,8 @@ function renderInv(){
     // Check if linked to seguimiento
     const segLink=SEGS.find(s=>s.vin===v.vin);
     const segBadge=segLink?`<br><span style="font-size:9px;color:#1457a0">🔥 ${segLink.nombre}</span>`:'';
-    if(isAdm()){acc=v.estado==='DISPONIBLE'?`<button class="btn btnd btnsm" onclick="openSep('${v.vin}')">Separar</button>`:`<div class="si">${as?as.nombre:'—'}<br>${v.sepFecha||''}</div>${segBadge}<button class="btn btnok btnsm" onclick="libVeh('${v.vin}')" style="margin-top:3px">Liberar</button>`;}
+    const delBtn=isGer()?`<button class="btn btnsm" style="background:#fff0f0;color:#9b2020;border:1px solid #f0c0c0;margin-top:3px" onclick="eliminarVeh('${v.vin}','${v.producto}')">🗑️</button>`:'';
+    if(isAdm()){acc=v.estado==='DISPONIBLE'?`<div style="display:flex;flex-direction:column;gap:3px"><button class="btn btnd btnsm" onclick="openSep('${v.vin}')">Separar</button>${delBtn}</div>`:`<div class="si">${as?as.nombre:'—'}<br>${v.sepFecha||''}</div>${segBadge}<div style="display:flex;flex-direction:column;gap:3px;margin-top:3px"><button class="btn btnok btnsm" onclick="libVeh('${v.vin}')">Liberar</button>${delBtn}</div>`;}
     else{acc=(v.estado==='SEPARADO'&&v.sepAsesorId===CU.id)?`<span class="b ba">Tuyo·${dias}d</span>${segBadge}`:'<span style="color:#ddd">—</span>';}
     return `<tr><td><strong style="font-size:12px">${v.producto}</strong></td><td>${v.mod}</td><td style="font-size:12px">${v.color}</td><td class="mono">${v.chasis}</td><td class="mono">${v.vin}</td><td><span class="b bb" style="font-size:10px">${v.ubicacion}</span></td><td style="text-align:center;font-weight:700;font-size:12px;color:${dc}">${v.diasInv}d</td><td>${unoeB}</td><td>${estB}</td><td>${acc}</td></tr>`;
   }).join('');
@@ -1310,6 +1406,15 @@ async function libVeh(vin){
   toast('✅ Vehículo liberado');
 }
 function openAddVeh(){['vP','vA','vC','vCI','vCH','vV'].forEach(i=>$(i).value='');om('mAddV');}
+async function eliminarVeh(vin, producto){
+  if(!isGer()){toast('⚠️ Solo el gerente puede eliminar vehículos');return;}
+  if(!confirm(`¿Eliminar el vehículo ${producto} (VIN: ${vin}) del inventario?
+
+Esta acción no se puede deshacer.`)) return;
+  await db.collection('inventario').doc(vin).delete();
+  toast('🗑️ Vehículo eliminado del inventario');
+}
+
 async function guardarVeh(){
   const prod=$('vP').value.trim(),vin=$('vV').value.trim();
   if(!prod||!vin){toast('⚠️ Producto y VIN requeridos');return;}
@@ -1628,11 +1733,23 @@ let METAS={}; // {mes: {asesorId: metaUnidades}}
 
 async function cargarMetas(){
   const mes=$('metasMes').value;
-  if(!mes||!db) return;
-  try{
-    const snap=await db.collection('metas').doc(mes).get();
-    METAS[mes]=snap.exists?snap.data():{};
-  }catch(e){ METAS[mes]={}; }
+  if(!mes) return;
+
+  // Si ya tenemos los datos en memoria, solo renderiza
+  if(METAS[mes]!==undefined){
+    renderMetas();
+    return;
+  }
+
+  // Si no, cargar de Firebase
+  if(db){
+    try{
+      const snap=await db.collection('metas').doc(mes).get();
+      METAS[mes]=snap.exists?snap.data():{};
+    }catch(e){METAS[mes]={};}
+  } else {
+    METAS[mes]={};
+  }
   renderMetas();
 }
 
@@ -2723,6 +2840,125 @@ function descargarPlantilla(){
   toast('✅ Plantilla descargada');
 }
 
+// ══════════════════════════════════════════
+// CONFIGURACIÓN — MODELOS
+// ══════════════════════════════════════════
+let MODELOS_VEHICULOS=[...VEHICULOS_SEG]; // Working copy
+
+async function cargarModelosConfig(){
+  if(!db) return;
+  try{
+    const snap=await db.collection('config').doc('modelos_vehiculos').get();
+    if(snap.exists&&snap.data().lista&&snap.data().lista.length>0){
+      MODELOS_VEHICULOS=[...snap.data().lista];
+      // Update global VEHICULOS_SEG
+      VEHICULOS_SEG.length=0;
+      MODELOS_VEHICULOS.forEach(m=>VEHICULOS_SEG.push(m));
+    }
+  }catch(e){}
+  renderModelosConfig();
+}
+
+function renderModelosConfig(){
+  const lista=$('listaModelos');
+  const preview=$('modelosPreview');
+  if(!lista) return;
+
+  lista.innerHTML=MODELOS_VEHICULOS.map((m,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fafafa;border:1px solid #ebebeb;border-radius:8px">
+      <span style="font-size:12px;color:#888;width:24px;text-align:right;flex-shrink:0">${i+1}.</span>
+      <input type="text" value="${m}" id="modelo_${i}"
+        style="flex:1;padding:6px 10px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:13px;font-weight:600;outline:none"
+        onfocus="this.style.borderColor='#CC0001'" onblur="this.style.borderColor='#e0e0e0'"
+        onchange="MODELOS_VEHICULOS[${i}]=this.value.toUpperCase();renderPreview()">
+      <button onclick="subirModelo(${i})" style="background:none;border:none;cursor:pointer;font-size:16px;color:#aaa;padding:2px 6px" title="Subir">↑</button>
+      <button onclick="bajarModelo(${i})" style="background:none;border:none;cursor:pointer;font-size:16px;color:#aaa;padding:2px 6px" title="Bajar">↓</button>
+      <button onclick="eliminarModelo(${i})" style="background:#fff0f0;border:1px solid #f0c0c0;color:#9b2020;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer">🗑️</button>
+    </div>`).join('');
+
+  renderPreview();
+}
+
+function renderPreview(){
+  const preview=$('modelosPreview');
+  if(!preview) return;
+  preview.innerHTML=MODELOS_VEHICULOS.map(m=>`<span class="b bgy" style="font-size:11px">${m}</span>`).join('');
+}
+
+function agregarModelo(){
+  const input=$('nuevoModelo');
+  const val=input.value.trim().toUpperCase();
+  if(!val){toast('⚠️ Escribe el nombre del modelo');return;}
+  if(MODELOS_VEHICULOS.includes(val)){toast('⚠️ Ese modelo ya existe');return;}
+  MODELOS_VEHICULOS.push(val);
+  input.value='';
+  renderModelosConfig();
+  toast('✅ Modelo agregado — recuerda guardar los cambios');
+}
+
+function eliminarModelo(i){
+  if(!confirm(`¿Eliminar el modelo "${MODELOS_VEHICULOS[i]}"?`)) return;
+  MODELOS_VEHICULOS.splice(i,1);
+  renderModelosConfig();
+  toast('🗑️ Modelo eliminado — recuerda guardar los cambios');
+}
+
+function subirModelo(i){
+  if(i===0) return;
+  [MODELOS_VEHICULOS[i-1],MODELOS_VEHICULOS[i]]=[MODELOS_VEHICULOS[i],MODELOS_VEHICULOS[i-1]];
+  renderModelosConfig();
+}
+
+function bajarModelo(i){
+  if(i>=MODELOS_VEHICULOS.length-1) return;
+  [MODELOS_VEHICULOS[i+1],MODELOS_VEHICULOS[i]]=[MODELOS_VEHICULOS[i],MODELOS_VEHICULOS[i+1]];
+  renderModelosConfig();
+}
+
+async function guardarModelos(){
+  if(!db){toast('⚠️ Sin conexión a Firebase');return;}
+  // Read current values from inputs
+  MODELOS_VEHICULOS=MODELOS_VEHICULOS.map((_,i)=>{
+    const inp=document.getElementById('modelo_'+i);
+    return inp?inp.value.trim().toUpperCase():MODELOS_VEHICULOS[i];
+  }).filter(m=>m);
+
+  await db.collection('config').doc('modelos_vehiculos').set({
+    lista:MODELOS_VEHICULOS,
+    updatedAt:today(),
+    updatedBy:CU?CU.nombre:''
+  });
+
+  // Update global VEHICULOS_SEG everywhere
+  VEHICULOS_SEG.length=0;
+  MODELOS_VEHICULOS.forEach(m=>VEHICULOS_SEG.push(m));
+
+  // Refresh selects in seguimiento and leads modals
+  actualizarSelectsModelos();
+  renderModelosConfig();
+  toast('✅ Modelos guardados y actualizados en todos los módulos');
+}
+
+function actualizarSelectsModelos(){
+  const selectIds=['segVehiculo','leadVehiculo','segFiltVeh','leadsFiltVeh','dashFiltVeh2','invFiltProd'];
+  selectIds.forEach(id=>{
+    const sel=$(id);
+    if(!sel) return;
+    const prev=sel.value;
+    const hasEmpty=sel.options[0]&&sel.options[0].value==='';
+    const opts=VEHICULOS_SEG.map(v=>`<option value="${v}">${v}</option>`).join('');
+    sel.innerHTML=(hasEmpty?`<option value="">${sel.options[0]?sel.options[0].text:'Todos los modelos'}</option>`:'')+opts;
+    if(prev) sel.value=prev;
+  });
+}
+
+function resetModelosDefault(){
+  if(!confirm('¿Restaurar la lista de modelos por defecto? Se perderán los cambios actuales.')) return;
+  MODELOS_VEHICULOS=['CITY 4D X-TYLE','CITY 4D PRESTIGE','CITY 5D PRESTIGE','WR-V X-TYLE','WR-V PRESTIGE','HR-V X-TYLE','HR-V PRESTIGE','ZR-V X-TYLE','ZR-V PRESTIGE','CR-V PRESTIGE','CR-V TOURING','PILOT TOURING'];
+  renderModelosConfig();
+  toast('↩️ Lista restaurada — recuerda guardar los cambios');
+}
+
 // ── SEGUIMIENTO DATA ──
 const VEHICULOS_SEG=['CITY 4D X-TYLE','CITY 4D PRESTIGE','CITY 5D PRESTIGE','WR-V X-TYLE','WR-V PRESTIGE','HR-V X-TYLE','HR-V PRESTIGE','ZR-V X-TYLE','ZR-V PRESTIGE','CR-V PRESTIGE','CR-V TOURING','PILOT TOURING'];
 let SEGS=[];
@@ -2774,6 +3010,16 @@ function renderSeg(){
   if(fA) data=data.filter(s=>s.asesorId===fA);
   if(fE) data=data.filter(s=>s.estado===fE);
   if(fV) data=data.filter(s=>s.vehiculo===fV);
+
+  // Ordenar: Separado → Caliente → Facturado → Matriculado → resto → Desistido
+  const estadoOrden={'Separado':1,'Caliente':2,'Facturado':3,'Matriculado':4,'En proceso':5,'Desistido':99};
+  data.sort((a,b)=>{
+    const oa=estadoOrden[a.estado]||50;
+    const ob=estadoOrden[b.estado]||50;
+    if(oa!==ob) return oa-ob;
+    // Dentro del mismo estado: más reciente primero
+    return (b.updatedAt||b.createdAt||'').localeCompare(a.updatedAt||a.createdAt||'');
+  });
 
   // Stats
   const total=SEGS.length;
@@ -3214,9 +3460,10 @@ document.addEventListener('DOMContentLoaded', function() {
   $('btnCancelPE').addEventListener('click', ()=>cm('mPE'));
   $('btnConfEnt').addEventListener('click', confirmarEnt);
 
-  // Dashboard & Metas
+  // Dashboard, Metas & Config
   $('nav-dashboard').addEventListener('click', ()=>showPage('dashboard'));
   $('nav-metas').addEventListener('click', ()=>showPage('metas'));
+  $('nav-config').addEventListener('click', ()=>showPage('config'));
 
   // Leads
   $('nav-leads').addEventListener('click', ()=>showPage('leads'));
