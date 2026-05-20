@@ -121,6 +121,32 @@ tr:hover td{background:#fafafa}
 .sd{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:4px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
+/* ── UBICACIÓN ── */
+#mapContainer{height:460px;border-radius:12px;overflow:hidden;border:1px solid #e8e8e8;z-index:0}
+.leaflet-container{font-family:system-ui,sans-serif}
+.map-layout{display:grid;grid-template-columns:1fr 340px;gap:14px;align-items:start}
+.map-sidebar{display:flex;flex-direction:column;gap:12px;max-height:460px;overflow-y:auto}
+.sede-card{background:#fff;border-radius:12px;border:1px solid #e8e8e8;overflow:hidden}
+.sede-card-hdr{padding:.75rem 1rem;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f0f0f0}
+.sede-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.sede-name{font-size:13px;font-weight:700}
+.sede-count{margin-left:auto;font-size:11px;font-weight:700;background:#f0f0f0;border-radius:20px;padding:2px 8px}
+.sede-veh-list{max-height:160px;overflow-y:auto}
+.sede-veh-item{display:flex;align-items:center;gap:8px;padding:7px 1rem;border-bottom:1px solid #f8f8f8;font-size:12px;cursor:pointer;transition:background .1s}
+.sede-veh-item:hover{background:#fef0f0}
+.sede-veh-item:last-child{border:none}
+.veh-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.map-filters{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.map-filters select,.map-filters input{padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none;background:#fff}
+.map-filters select:focus{border-color:#CC0001}
+.ubicacion-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#666}
+.leg-dot{width:10px;height:10px;border-radius:50%}
+.route-info{background:#e6f1fb;border-radius:9px;padding:.75rem 1rem;font-size:12px;color:#1457a0;margin-top:.5rem;display:none}
+.gps-badge{display:inline-flex;align-items:center;gap:4px;background:#eaf3de;color:#2d6011;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:600}
+.gps-badge.off{background:#f1efe8;color:#888}
+@media(max-width:768px){.map-layout{grid-template-columns:1fr}.map-sidebar{max-height:300px}}
+
 /* ── DASHBOARD ── */
 .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
 .kpi-card{background:#fff;border-radius:13px;border:1px solid #e8e8e8;padding:1.1rem 1.25rem;position:relative;overflow:hidden}
@@ -186,6 +212,23 @@ tr:hover td{background:#fafafa}
 .mini-gauge{height:8px;border-radius:10px;background:#f0f0f0;overflow:hidden;min-width:80px}
 .mini-gauge-fill{height:100%;border-radius:10px;transition:width .4s}
 
+/* LISTAS CONFIG */
+.lista-card{background:#fff;border-radius:12px;border:1px solid #e8e8e8;overflow:hidden}
+.lista-card-hdr{padding:.75rem 1.1rem;background:#fafafa;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:8px}
+.lista-card-title{font-size:13px;font-weight:700;color:#333;flex:1}
+.lista-card-where{font-size:10px;color:#aaa;background:#f0f0f0;border-radius:20px;padding:2px 8px}
+.lista-card-body{padding:.85rem 1rem}
+.lista-item-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.lista-item-input{flex:1;padding:6px 10px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:12px;outline:none}
+.lista-item-input:focus{border-color:#CC0001}
+.lista-item-del{background:#fff0f0;border:1px solid #f0c0c0;color:#9b2020;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;flex-shrink:0}
+.lista-add-row{display:flex;gap:6px;margin-top:6px}
+.lista-add-input{flex:1;padding:7px 10px;border:1.5px dashed #e0e0e0;border-radius:6px;font-size:12px;outline:none;background:#fafafa}
+.lista-add-input:focus{border-color:#CC0001;background:#fff}
+.lista-add-btn{padding:7px 12px;background:#CC0001;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
+.lista-save-btn{width:100%;padding:7px;background:#eaf3de;color:#2d6011;border:1px solid #b5d880;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px}
+.lista-save-btn:hover{background:#d4efc0}
+
 /* ── ENTREGADOS ── */
 .entregado-row td{opacity:0.5;text-decoration:none;background:#fafaf8!important}
 .entregado-row:hover td{opacity:0.7!important}
@@ -247,6 +290,7 @@ tr:hover td{background:#fafafa}
       <div class="ns">Comercial</div>
       <div class="ni" id="nav-dashboard"><span>📊</span>Dashboard</div>
       <div class="ni hidden" id="nav-metas"><span>🎯</span>Metas</div>
+      <div class="ni" id="nav-ubicacion"><span>🗺️</span>Ubicación</div>
       <div class="ni" id="nav-leads"><span>📋</span>Leads</div>
       <div class="ni" id="nav-seguimiento"><span>🔥</span>Seguimiento</div>
       <div class="ns">Administración</div>
@@ -581,6 +625,85 @@ tr:hover td{background:#fafafa}
 
       </div>
 
+      <div class="pg" id="page-ubicacion">
+        <div class="pt">Mapa de ubicaciones</div>
+        <div class="ps">Vehículos de inventario y demos — posición en tiempo real</div>
+
+        <!-- FILTROS Y LEYENDA -->
+        <div class="card" style="padding:.85rem 1.25rem;margin-bottom:1rem">
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+            <div class="map-filters" style="margin:0;flex:1">
+              <select id="mapFiltTipo" onchange="renderMapa()">
+                <option value="">Todo el inventario + demos</option>
+                <option value="inventario">Solo inventario</option>
+                <option value="demo">Solo demos</option>
+              </select>
+              <select id="mapFiltSede" onchange="renderMapa()">
+                <option value="">Todas las ubicaciones</option>
+                <option value="Ciudad Jardín">Ciudad Jardín</option>
+                <option value="Avenida 3ra Norte">Avenida 3ra Norte</option>
+                <option value="Zona Franca">Zona Franca</option>
+                <option value="CEDIS">CEDIS</option>
+                <option value="GUAYACAN">GUAYACAN</option>
+                <option value="LAUREL">LAUREL</option>
+                <option value="PALMA">PALMA</option>
+                <option value="CARTAGENA">CARTAGENA</option>
+              </select>
+              <select id="mapFiltEstado" onchange="renderMapa()">
+                <option value="">Todos los estados</option>
+                <option value="DISPONIBLE">Disponible</option>
+                <option value="SEPARADO">Separado</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn btnp btnsm" onclick="mostrarRuta()">🗺️ Ver ruta entre sedes</button>
+              <button class="btn btns btnsm" onclick="limpiarRuta()">✕ Limpiar ruta</button>
+              <button class="btn btns btnsm" onclick="centrarMapa()">⊙ Centrar</button>
+            </div>
+          </div>
+          <div class="route-info" id="routeInfo"></div>
+        </div>
+
+        <!-- MAPA + SIDEBAR -->
+        <div class="map-layout">
+          <div>
+            <!-- LEYENDA -->
+            <div class="ubicacion-legend">
+              <div class="leg-item"><div class="leg-dot" style="background:#CC0001"></div>Ciudad Jardín</div>
+              <div class="leg-item"><div class="leg-dot" style="background:#1457a0"></div>Av. 3ra Norte</div>
+              <div class="leg-item"><div class="leg-dot" style="background:#7a4a0a"></div>Zona Franca / CEDIS</div>
+              <div class="leg-item"><div class="leg-dot" style="background:#2d6011"></div>Otras bodegas</div>
+              <div class="leg-item"><div class="leg-dot" style="background:#3a2e8f"></div>Demo</div>
+              <div class="leg-item"><div class="leg-dot" style="background:#888;border:2px solid #CC0001"></div>Separado</div>
+            </div>
+            <div id="mapContainer"></div>
+            <!-- GPS STATUS -->
+            <div style="display:flex;align-items:center;gap:10px;margin-top:.75rem">
+              <span id="gpsBadge" class="gps-badge off">📍 GPS desactivado</span>
+              <button class="btn btns btnsm" onclick="activarGPS()">Activar mi ubicación</button>
+              <span style="font-size:11px;color:#aaa">Para ver tu posición en el mapa</span>
+            </div>
+          </div>
+
+          <!-- SIDEBAR -->
+          <div class="map-sidebar" id="mapSidebar">
+            <!-- Se genera dinámicamente -->
+          </div>
+        </div>
+
+        <!-- TABLA DE VEHÍCULOS POR SEDE -->
+        <div class="card" style="margin-top:1rem">
+          <div class="ct">📊 Resumen por sede
+            <span id="mapTotal" style="margin-left:auto;font-size:12px;color:#888;font-weight:400"></span>
+          </div>
+          <div class="tw"><table>
+            <thead><tr><th>Sede</th><th>Disponibles</th><th>Separados</th><th>Demos</th><th>Total</th><th>Acciones</th></tr></thead>
+            <tbody id="sedeResumenTb"></tbody>
+          </table></div>
+        </div>
+
+      </div>
+
       <div class="pg" id="page-leads">
         <div class="pt">Leads comerciales</div>
         <div class="ps">Base de datos de prospectos — cargue masivo desde Excel o registro individual</div>
@@ -684,8 +807,13 @@ tr:hover td{background:#fafafa}
       </div>
 
       <div class="pg" id="page-config">
-        <div class="pt">Configuración del sistema</div>
-        <div class="ps">Administra modelos de vehículos, parámetros y opciones del sistema</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1.4rem">
+          <div>
+            <div class="pt">Configuración del sistema</div>
+            <div style="font-size:12px;color:#aaa;margin-top:3px">Administra modelos, listas desplegables y parámetros del sistema</div>
+          </div>
+          <button class="btn btnp" onclick="guardarTodasListas();guardarModelos()">💾 Guardar todos los cambios</button>
+        </div>
 
         <div class="card">
           <div class="ct">🚗 Modelos de vehículos disponibles
@@ -712,6 +840,16 @@ tr:hover td{background:#fafafa}
         <div class="card" style="margin-top:0">
           <div class="ct">🎨 Vista previa del listado actual</div>
           <div id="modelosPreview" style="display:flex;flex-wrap:wrap;gap:6px;padding:.5rem 0"></div>
+        </div>
+
+        <!-- OTRAS LISTAS DESPLEGABLES -->
+        <div class="ct" style="margin-top:1.5rem;margin-bottom:.75rem;font-size:14px;font-weight:700;color:#333">
+          ⚙️ Otras listas desplegables del sistema
+          <span style="font-size:11px;color:#aaa;font-weight:400;margin-left:8px">Edita cualquier lista que aparece en los formularios</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" id="listasGrid">
+          <!-- Se genera dinámicamente -->
         </div>
 
       </div>
@@ -1135,6 +1273,8 @@ tr:hover td{background:#fafafa}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
 <script>
 // ═══════════════════════════════════════════
@@ -1237,8 +1377,8 @@ async function seedData(){
 // ── LISTENERS ──
 function startListeners(){
   unsubArr.forEach(u=>u());unsubArr=[];
-  unsubArr.push(db.collection('inventario').onSnapshot(s=>{INV=s.docs.map(d=>{return{...d.data(),_id:d.id}});fillPF();renderInv();if($('segVin'))fillVinSelect();}));
-  unsubArr.push(db.collection('demos').onSnapshot(s=>{DEMOS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderDemos();renderCal();}));
+  unsubArr.push(db.collection('inventario').onSnapshot(s=>{INV=s.docs.map(d=>{return{...d.data(),_id:d.id}});fillPF();renderInv();if($('segVin'))fillVinSelect();if(MAP_INIT&&document.getElementById('page-ubicacion').classList.contains('active'))renderMapa();}));
+  unsubArr.push(db.collection('demos').onSnapshot(s=>{DEMOS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderDemos();renderCal();if(MAP_INIT&&document.getElementById('page-ubicacion').classList.contains('active'))renderMapa();}));
   unsubArr.push(db.collection('pruebas').orderBy('fecha').orderBy('hora').onSnapshot(s=>{PRUEBAS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderCal();}));
   unsubArr.push(db.collection('procesos').onSnapshot(s=>{PROCS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderEnts();}));
   unsubArr.push(db.collection('leads').orderBy('createdAt','desc').onSnapshot(s=>{LEADS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderLeads();},err=>{
@@ -1355,7 +1495,18 @@ function showPage(p){
     if(selMes) selMes.value=mesActual;
     cargarMetas();
   }
-  if(p==='config'){cargarModelosConfig();}
+  if(p==='config'){
+    cargarModelosConfig();
+    if(Object.keys(LISTAS_DATA).length===0){
+      cargarListasConfig().then(()=>{renderTodasListas();aplicarListasEnApp();});
+    } else {
+      renderTodasListas();
+    }
+  }
+  if(p==='ubicacion'){
+    initMap();
+    setTimeout(()=>{renderMapa();MAP.invalidateSize();},200);
+  }
   if(p==='leads') renderLeads();
   if(p==='seguimiento') renderSeg();
   if(p==='usuarios') renderUsrs();
@@ -2454,6 +2605,351 @@ function renderCosechas(data){
 }
 
 // ══════════════════════════════════════════
+// UBICACIÓN MODULE
+// ══════════════════════════════════════════
+let MAP = null;
+let MAP_MARKERS = [];
+let MAP_ROUTE = null;
+let GPS_MARKER = null;
+let MAP_INIT = false;
+
+// Coordenadas reales de Cali, Colombia
+const SEDES_COORDS = {
+  'Ciudad Jardín':      {lat:3.3756, lng:-76.5348, color:'#CC0001', label:'CJ'},
+  'Avenida 3ra Norte':  {lat:3.4516, lng:-76.5320, color:'#1457a0', label:'A3N'},
+  'Zona Franca':        {lat:3.4200, lng:-76.4980, color:'#7a4a0a', label:'ZF'},
+  'CEDIS':              {lat:3.3900, lng:-76.5100, color:'#7a4a0a', label:'CEDIS'},
+  'SUP CEIBA':          {lat:3.3750, lng:-76.5360, color:'#CC0001', label:'SUP'},
+  'PBH IMPOR':          {lat:3.4100, lng:-76.5200, color:'#7a4a0a', label:'PBH'},
+  'SUP IMPOR':          {lat:3.4050, lng:-76.5180, color:'#7a4a0a', label:'SI'},
+  'CEIBA':              {lat:3.3756, lng:-76.5348, color:'#CC0001', label:'CEIBA'},
+  'GUAYACAN':           {lat:3.4300, lng:-76.5400, color:'#2d6011', label:'GY'},
+  'LAUREL':             {lat:3.3600, lng:-76.5500, color:'#2d6011', label:'LR'},
+  'PALMA':              {lat:3.4400, lng:-76.5600, color:'#2d6011', label:'PM'},
+  'CARTAGENA':          {lat:10.3910, lng:-75.4794, color:'#9b2020', label:'CTG'},
+};
+
+const SEDE_COLORS = {
+  'Ciudad Jardín':'#CC0001','Avenida 3ra Norte':'#1457a0',
+  'Zona Franca':'#7a4a0a','CEDIS':'#7a4a0a','CEIBA':'#CC0001',
+  'SUP CEIBA':'#CC0001','PBH IMPOR':'#7a4a0a','SUP IMPOR':'#7a4a0a',
+  'GUAYACAN':'#2d6011','LAUREL':'#2d6011','PALMA':'#2d6011','CARTAGENA':'#9b2020'
+};
+
+function initMap(){
+  if(MAP_INIT) return;
+  const container=document.getElementById('mapContainer');
+  if(!container||typeof L==='undefined') return;
+  MAP=L.map('mapContainer',{center:[3.4100,-76.5220],zoom:13,zoomControl:true});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+    maxZoom:19
+  }).addTo(MAP);
+  MAP_INIT=true;
+  setTimeout(()=>MAP.invalidateSize(),100);
+}
+
+function makeIcon(color, label, isSeparado=false, isDemo=false){
+  const border=isSeparado?'3px solid #CC0001':isDemo?'3px solid #3a2e8f':'2px solid rgba(0,0,0,0.2)';
+  const bg=isDemo?'#3a2e8f':color;
+  return L.divIcon({
+    className:'',
+    html:`<div style="background:${bg};color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:${border};box-shadow:0 2px 6px rgba(0,0,0,0.3);white-space:nowrap;overflow:hidden">${label}</div>`,
+    iconSize:[32,32],
+    iconAnchor:[16,16],
+    popupAnchor:[0,-16]
+  });
+}
+
+function makeSedeIcon(color, label){
+  return L.divIcon({
+    className:'',
+    html:`<div style="background:${color};color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:700;border:2px solid rgba(0,0,0,0.3);box-shadow:0 2px 8px rgba(0,0,0,0.4);white-space:nowrap">${label}</div>`,
+    iconSize:[null,null],
+    iconAnchor:[0,0],
+    popupAnchor:[0,-10]
+  });
+}
+
+function clearMarkers(){
+  MAP_MARKERS.forEach(m=>MAP.removeLayer(m));
+  MAP_MARKERS=[];
+}
+
+function renderMapa(){
+  if(!MAP_INIT) return;
+  clearMarkers();
+
+  const fTipo=document.getElementById('mapFiltTipo')?document.getElementById('mapFiltTipo').value:'';
+  const fSede=document.getElementById('mapFiltSede')?document.getElementById('mapFiltSede').value:'';
+  const fEst=document.getElementById('mapFiltEstado')?document.getElementById('mapFiltEstado').value:'';
+
+  // Group by sede for sidebar
+  const bySedeInv={};
+  const bySedeDemo={};
+
+  // ── INVENTARIO MARKERS ──
+  if(fTipo!=='demo'){
+    let invData=[...INV];
+    if(fSede) invData=invData.filter(v=>v.ubicacion===fSede);
+    if(fEst)  invData=invData.filter(v=>v.estado===fEst);
+
+    invData.forEach(v=>{
+      const coords=SEDES_COORDS[v.ubicacion];
+      if(!coords) return;
+      const color=SEDE_COLORS[v.ubicacion]||'#888';
+      const isSep=v.estado==='SEPARADO';
+      // Slight offset to avoid overlap
+      const offset=0.0003;
+      const lat=coords.lat+(Math.random()-0.5)*offset;
+      const lng=coords.lng+(Math.random()-0.5)*offset;
+      const as=isSep&&v.sepAsesorId?USERS.find(u=>u.id===v.sepAsesorId):null;
+      const marker=L.marker([lat,lng],{icon:makeIcon(color,v.producto.split(' ')[0],isSep,false)});
+      marker.bindPopup(`
+        <div style="min-width:200px;font-family:system-ui,sans-serif">
+          <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#1a1a1a">${v.producto}</div>
+          <div style="font-size:12px;color:#555;margin-bottom:2px">🎨 ${v.color}</div>
+          <div style="font-size:11px;color:#888;font-family:monospace;margin-bottom:4px">VIN: ${v.vin}</div>
+          <div style="font-size:12px;margin-bottom:4px">
+            <span style="background:${isSep?'#faeeda':'#eaf3de'};color:${isSep?'#7a4a0a':'#2d6011'};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600">
+              ${v.estado}
+            </span>
+          </div>
+          ${isSep&&as?`<div style="font-size:11px;color:#888">👤 ${as.nombre}</div>`:''}
+          <div style="font-size:11px;color:#1457a0;margin-top:4px">📍 ${v.ubicacion}</div>
+          ${isAdm()?`<div style="margin-top:8px;border-top:1px solid #f0f0f0;padding-top:6px">
+            <select onchange="cambiarUbicVeh('${v.vin}',this.value)" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:5px;font-size:11px">
+              <option value="">Cambiar sede...</option>
+              ${Object.keys(SEDES_COORDS).map(s=>`<option value="${s}"${s===v.ubicacion?' selected':''}>${s}</option>`).join('')}
+            </select>
+          </div>`:''}
+        </div>`);
+      marker.addTo(MAP);
+      MAP_MARKERS.push(marker);
+      if(!bySedeInv[v.ubicacion]) bySedeInv[v.ubicacion]={disponibles:0,separados:0,items:[]};
+      if(isSep) bySedeInv[v.ubicacion].separados++;
+      else bySedeInv[v.ubicacion].disponibles++;
+      bySedeInv[v.ubicacion].items.push(v);
+    });
+  }
+
+  // ── DEMO MARKERS ──
+  if(fTipo!=='inventario'){
+    DEMOS.forEach(d=>{
+      const sedeKey=d.sedeActual;
+      const coords=SEDES_COORDS[sedeKey]||SEDES_COORDS['Ciudad Jardín'];
+      const lat=coords.lat+0.0008;
+      const lng=coords.lng+0.0008;
+      const marker=L.marker([lat,lng],{icon:makeIcon('#3a2e8f',d.modelo,false,true)});
+      marker.bindPopup(`
+        <div style="min-width:180px;font-family:system-ui,sans-serif">
+          <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#3a2e8f">🚗 DEMO: Honda ${d.modelo}</div>
+          <div style="font-size:12px;color:#555;margin-bottom:2px">🎨 ${d.color}</div>
+          <div style="font-size:12px;margin-bottom:2px">🏷️ ${d.placa}</div>
+          <div style="font-size:12px;color:#1457a0;margin-bottom:4px">📍 Esta semana: <strong>${d.sedeActual}</strong></div>
+          <div style="font-size:12px;color:#7a4a0a">📅 Próx. semana: ${d.sedeSig}</div>
+          ${isAdm()?`<div style="margin-top:8px;border-top:1px solid #f0f0f0;padding-top:6px">
+            <div style="font-size:10px;color:#aaa;margin-bottom:3px">Cambiar sede actual:</div>
+            <select onchange="cambiarSedeDemo('${d._id}',this.value,'actual')" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:5px;font-size:11px">
+              <option value="Ciudad Jardín"${d.sedeActual==='Ciudad Jardín'?' selected':''}>Ciudad Jardín</option>
+              <option value="Avenida 3ra Norte"${d.sedeActual==='Avenida 3ra Norte'?' selected':''}>Avenida 3ra Norte</option>
+            </select>
+          </div>`:''}
+        </div>`);
+      marker.addTo(MAP);
+      MAP_MARKERS.push(marker);
+      if(!bySedeDemo[sedeKey]) bySedeDemo[sedeKey]=[];
+      bySedeDemo[sedeKey].push(d);
+    });
+  }
+
+  // ── SEDE LABELS (fixed markers for the two main sedes) ──
+  ['Ciudad Jardín','Avenida 3ra Norte'].forEach(s=>{
+    const c=SEDES_COORDS[s];
+    if(!c) return;
+    const lbl=L.marker([c.lat+0.0015,c.lng],{
+      icon:makeSedeIcon(c.color,s),
+      zIndexOffset:1000,
+      interactive:false
+    }).addTo(MAP);
+    MAP_MARKERS.push(lbl);
+  });
+
+  // ── SIDEBAR ──
+  renderMapSidebar(bySedeInv, bySedeDemo);
+
+  // ── RESUMEN TABLE ──
+  renderSedeResumen(bySedeInv, bySedeDemo);
+}
+
+function renderMapSidebar(bySedeInv, bySedeDemo){
+  const sidebar=document.getElementById('mapSidebar');
+  if(!sidebar) return;
+  const allSedes=[...new Set([...Object.keys(bySedeInv),...Object.keys(bySedeDemo)])].sort();
+  if(!allSedes.length){
+    sidebar.innerHTML='<div style="text-align:center;color:#ccc;padding:2rem;font-size:13px">No hay vehículos con los filtros seleccionados</div>';
+    return;
+  }
+  sidebar.innerHTML=allSedes.map(sede=>{
+    const inv=bySedeInv[sede]||{disponibles:0,separados:0,items:[]};
+    const demos=bySedeDemo[sede]||[];
+    const total=inv.disponibles+inv.separados+demos.length;
+    const color=SEDE_COLORS[sede]||'#888';
+    const invItems=inv.items.slice(0,6).map(v=>`
+      <div class="sede-veh-item" onclick="focusVeh('${v.vin}')">
+        <div class="veh-dot" style="background:${v.estado==='SEPARADO'?'#fac775':'#2d6011'}"></div>
+        <span style="flex:1;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${v.producto}</span>
+        <span style="color:#aaa;font-size:10px">${v.vin}</span>
+      </div>`).join('');
+    const demoItems=demos.map(d=>`
+      <div class="sede-veh-item">
+        <div class="veh-dot" style="background:#3a2e8f"></div>
+        <span style="flex:1;font-weight:600">DEMO ${d.modelo}</span>
+        <span style="color:#3a2e8f;font-size:10px;font-weight:700">DEMO</span>
+      </div>`).join('');
+    const more=inv.items.length>6?`<div style="font-size:11px;color:#aaa;text-align:center;padding:5px">+${inv.items.length-6} más</div>`:'';
+    return `<div class="sede-card">
+      <div class="sede-card-hdr">
+        <div class="sede-dot" style="background:${color}"></div>
+        <div class="sede-name">${sede}</div>
+        <div class="sede-count">${total}</div>
+      </div>
+      <div class="sede-veh-list">${invItems}${demoItems}${more}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('mapTotal').textContent=
+    `${INV.length} vehículos · ${DEMOS.length} demos`;
+}
+
+function renderSedeResumen(bySedeInv, bySedeDemo){
+  const tb=document.getElementById('sedeResumenTb');
+  if(!tb) return;
+  const allSedes=[...new Set([...Object.keys(bySedeInv),...Object.keys(bySedeDemo)])].sort();
+  if(!allSedes.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:#ccc;padding:1.5rem">Sin datos</td></tr>';return;}
+  tb.innerHTML=allSedes.map(sede=>{
+    const inv=bySedeInv[sede]||{disponibles:0,separados:0,items:[]};
+    const demos=bySedeDemo[sede]||[];
+    const color=SEDE_COLORS[sede]||'#888';
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0"></div>
+        <strong style="font-size:12px">${sede}</strong>
+      </div></td>
+      <td style="text-align:center"><span class="b bg">${inv.disponibles}</span></td>
+      <td style="text-align:center"><span class="b ba">${inv.separados}</span></td>
+      <td style="text-align:center"><span class="b bp">${demos.length}</span></td>
+      <td style="text-align:center;font-weight:700">${inv.disponibles+inv.separados+demos.length}</td>
+      <td>
+        <button class="btn btns btnsm" onclick="filtrarPorSede('${sede}')">Ver en mapa</button>
+        ${isAdm()&&sede!=='CARTAGENA'?`<button class="btn btns btnsm" onclick="mostrarRutaASede('${sede}')" style="margin-left:3px">Ruta</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function focusVeh(vin){
+  // Find marker and open popup
+  const v=INV.find(x=>x.vin===vin);
+  if(!v) return;
+  const coords=SEDES_COORDS[v.ubicacion];
+  if(!coords||!MAP) return;
+  MAP.setView([coords.lat,coords.lng],16);
+}
+
+function filtrarPorSede(sede){
+  const sel=document.getElementById('mapFiltSede');
+  if(sel){sel.value=sede;renderMapa();}
+  const coords=SEDES_COORDS[sede];
+  if(coords&&MAP) MAP.setView([coords.lat,coords.lng],16);
+}
+
+function centrarMapa(){
+  if(!MAP) return;
+  MAP.setView([3.4100,-76.5220],13);
+  document.getElementById('mapFiltSede').value='';
+  renderMapa();
+}
+
+function mostrarRuta(){
+  if(!MAP) return;
+  limpiarRuta();
+  const cj=SEDES_COORDS['Ciudad Jardín'];
+  const av=SEDES_COORDS['Avenida 3ra Norte'];
+  MAP_ROUTE=L.polyline(
+    [[cj.lat,cj.lng],[av.lat,av.lng]],
+    {color:'#CC0001',weight:4,opacity:0.8,dashArray:'10,8'}
+  ).addTo(MAP);
+  MAP.fitBounds(MAP_ROUTE.getBounds(),{padding:[40,40]});
+  // Calc approx distance
+  const R=6371;
+  const dLat=(av.lat-cj.lat)*Math.PI/180;
+  const dLng=(av.lng-cj.lng)*Math.PI/180;
+  const a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(cj.lat*Math.PI/180)*Math.cos(av.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  const dist=Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*10)/10;
+  const ri=document.getElementById('routeInfo');
+  if(ri){
+    ri.style.display='block';
+    ri.innerHTML=`🗺️ <strong>Ciudad Jardín → Av. 3ra Norte</strong> · Distancia aprox: <strong>${dist} km</strong> · Tiempo estimado: <strong>${Math.round(dist/25*60)} min</strong> en tráfico normal`;
+  }
+}
+
+function mostrarRutaASede(sede){
+  if(!MAP) return;
+  limpiarRuta();
+  const cj=SEDES_COORDS['Ciudad Jardín'];
+  const dest=SEDES_COORDS[sede];
+  if(!dest) return;
+  MAP_ROUTE=L.polyline([[cj.lat,cj.lng],[dest.lat,dest.lng]],{color:'#1457a0',weight:3,opacity:0.7,dashArray:'8,6'}).addTo(MAP);
+  MAP.fitBounds(MAP_ROUTE.getBounds(),{padding:[40,40]});
+}
+
+function limpiarRuta(){
+  if(MAP_ROUTE&&MAP){MAP.removeLayer(MAP_ROUTE);MAP_ROUTE=null;}
+  const ri=document.getElementById('routeInfo');
+  if(ri) ri.style.display='none';
+}
+
+async function cambiarUbicVeh(vin, nuevaSede){
+  if(!nuevaSede||!db) return;
+  await db.collection('inventario').doc(vin).update({ubicacion:nuevaSede});
+  toast('✅ Ubicación actualizada: '+nuevaSede);
+  setTimeout(()=>renderMapa(),500);
+}
+
+async function cambiarSedeDemo(id, nuevaSede, tipo){
+  if(!nuevaSede||!db) return;
+  const upd=tipo==='actual'?{sedeActual:nuevaSede}:{sedeSig:nuevaSede};
+  await db.collection('demos').doc(id).update(upd);
+  toast('✅ Sede demo actualizada');
+  setTimeout(()=>renderMapa(),500);
+}
+
+function activarGPS(){
+  if(!navigator.geolocation){toast('⚠️ Tu navegador no soporta GPS');return;}
+  const badge=document.getElementById('gpsBadge');
+  if(badge){badge.className='gps-badge';badge.textContent='📍 Obteniendo ubicación...';}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lat=pos.coords.latitude;
+    const lng=pos.coords.longitude;
+    if(GPS_MARKER&&MAP) MAP.removeLayer(GPS_MARKER);
+    GPS_MARKER=L.marker([lat,lng],{
+      icon:L.divIcon({
+        className:'',
+        html:'<div style="background:#CC0001;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 3px rgba(204,0,1,0.3),0 2px 6px rgba(0,0,0,0.4)"></div>',
+        iconSize:[16,16],iconAnchor:[8,8]
+      })
+    }).addTo(MAP);
+    GPS_MARKER.bindPopup('<strong>📍 Tu ubicación actual</strong>').openPopup();
+    MAP.setView([lat,lng],15);
+    if(badge){badge.className='gps-badge';badge.textContent='📍 GPS activo';}
+    toast('✅ Ubicación GPS activada');
+  },err=>{
+    if(badge){badge.className='gps-badge off';badge.textContent='📍 GPS no disponible';}
+    toast('⚠️ No se pudo obtener la ubicación: '+err.message);
+  },{enableHighAccuracy:true,timeout:10000});
+}
+
+// ══════════════════════════════════════════
 // LEADS MODULE
 // ══════════════════════════════════════════
 let LEADS=[];
@@ -2848,6 +3344,152 @@ function descargarPlantilla(){
 // CONFIGURACIÓN — MODELOS
 // ══════════════════════════════════════════
 // MODELOS_VEHICULOS declared at top of script
+
+// ══════════════════════════════════════════
+// CONFIGURACIÓN GENERAL — TODAS LAS LISTAS
+// ══════════════════════════════════════════
+const LISTAS_CONFIG = {
+  formas_pago:{titulo:'💳 Formas de pago',donde:'Seguimiento · Leads',icon:'💳',items:['Crédito + Contado','Crédito 100%','Retoma + Crédito','Retoma + Contado','Contado','Renting','Leasing']},
+  entidades:{titulo:'🏦 Entidades financieras',donde:'Seguimiento · Leads',icon:'🏦',items:['Finandina','Sufi','Banco de Occidente','Banco Santander','Finanzauto','Vehigrupo','Finesa','Renting Total']},
+  fuentes_prospeccion:{titulo:'📡 Fuentes de prospección',donde:'Leads',icon:'📡',items:['Referido','Redes sociales','Sala de ventas','Llamada entrante','Página web','Evento / Feria','Base de datos','WhatsApp','Email marketing']},
+  motivos_desistimiento_seg:{titulo:'❌ Motivos desistimiento (Seguimiento)',donde:'Seguimiento',icon:'❌',items:['Crédito negado','Capacidad de pago','Compró otra marca','Compró vehículo HEV o EV','Aplaza compra']},
+  motivos_desistimiento_leads:{titulo:'❌ Motivos desistimiento (Leads)',donde:'Leads',icon:'❌',items:['No contesta','No interesado','Perfil no viable','Compró otra marca','Crédito negado']},
+  tipos_cliente:{titulo:'👤 Tipos de cliente',donde:'Seguimiento · Leads',icon:'👤',items:['Vehículo nuevo','Empleado']},
+  ubicaciones_inventario:{titulo:'📍 Ubicaciones de inventario',donde:'Inventario · Mapa',icon:'📍',items:['CEIBA','SUP CEIBA','PBH IMPOR','SUP IMPOR','GUAYACAN','LAUREL','PALMA','CARTAGENA','Zona Franca','CEDIS']},
+  estados_seguimiento:{titulo:'🔄 Estados de seguimiento',donde:'Seguimiento',icon:'🔄',items:['Caliente','Separado','Facturado','Matriculado','Desistido']},
+  temperaturas_cierre:{titulo:'🌡️ Temperaturas de cierre',donde:'Seguimiento',icon:'🌡️',items:['Esta semana','Este mes','Próximo mes','Sin definir']},
+  estados_leads:{titulo:'📋 Estados de leads',donde:'Leads',icon:'📋',items:['Nuevo','Contactado','Interesado','Cita agendada','En negociación','Convertido','Desistido']},
+  sedes:{titulo:'🏪 Sedes / Vitrinas',donde:'Seguimiento · Entregas · Leads',icon:'🏪',items:['Ciudad Jardín','Avenida 3ra Norte']}
+};
+let LISTAS_DATA={};
+
+async function cargarListasConfig(){
+  if(!db) return;
+  try{
+    const snap=await db.collection('config').doc('listas_desplegables').get();
+    Object.keys(LISTAS_CONFIG).forEach(key=>{
+      if(snap.exists&&snap.data()[key]&&snap.data()[key].length>0){
+        LISTAS_DATA[key]=[...snap.data()[key]];
+      } else {
+        LISTAS_DATA[key]=[...LISTAS_CONFIG[key].items];
+      }
+    });
+  }catch(e){
+    Object.keys(LISTAS_CONFIG).forEach(key=>{LISTAS_DATA[key]=[...LISTAS_CONFIG[key].items];});
+  }
+}
+
+async function guardarTodasListas(){
+  if(!db){toast('⚠️ Sin conexión');return;}
+  Object.keys(LISTAS_CONFIG).forEach(key=>{
+    const container=document.getElementById('lista_items_'+key);
+    if(!container) return;
+    const inputs=container.querySelectorAll('.lista-item-input');
+    LISTAS_DATA[key]=Array.from(inputs).map(i=>i.value.trim()).filter(v=>v);
+  });
+  const dataToSave={};
+  Object.keys(LISTAS_DATA).forEach(key=>{dataToSave[key]=[...LISTAS_DATA[key]];});
+  await db.collection('config').doc('listas_desplegables').set({...dataToSave,updatedAt:today(),updatedBy:CU?CU.nombre:''});
+  aplicarListasEnApp();
+  toast('✅ Todas las listas guardadas y aplicadas');
+}
+
+async function guardarLista(key){
+  if(!db){toast('⚠️ Sin conexión');return;}
+  const container=document.getElementById('lista_items_'+key);
+  if(!container) return;
+  const inputs=container.querySelectorAll('.lista-item-input');
+  LISTAS_DATA[key]=Array.from(inputs).map(i=>i.value.trim()).filter(v=>v);
+  const update={};update[key]=[...LISTAS_DATA[key]];update['updatedAt']=today();
+  await db.collection('config').doc('listas_desplegables').set(update,{merge:true});
+  aplicarListasEnApp();
+  toast('✅ Lista guardada: '+LISTAS_CONFIG[key].titulo);
+}
+
+function agregarItemLista(key){
+  const input=document.getElementById('lista_new_'+key);if(!input)return;
+  const val=input.value.trim();
+  if(!val){toast('⚠️ Escribe el valor a agregar');return;}
+  if(LISTAS_DATA[key].includes(val)){toast('⚠️ Ese valor ya existe');return;}
+  LISTAS_DATA[key].push(val);input.value='';
+  renderListaCard(key);toast('✅ Opción agregada — recuerda guardar');
+}
+
+function eliminarItemLista(key,idx){
+  if(LISTAS_DATA[key].length<=1){toast('⚠️ Debe haber al menos una opción');return;}
+  LISTAS_DATA[key].splice(idx,1);renderListaCard(key);
+}
+
+function subirItemLista(key,idx){
+  if(idx===0) return;
+  [LISTAS_DATA[key][idx-1],LISTAS_DATA[key][idx]]=[LISTAS_DATA[key][idx],LISTAS_DATA[key][idx-1]];
+  renderListaCard(key);
+}
+
+function bajarItemLista(key,idx){
+  if(idx>=LISTAS_DATA[key].length-1) return;
+  [LISTAS_DATA[key][idx+1],LISTAS_DATA[key][idx]]=[LISTAS_DATA[key][idx],LISTAS_DATA[key][idx+1]];
+  renderListaCard(key);
+}
+
+function renderListaCard(key){
+  const cfg=LISTAS_CONFIG[key];
+  const items=LISTAS_DATA[key]||[];
+  const container=document.getElementById('lista_card_'+key);
+  if(!container) return;
+  const rowsHtml=items.map((item,i)=>`
+    <div class="lista-item-row">
+      <span style="font-size:10px;color:#ccc;width:16px;text-align:right;flex-shrink:0">${i+1}</span>
+      <input class="lista-item-input" type="text" value="${item.replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"
+        onchange="LISTAS_DATA['${key}'][${i}]=this.value">
+      <button onclick="subirItemLista('${key}',${i})" style="background:none;border:none;cursor:pointer;color:#ccc;padding:2px 4px;font-size:13px">↑</button>
+      <button onclick="bajarItemLista('${key}',${i})" style="background:none;border:none;cursor:pointer;color:#ccc;padding:2px 4px;font-size:13px">↓</button>
+      <button class="lista-item-del" onclick="eliminarItemLista('${key}',${i})">✕</button>
+    </div>`).join('');
+  container.innerHTML=`
+    <div class="lista-card-hdr">
+      <span style="font-size:16px">${cfg.icon}</span>
+      <div class="lista-card-title">${cfg.titulo}</div>
+      <div class="lista-card-where">${cfg.donde}</div>
+    </div>
+    <div class="lista-card-body">
+      <div id="lista_items_${key}">${rowsHtml}</div>
+      <div class="lista-add-row">
+        <input class="lista-add-input" type="text" id="lista_new_${key}" placeholder="Nueva opción..."
+          onkeydown="if(event.key==='Enter')agregarItemLista('${key}')">
+        <button class="lista-add-btn" onclick="agregarItemLista('${key}')">+ Agregar</button>
+      </div>
+      <button class="lista-save-btn" onclick="guardarLista('${key}')">💾 Guardar esta lista</button>
+    </div>`;
+}
+
+function renderTodasListas(){
+  const grid=document.getElementById('listasGrid');if(!grid) return;
+  grid.innerHTML=Object.keys(LISTAS_CONFIG).map(key=>`<div id="lista_card_${key}"></div>`).join('');
+  Object.keys(LISTAS_CONFIG).forEach(key=>renderListaCard(key));
+}
+
+function aplicarListasEnApp(){
+  const mappings={
+    'segPago':'formas_pago','leadPago':'formas_pago',
+    'segEntidad':'entidades','leadEntidad':'entidades',
+    'leadFuente':'fuentes_prospeccion','leadsFiltFuente':'fuentes_prospeccion',
+    'segMotivo':'motivos_desistimiento_seg',
+    'leadMotivo':'motivos_desistimiento_leads',
+    'segTipo':'tipos_cliente','leadTipo':'tipos_cliente',
+    'epSd':'sedes','agSd':'sedes'
+  };
+  Object.entries(mappings).forEach(([selId,listKey])=>{
+    const sel=document.getElementById(selId);
+    if(!sel||!LISTAS_DATA[listKey]) return;
+    const prev=sel.value;
+    const hasEmpty=sel.options[0]&&sel.options[0].value==='';
+    const emptyText=hasEmpty?sel.options[0].text:'';
+    sel.innerHTML=(hasEmpty?`<option value="">${emptyText}</option>`:'')+
+      LISTAS_DATA[listKey].map(v=>`<option value="${v}">${v}</option>`).join('');
+    if(prev&&[...sel.options].find(o=>o.value===prev)) sel.value=prev;
+  });
+}
 
 async function cargarModelosConfig(){
   if(!db) return;
@@ -3468,6 +4110,9 @@ document.addEventListener('DOMContentLoaded', function() {
   $('nav-dashboard').addEventListener('click', ()=>showPage('dashboard'));
   $('nav-metas').addEventListener('click', ()=>showPage('metas'));
   $('nav-config').addEventListener('click', ()=>showPage('config'));
+
+  // Ubicación
+  $('nav-ubicacion').addEventListener('click', ()=>showPage('ubicacion'));
 
   // Leads
   $('nav-leads').addEventListener('click', ()=>showPage('leads'));
