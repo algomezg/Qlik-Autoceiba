@@ -1376,7 +1376,17 @@ async function seedData(){
 // ── LISTENERS ──
 function startListeners(){
   unsubArr.forEach(u=>u());unsubArr=[];
-  unsubArr.push(db.collection('inventario').onSnapshot(s=>{INV=s.docs.map(d=>{return{...d.data(),_id:d.id}});fillPF();fillVehicleSelects();renderInv();if($('segVin'))fillVinSelect();if(MAP_INIT&&document.getElementById('page-ubicacion').classList.contains('active'))renderMapa();}));
+  unsubArr.push(db.collection('inventario').onSnapshot(s=>{
+    INV=s.docs.map(d=>{
+      const data={...d.data(),_id:d.id};
+      // Treat FACTURADO/MATRICULADO as oculto even if field not set in Firebase
+      if(data.estado==='FACTURADO'||data.estado==='MATRICULADO') data.oculto=true;
+      return data;
+    });
+    fillPF();fillVehicleSelects();renderInv();
+    if($('segVin'))fillVinSelect();
+    if(MAP_INIT&&document.getElementById('page-ubicacion').classList.contains('active'))renderMapa();
+  }));
   unsubArr.push(db.collection('demos').onSnapshot(s=>{DEMOS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderDemos();renderCal();if(MAP_INIT&&document.getElementById('page-ubicacion').classList.contains('active'))renderMapa();}));
   unsubArr.push(db.collection('pruebas').orderBy('fecha').orderBy('hora').onSnapshot(s=>{PRUEBAS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderCal();}));
   unsubArr.push(db.collection('procesos').onSnapshot(s=>{PROCS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderEnts();}));
@@ -1529,7 +1539,13 @@ function renderInv(){
   if(!CU)return;
   const q=($('isearch').value||'').toLowerCase();
   const fu=$('ifUbic').value,fe=$('ifEst').value,fp=$('ifProd').value;
+  // ── Ocultar facturados/matriculados por defecto ──
+  const mostrarFacturados=$('toggleFacturados')&&$('toggleFacturados').checked;
   let data=[...INV];
+  // Always hide oculto vehicles unless gerente toggled them on
+  if(!mostrarFacturados){
+    data=data.filter(v=>!v.oculto&&v.estado!=='FACTURADO'&&v.estado!=='MATRICULADO');
+  }
   if(q)data=data.filter(v=>[v.vin,v.chasis,v.producto,v.color].join(' ').toLowerCase().includes(q));
   if(fu)data=data.filter(v=>v.ubicacion===fu);
   if(fe)data=data.filter(v=>v.estado===fe);
@@ -4064,7 +4080,9 @@ async function guardarSeg(){
 
   // ── SINCRONIZACIÓN AUTOMÁTICA ──
   // 1. Sync VIN status with inventario
-  if(vin) await syncVinWithInventario(vin, estado, asesorId);
+  // Get VIN from form OR from existing record if editing
+  const vinToSync = vin || (editId ? (SEGS.find(s=>s._id===editId)||{}).vin : null);
+  if(vinToSync) await syncVinWithInventario(vinToSync, estado, asesorId);
 
   // 2. Auto-create proceso de entrega if Facturado
   if((estado==='Facturado'||estado==='Matriculado')&&vin){
