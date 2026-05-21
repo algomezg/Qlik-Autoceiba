@@ -304,7 +304,11 @@ tr:hover td{background:#fafafa}
         <div class="sg" id="sgrid"></div>
         <div class="cd">
           <div class="ct">🚗 Vehículos
-            <div style="margin-left:auto;display:flex;gap:6px" id="adminBtns">
+            <div style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="adminBtns">
+              <label id="toggleFacturadosWrap" style="display:none;align-items:center;gap:5px;font-size:12px;color:#888;cursor:pointer">
+                <input type="checkbox" id="toggleFacturados" onchange="renderInv()" style="accent-color:#CC0001">
+                Ver facturados
+              </label>
               <button class="btn btns btnsm" id="btnImport">📥 Importar Excel</button>
               <input type="file" id="xlFile" accept=".xlsx,.xls,.csv" style="display:none">
               <button class="btn btnp btnsm" id="btnAddVeh">+ Agregar</button>
@@ -1471,6 +1475,9 @@ function setupNav(){
   $('nav-usuarios').classList.toggle('hidden',!isGer());
   $('nav-metas').classList.toggle('hidden',!isGer());
   $('nav-config').classList.toggle('hidden',!isGer());
+  // Show "ver facturados" toggle only for gerente
+  const tfWrap=$('toggleFacturadosWrap');
+  if(tfWrap) tfWrap.style.display=isGer()?'flex':'none';
   $('adminBtns').style.display=isAdm()?'flex':'none';
   $('btnNP').classList.toggle('hidden',!isAdm());
 }
@@ -1527,10 +1534,13 @@ function renderInv(){
   if(fu)data=data.filter(v=>v.ubicacion===fu);
   if(fe)data=data.filter(v=>v.estado===fe);
   if(fp)data=data.filter(v=>v.producto===fp);
-  const tot=INV.length,dis=INV.filter(v=>v.estado==='DISPONIBLE').length;
-  const sep=INV.filter(v=>v.estado==='SEPARADO').length;
-  const comp=INV.filter(v=>v.estadoUNOE==='Comprometido').length;
-  const ceiba=INV.filter(v=>v.ubicacion==='CEIBA').length;
+  const invActivo=INV.filter(v=>!v.oculto&&v.estado!=='FACTURADO'&&v.estado!=='MATRICULADO');
+  const tot=invActivo.length;
+  const dis=invActivo.filter(v=>v.estado==='DISPONIBLE').length;
+  const sep=invActivo.filter(v=>v.estado==='SEPARADO').length;
+  const comp=invActivo.filter(v=>v.estadoUNOE==='Comprometido').length;
+  const ceiba=invActivo.filter(v=>v.ubicacion==='CEIBA').length;
+  const facturados=INV.filter(v=>v.oculto||v.estado==='FACTURADO'||v.estado==='MATRICULADO').length;
   $('sgrid').innerHTML=`<div class="sc"><div class="sn">${tot}</div><div class="sl">Total</div></div><div class="sc"><div class="sn" style="color:#2d6011">${dis}</div><div class="sl">Disponibles</div></div><div class="sc"><div class="sn" style="color:#7a4a0a">${sep}</div><div class="sl">Separados</div></div><div class="sc"><div class="sn" style="color:#9b2020">${comp}</div><div class="sl">Comprometidos</div></div><div class="sc"><div class="sn" style="color:#1457a0">${ceiba}</div><div class="sl">En CEIBA</div></div>`;
   const tb=$('invTb');
   if(!data.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#ccc;padding:2rem">Sin resultados</td></tr>';return;}
@@ -1560,6 +1570,12 @@ async function libVeh(vin){
   toast('✅ Vehículo liberado');
 }
 function openAddVeh(){['vP','vA','vC','vCI','vCH','vV'].forEach(i=>$(i).value='');om('mAddV');}
+function toggleVerFacturados(){
+  if(!isGer()) return;
+  const cb=$('toggleFacturados');
+  if(cb){cb.checked=!cb.checked;renderInv();}
+}
+
 async function eliminarVeh(vin, producto){
   if(!isGer()){toast('⚠️ Solo el gerente puede eliminar vehículos');return;}
   if(!confirm(`¿Eliminar el vehículo ${producto} (VIN: ${vin}) del inventario?
@@ -1791,8 +1807,11 @@ async function marcarEntregado(pid, checked){
         updatedAt:today()
       });
     }
-    // Also update inventario — mark as delivered (keep separado but note delivered)
+    // Also update inventario — mark as delivered and hidden
     await db.collection('inventario').doc(p.vin).update({
+      estado:'MATRICULADO',
+      oculto:true,
+      fechaEntrega:today(),
       sepObs:'ENTREGADO el '+today()
     });
   }
@@ -3805,14 +3824,13 @@ function fillVinSelect(){
   if(!sel) return;
   const prev=sel.value;
   sel.innerHTML='<option value="">Sin VIN asignado</option>';
-  // Show available inventory + already assigned VINs
-  INV.forEach(v=>{
+  // Only show vehicles not yet facturado/oculto (unless already assigned to this seguimiento)
+  INV.filter(v=>!v.oculto||v.vin===prev).forEach(v=>{
+    if((v.estado==='FACTURADO'||v.estado==='MATRICULADO')&&v.vin!==prev) return;
     const opt=document.createElement('option');
     opt.value=v.vin;
     opt.textContent=`${v.vin} · ${v.producto} · ${v.color} · ${v.ubicacion}`;
-    if(v.estado==='SEPARADO'||v.estado==='FACTURADO'||v.estado==='MATRICULADO'){
-      opt.textContent+=' ['+v.estado+']';
-    }
+    if(v.estado==='SEPARADO') opt.textContent+=' [SEPARADO]';
     sel.appendChild(opt);
   });
   if(prev) sel.value=prev;
@@ -3862,24 +3880,30 @@ async function syncVinWithInventario(vin, estadoSeg, asesorId){
 
   const updates={};
 
-  // Map seguimiento estado to inventario estado
   if(estadoSeg==='Separado'&&v.estado==='DISPONIBLE'){
     updates.estado='SEPARADO';
     updates.sepAsesorId=asesorId;
     updates.sepFecha=today();
-  } else if((estadoSeg==='Facturado'||estadoSeg==='Matriculado')&&v.estado!=='FACTURADO'&&v.estado!=='MATRICULADO'){
-    updates.estado='SEPARADO'; // Keep as separado in inventory when facturado
+    updates.oculto=false;
+
+  } else if((estadoSeg==='Facturado'||estadoSeg==='Matriculado')){
+    // ── OCULTAR del inventario al facturar ──
+    updates.estado='FACTURADO';
+    updates.oculto=true;
+    updates.fechaFactura=today();
     updates.sepAsesorId=asesorId;
     if(!v.sepFecha) updates.sepFecha=today();
-  } else if(estadoSeg==='Caliente'&&v.estado==='DISPONIBLE'){
-    // Just note the asesor interest, don't change status
-    return;
-  } else if(estadoSeg==='Desistido'&&v.estado==='SEPARADO'&&v.sepAsesorId===asesorId){
-    // Release vehicle if asesor desists
+
+  } else if(estadoSeg==='Caliente'){
+    return; // Sin cambio en inventario
+
+  } else if(estadoSeg==='Desistido'&&v.sepAsesorId===asesorId){
+    // Liberar vehículo
     updates.estado='DISPONIBLE';
     updates.sepAsesorId=null;
     updates.sepFecha=null;
     updates.sepObs='';
+    updates.oculto=false;
   }
 
   if(Object.keys(updates).length>0){
