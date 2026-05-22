@@ -1394,7 +1394,7 @@ function startListeners(){
     // Fallback without orderBy if index not ready
     db.collection('leads').onSnapshot(s=>{LEADS=s.docs.map(d=>{return{...d.data(),_id:d.id}});LEADS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderLeads();});
   }));
-  unsubArr.push(db.collection('seguimiento').onSnapshot(s=>{SEGS=s.docs.map(d=>{return{...d.data(),_id:d.id}});SEGS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderSeg();renderInv();if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();}));
+  unsubArr.push(db.collection('seguimiento').onSnapshot(s=>{SEGS=s.docs.map(d=>{return{...d.data(),_id:d.id}});SEGS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderSeg();renderInv();if($('segVin'))fillVinSelect();if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();}));
 
   // Listener metas en tiempo real
   unsubArr.push(db.collection('metas').onSnapshot(snap=>{
@@ -1541,22 +1541,37 @@ function renderInv(){
   const fu=$('ifUbic').value,fe=$('ifEst').value,fp=$('ifProd').value;
   // ── Ocultar facturados/matriculados por defecto ──
   const mostrarFacturados=$('toggleFacturados')&&$('toggleFacturados').checked;
+
+  // Build set of VINs that are facturado in seguimiento (even if inv record not updated yet)
+  const vinsFacturados=new Set(
+    SEGS.filter(s=>s.vin&&(s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact||s.fechaMat))
+        .map(s=>s.vin)
+  );
+
   let data=[...INV];
-  // Always hide oculto vehicles unless gerente toggled them on
+  // Always hide oculto/facturado vehicles unless gerente toggled them on
   if(!mostrarFacturados){
-    data=data.filter(v=>!v.oculto&&v.estado!=='FACTURADO'&&v.estado!=='MATRICULADO');
+    data=data.filter(v=>
+      !v.oculto &&
+      v.estado!=='FACTURADO' &&
+      v.estado!=='MATRICULADO' &&
+      !vinsFacturados.has(v.vin)  // also hide if facturado in seguimiento
+    );
   }
   if(q)data=data.filter(v=>[v.vin,v.chasis,v.producto,v.color].join(' ').toLowerCase().includes(q));
   if(fu)data=data.filter(v=>v.ubicacion===fu);
   if(fe)data=data.filter(v=>v.estado===fe);
   if(fp)data=data.filter(v=>v.producto===fp);
-  const invActivo=INV.filter(v=>!v.oculto&&v.estado!=='FACTURADO'&&v.estado!=='MATRICULADO');
+  const vinsFacturadosStats=new Set(
+    SEGS.filter(s=>s.vin&&(s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact||s.fechaMat)).map(s=>s.vin)
+  );
+  const invActivo=INV.filter(v=>!v.oculto&&v.estado!=='FACTURADO'&&v.estado!=='MATRICULADO'&&!vinsFacturadosStats.has(v.vin));
   const tot=invActivo.length;
   const dis=invActivo.filter(v=>v.estado==='DISPONIBLE').length;
   const sep=invActivo.filter(v=>v.estado==='SEPARADO').length;
   const comp=invActivo.filter(v=>v.estadoUNOE==='Comprometido').length;
   const ceiba=invActivo.filter(v=>v.ubicacion==='CEIBA').length;
-  const facturados=INV.filter(v=>v.oculto||v.estado==='FACTURADO'||v.estado==='MATRICULADO').length;
+  const facturados=INV.filter(v=>v.oculto||v.estado==='FACTURADO'||v.estado==='MATRICULADO'||vinsFacturadosStats.has(v.vin)).length;
   $('sgrid').innerHTML=`<div class="sc"><div class="sn">${tot}</div><div class="sl">Total</div></div><div class="sc"><div class="sn" style="color:#2d6011">${dis}</div><div class="sl">Disponibles</div></div><div class="sc"><div class="sn" style="color:#7a4a0a">${sep}</div><div class="sl">Separados</div></div><div class="sc"><div class="sn" style="color:#9b2020">${comp}</div><div class="sl">Comprometidos</div></div><div class="sc"><div class="sn" style="color:#1457a0">${ceiba}</div><div class="sl">En CEIBA</div></div>`;
   const tb=$('invTb');
   if(!data.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#ccc;padding:2rem">Sin resultados</td></tr>';return;}
