@@ -293,6 +293,9 @@ tr:hover td{background:#fafafa}
       <div class="ni" id="nav-ubicacion"><span>🗺️</span>Ubicación</div>
       <div class="ni" id="nav-leads"><span>📋</span>Leads</div>
       <div class="ni" id="nav-seguimiento"><span>🔥</span>Seguimiento</div>
+      <div class="ns">Cierres</div>
+      <div class="ni" id="nav-entregados"><span>🚗</span>Entregados</div>
+      <div class="ni" id="nav-desistidos"><span>❌</span>Desistidos</div>
       <div class="ns">Administración</div>
       <div class="ni hidden" id="nav-config"><span>⚙️</span>Configuración</div>
       <div class="ni hidden" id="nav-usuarios"><span>👥</span>Usuarios</div>
@@ -810,6 +813,85 @@ tr:hover td{background:#fafafa}
         </div>
       </div>
 
+      <!-- ══ ENTREGADOS ══ -->
+      <div class="pg" id="page-entregados">
+        <div class="pt">Vehículos entregados</div>
+        <div class="ps">Clientes que recibieron su vehículo — historial completo</div>
+        <div class="sg" id="entregadosStatGrid"></div>
+        <div class="card">
+          <div class="ct">🚗 Registro de entregas
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <input type="text" id="entregadosSearch" placeholder="Buscar cliente, VIN, asesor..."
+                style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none;width:220px"
+                oninput="renderEntregados()">
+              <select id="entregadosFiltAsesor" onchange="renderEntregados()"
+                style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none">
+                <option value="">Todos los asesores</option>
+              </select>
+              <select id="entregadosFiltMes" onchange="renderEntregados()"
+                style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none">
+                <option value="">Todos los meses</option>
+                <option value="2026-01">Enero 2026</option><option value="2026-02">Febrero 2026</option>
+                <option value="2026-03">Marzo 2026</option><option value="2026-04">Abril 2026</option>
+                <option value="2026-05">Mayo 2026</option><option value="2026-06">Junio 2026</option>
+                <option value="2026-07">Julio 2026</option><option value="2026-08">Agosto 2026</option>
+                <option value="2026-09">Septiembre 2026</option><option value="2026-10">Octubre 2026</option>
+                <option value="2026-11">Noviembre 2026</option><option value="2026-12">Diciembre 2026</option>
+              </select>
+              <button class="btn btns btnsm" onclick="exportEntregadosXL()">📤 Exportar</button>
+            </div>
+          </div>
+          <div class="tw"><table>
+            <thead><tr>
+              <th>Asesor</th><th>Cliente</th><th>Cédula</th><th>Celular</th>
+              <th>Vehículo</th><th>VIN</th><th>Color</th><th>Forma de pago</th>
+              <th>Precio</th><th>F. Separación</th><th>F. Factura</th>
+              <th>F. Matrícula</th><th>F. Entrega</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="entregadosTbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ══ DESISTIDOS ══ -->
+      <div class="pg" id="page-desistidos">
+        <div class="pt">Clientes desistidos</div>
+        <div class="ps">Prospectos que no llegaron a factura — análisis de pérdida</div>
+        <div class="sg" id="desistidosStatGrid"></div>
+        <div class="card">
+          <div class="ct">❌ Registro de desistimientos
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <input type="text" id="desistidosSearch" placeholder="Buscar cliente, asesor..."
+                style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none;width:220px"
+                oninput="renderDesistidos()">
+              <select id="desistidosFiltAsesor" onchange="renderDesistidos()"
+                style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none">
+                <option value="">Todos los asesores</option>
+              </select>
+              <select id="desistidosFiltMotivo" onchange="renderDesistidos()"
+                style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none">
+                <option value="">Todos los motivos</option>
+                <option>Crédito negado</option>
+                <option>Capacidad de pago</option>
+                <option>Compró otra marca</option>
+                <option>Compró vehículo HEV o EV</option>
+                <option>Aplaza compra</option>
+              </select>
+              <button class="btn btns btnsm" onclick="exportDesistidosXL()">📤 Exportar</button>
+            </div>
+          </div>
+          <div class="tw"><table>
+            <thead><tr>
+              <th>Asesor</th><th>Cliente</th><th>Cédula</th><th>Celular</th>
+              <th>Vehículo</th><th>Color</th><th>Forma de pago</th>
+              <th>Motivo desistimiento</th><th>Temperatura</th>
+              <th>F. Creación</th><th>F. Desistimiento</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="desistidosTbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
       <div class="pg" id="page-config">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1.4rem">
           <div>
@@ -1077,6 +1159,7 @@ tr:hover td{background:#fafafa}
         <option value="Separado">🔒 Separado</option>
         <option value="Facturado">📄 Facturado</option>
         <option value="Matriculado">✅ Matriculado</option>
+        <option value="Entregado">🚗 Entregado</option>
         <option value="Desistido">❌ Desistido</option>
       </select>
     </div>
@@ -1216,7 +1299,7 @@ tr:hover td{background:#fafafa}
     </div>
     <div class="fr">
       <div class="ff"><label>Fecha de matrícula</label><input type="date" id="segFechaMat"></div>
-      <div class="ff"></div>
+      <div class="ff"><label>🚗 Fecha de entrega</label><input type="date" id="segFechaEntrega"></div>
     </div>
   </div>
   <div class="fr">
@@ -1394,7 +1477,7 @@ function startListeners(){
     // Fallback without orderBy if index not ready
     db.collection('leads').onSnapshot(s=>{LEADS=s.docs.map(d=>{return{...d.data(),_id:d.id}});LEADS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderLeads();});
   }));
-  unsubArr.push(db.collection('seguimiento').onSnapshot(s=>{SEGS=s.docs.map(d=>{return{...d.data(),_id:d.id}});SEGS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderSeg();renderInv();if($('segVin'))fillVinSelect();if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();}));
+  unsubArr.push(db.collection('seguimiento').onSnapshot(s=>{SEGS=s.docs.map(d=>{return{...d.data(),_id:d.id}});SEGS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderSeg();renderInv();if($('segVin'))fillVinSelect();if(document.getElementById('page-entregados')&&document.getElementById('page-entregados').classList.contains('active'))renderEntregados();if(document.getElementById('page-desistidos')&&document.getElementById('page-desistidos').classList.contains('active'))renderDesistidos();if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();}));
 
   // Listener metas en tiempo real
   unsubArr.push(db.collection('metas').onSnapshot(snap=>{
@@ -1509,6 +1592,8 @@ function showPage(p){
     if(selMes) selMes.value=mesActual;
     cargarMetas();
   }
+  if(p==='entregados'){renderEntregados();}
+  if(p==='desistidos'){renderDesistidos();}
   if(p==='config'){
     cargarModelosConfig();
     if(Object.keys(LISTAS_DATA).length===0){
@@ -3395,6 +3480,186 @@ function descargarPlantilla(){
 // MODELOS_VEHICULOS declared at top of script
 
 // ══════════════════════════════════════════
+// ENTREGADOS MODULE
+// ══════════════════════════════════════════
+function renderEntregados(){
+  if(!CU) return;
+
+  // Fill filters
+  const selA=$('entregadosFiltAsesor');
+  if(selA){
+    const prev=selA.value;
+    const asesores=CU.rol==='asesor'?USERS.filter(u=>u.id===CU.id):USERS.filter(u=>u.rol==='asesor'&&u.activo);
+    selA.innerHTML='<option value="">Todos los asesores</option>'+asesores.map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+    selA.value=prev;
+  }
+
+  const q=($('entregadosSearch')?$('entregadosSearch').value:'').toLowerCase();
+  const fA=$('entregadosFiltAsesor')?$('entregadosFiltAsesor').value:'';
+  const fM=$('entregadosFiltMes')?$('entregadosFiltMes').value:'';
+
+  let data=SEGS.filter(s=>s.estado==='Entregado'||s.estado==='Matriculado'||(s.estado==='Facturado'&&s.fechaEntrega));
+  if(CU.rol==='asesor') data=data.filter(s=>s.asesorId===CU.id);
+  if(q) data=data.filter(s=>[s.nombre,s.cedula,s.celular,s.vin||''].join(' ').toLowerCase().includes(q));
+  if(fA) data=data.filter(s=>s.asesorId===fA);
+  if(fM) data=data.filter(s=>(s.fechaEntrega||s.fechaMat||s.fechaFact||'').startsWith(fM));
+  data.sort((a,b)=>(b.fechaEntrega||b.fechaMat||b.updatedAt||'').localeCompare(a.fechaEntrega||a.fechaMat||a.updatedAt||''));
+
+  // Stats
+  const tot=data.length;
+  const esteMes=data.filter(s=>(s.fechaEntrega||s.fechaMat||'').startsWith(today().substring(0,7))).length;
+  const totalVenta=data.reduce((acc,s)=>acc+(s.precio||0),0);
+  const totalAbonos=data.reduce((acc,s)=>acc+(s.abonos||0),0);
+
+  const sg=$('entregadosStatGrid');
+  if(sg) sg.innerHTML=`
+    <div class="sc"><div class="sn">${tot}</div><div class="sl">Total entregados</div></div>
+    <div class="sc"><div class="sn" style="color:#0d6048">${esteMes}</div><div class="sl">Este mes</div></div>
+    <div class="sc"><div class="sn" style="color:#CC0001">${fmtMillones(totalVenta)}</div><div class="sl">Facturación total</div></div>
+    <div class="sc"><div class="sn" style="color:#2d6011">${fmtMillones(totalAbonos)}</div><div class="sl">Abonos recibidos</div></div>
+    <div class="sc"><div class="sn" style="color:#9b2020">${fmtMillones(totalVenta-totalAbonos)}</div><div class="sl">Cartera pendiente</div></div>`;
+
+  const tb=$('entregadosTbody');
+  if(!tb) return;
+  if(!data.length){tb.innerHTML='<tr><td colspan="14" style="text-align:center;color:#ccc;padding:2rem">No hay entregas registradas</td></tr>';return;}
+
+  tb.innerHTML=data.map(s=>{
+    const as=USERS.find(u=>u.id===s.asesorId);
+    const veh=INV.find(v=>v.vin===s.vin);
+    return `<tr>
+      <td style="font-size:12px">${as?as.nombre.split(' ').slice(0,2).join(' '):'—'}</td>
+      <td><strong style="font-size:12px">${s.nombre}</strong></td>
+      <td class="mono">${s.cedula||'—'}</td>
+      <td class="mono">${s.celular||'—'}</td>
+      <td style="font-size:11px;font-weight:600">${s.vehiculo||'—'}</td>
+      <td class="mono" style="font-size:10px;color:#1457a0">${s.vin||'—'}</td>
+      <td style="font-size:11px">${s.color||'—'}</td>
+      <td style="font-size:11px">${s.pago||'—'}</td>
+      <td style="font-size:11px;font-weight:700;color:#CC0001">${fmtCOP(s.precio)}</td>
+      <td style="font-size:11px">${s.fechaSep||'—'}</td>
+      <td style="font-size:11px">${s.fechaFact||'—'}</td>
+      <td style="font-size:11px">${s.fechaMat||'—'}</td>
+      <td style="font-size:11px;font-weight:700;color:#0d6048">${s.fechaEntrega||s.fechaMat||'—'}</td>
+      <td><button class="btn btns btnsm" onclick="verDetSeg('${s._id}')">Ver</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function exportEntregadosXL(){
+  const data=SEGS.filter(s=>s.estado==='Entregado'||s.estado==='Matriculado'||(s.estado==='Facturado'&&s.fechaEntrega));
+  if(!data.length){toast('⚠️ No hay entregas para exportar');return;}
+  const rows=data.map(s=>{
+    const as=USERS.find(u=>u.id===s.asesorId);
+    return{
+      'Asesor':as?as.nombre:'—','Cliente':s.nombre,'Cédula':s.cedula||'',
+      'Celular':s.celular||'','Vehículo':s.vehiculo||'','VIN':s.vin||'',
+      'Color':s.color||'','Forma de Pago':s.pago||'',
+      'Precio':s.precio||0,'Abonos':s.abonos||0,
+      'F. Separación':s.fechaSep||'','F. Factura':s.fechaFact||'',
+      'F. Matrícula':s.fechaMat||'','F. Entrega':s.fechaEntrega||''
+    };
+  });
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,'Entregados',ws);
+  XLSX.writeFile(wb,'Entregados_AutoCeiba_'+today()+'.xlsx');
+  toast('✅ Excel exportado');
+}
+
+// ══════════════════════════════════════════
+// DESISTIDOS MODULE
+// ══════════════════════════════════════════
+function renderDesistidos(){
+  if(!CU) return;
+
+  // Fill filters
+  const selA=$('desistidosFiltAsesor');
+  if(selA){
+    const prev=selA.value;
+    const asesores=CU.rol==='asesor'?USERS.filter(u=>u.id===CU.id):USERS.filter(u=>u.rol==='asesor'&&u.activo);
+    selA.innerHTML='<option value="">Todos los asesores</option>'+asesores.map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+    selA.value=prev;
+  }
+
+  const q=($('desistidosSearch')?$('desistidosSearch').value:'').toLowerCase();
+  const fA=$('desistidosFiltAsesor')?$('desistidosFiltAsesor').value:'';
+  const fM=$('desistidosFiltMotivo')?$('desistidosFiltMotivo').value:'';
+
+  let data=SEGS.filter(s=>s.estado==='Desistido');
+  if(CU.rol==='asesor') data=data.filter(s=>s.asesorId===CU.id);
+  if(q) data=data.filter(s=>[s.nombre,s.cedula,s.celular].join(' ').toLowerCase().includes(q));
+  if(fA) data=data.filter(s=>s.asesorId===fA);
+  if(fM) data=data.filter(s=>s.motivo===fM);
+  data.sort((a,b)=>(b.updatedAt||b.createdAt||'').localeCompare(a.updatedAt||a.createdAt||''));
+
+  // Stats
+  const tot=data.length;
+  const porMotivo={};
+  data.forEach(s=>{const m=s.motivo||'Sin motivo';porMotivo[m]=(porMotivo[m]||0)+1;});
+  const topMotivo=Object.entries(porMotivo).sort((a,b)=>b[1]-a[1])[0];
+  const esteMes=data.filter(s=>(s.updatedAt||'').startsWith(today().substring(0,7))).length;
+
+  const sg=$('desistidosStatGrid');
+  if(sg) sg.innerHTML=`
+    <div class="sc"><div class="sn">${tot}</div><div class="sl">Total desistidos</div></div>
+    <div class="sc"><div class="sn" style="color:#9b2020">${esteMes}</div><div class="sl">Este mes</div></div>
+    <div class="sc"><div class="sn" style="color:#7a4a0a;font-size:16px">${topMotivo?topMotivo[0].split(' ').slice(0,2).join(' '):'—'}</div><div class="sl">Principal motivo</div></div>
+    ${Object.entries(porMotivo).sort((a,b)=>b[1]-a[1]).map(([m,c])=>`
+      <div class="sc"><div class="sn" style="color:#777;font-size:20px">${c}</div><div class="sl" style="font-size:10px">${m}</div></div>`).join('')}`;
+
+  const tb=$('desistidosTbody');
+  if(!tb) return;
+  if(!data.length){tb.innerHTML='<tr><td colspan="12" style="text-align:center;color:#ccc;padding:2rem">No hay desistimientos registrados</td></tr>';return;}
+
+  tb.innerHTML=data.map(s=>{
+    const as=USERS.find(u=>u.id===s.asesorId);
+    return `<tr>
+      <td style="font-size:12px">${as?as.nombre.split(' ').slice(0,2).join(' '):'—'}</td>
+      <td><strong style="font-size:12px">${s.nombre}</strong></td>
+      <td class="mono">${s.cedula||'—'}</td>
+      <td class="mono">${s.celular||'—'}</td>
+      <td style="font-size:11px;font-weight:600">${s.vehiculo||'—'}</td>
+      <td style="font-size:11px">${s.color||'—'}</td>
+      <td style="font-size:11px">${s.pago||'—'}</td>
+      <td><span class="b br" style="font-size:10px">${s.motivo||'—'}</span></td>
+      <td>${getTempBadge(s.temperatura)}</td>
+      <td style="font-size:11px">${s.createdAt||'—'}</td>
+      <td style="font-size:11px;color:#9b2020;font-weight:600">${s.updatedAt||'—'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btns btnsm" onclick="verDetSeg('${s._id}')">Ver</button>
+        ${isAdm()?`<button class="btn btnok btnsm" onclick="reactivarDesistido('${s._id}')" style="margin-top:3px">↩️ Reactivar</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function reactivarDesistido(id){
+  if(!confirm('¿Reactivar este cliente y moverlo de vuelta a Seguimiento como Caliente?')) return;
+  await db.collection('seguimiento').doc(id).update({estado:'Caliente',motivo:'',updatedAt:today()});
+  toast('✅ Cliente reactivado y movido a Seguimiento');
+}
+
+function exportDesistidosXL(){
+  const data=SEGS.filter(s=>s.estado==='Desistido');
+  if(!data.length){toast('⚠️ No hay desistidos para exportar');return;}
+  const rows=data.map(s=>{
+    const as=USERS.find(u=>u.id===s.asesorId);
+    return{
+      'Asesor':as?as.nombre:'—','Cliente':s.nombre,'Cédula':s.cedula||'',
+      'Celular':s.celular||'','Vehículo':s.vehiculo||'','Color':s.color||'',
+      'Forma de Pago':s.pago||'','Motivo':s.motivo||'',
+      'Temperatura':s.temperatura||'','F. Creación':s.createdAt||'',
+      'F. Desistimiento':s.updatedAt||'','Observaciones':s.obs||''
+    };
+  });
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,'Desistidos',ws);
+  XLSX.writeFile(wb,'Desistidos_AutoCeiba_'+today()+'.xlsx');
+  toast('✅ Excel exportado');
+}
+
+// ══════════════════════════════════════════
 // CONFIGURACIÓN GENERAL — TODAS LAS LISTAS
 // ══════════════════════════════════════════
 const LISTAS_CONFIG = {
@@ -3742,13 +4007,15 @@ function renderSeg(){
   const fV=$('segFiltVeh').value;
 
   let data=[...SEGS];
+  // ── Seguimiento ONLY shows active records (not Entregado or Desistido) ──
+  data=data.filter(s=>s.estado!=='Entregado'&&s.estado!=='Desistido');
   if(CU.rol==='asesor') data=data.filter(s=>s.asesorId===CU.id);
   if(q) data=data.filter(s=>[s.nombre,s.cedula,s.celular].join(' ').toLowerCase().includes(q));
   if(fA) data=data.filter(s=>s.asesorId===fA);
   if(fE) data=data.filter(s=>s.estado===fE);
   if(fV) data=data.filter(s=>s.vehiculo===fV);
 
-  // Ordenar: Separado → Caliente → Facturado → Matriculado → resto → Desistido
+  // Ordenar: Separado → Caliente → Facturado → Matriculado → resto (Entregado/Desistido ya excluidos)
   const estadoOrden={'Separado':1,'Caliente':2,'Facturado':3,'Matriculado':4,'En proceso':5,'Desistido':99};
   data.sort((a,b)=>{
     const oa=estadoOrden[a.estado]||50;
@@ -3987,7 +4254,7 @@ function openNewSeg(){
   $('segAsesor').innerHTML=USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
   // If current user is asesor, preselect
   if(CU.rol==='asesor') $('segAsesor').value=CU.id;
-  ['segNombre','segCedula','segCelular','segColor','segObs','segFechaSep','segFechaFact','segFechaMat','segProxContacto','segPrecio','segAbonos'].forEach(id=>$(id).value='');
+  ['segNombre','segCedula','segCelular','segColor','segObs','segFechaSep','segFechaFact','segFechaMat','segProxContacto','segPrecio','segAbonos','segFechaEntrega'].forEach(id=>$(id).value='');
   if($('segSaldoWrap')) $('segSaldoWrap').style.display='none';
   ['segCotizado','segPruebaRuta','segCreditoAprobado'].forEach(id=>{const el=$(id);if(el)el.checked=false;});
   ['segFechaCotizado','segFechaPrueba','segFechaCredito'].forEach(id=>{const el=$(id);if(el)el.value='';});
@@ -4076,6 +4343,7 @@ async function guardarSeg(){
     fechaCredito:$('segFechaCredito')?$('segFechaCredito').value||null:null,
     precio:parseFloat($('segPrecio').value)||null,
     abonos:parseFloat($('segAbonos').value)||null,
+    fechaEntrega:$('segFechaEntrega')?$('segFechaEntrega').value||null:null,
     obs:$('segObs').value.trim(),
     updatedAt:today()
   };
@@ -4207,6 +4475,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // Dashboard, Metas & Config
   $('nav-dashboard').addEventListener('click', ()=>showPage('dashboard'));
   $('nav-metas').addEventListener('click', ()=>showPage('metas'));
+  $('nav-entregados').addEventListener('click', ()=>showPage('entregados'));
+  $('nav-desistidos').addEventListener('click', ()=>showPage('desistidos'));
   $('nav-config').addEventListener('click', ()=>showPage('config'));
 
   // Ubicación
