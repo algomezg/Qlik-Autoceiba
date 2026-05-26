@@ -298,6 +298,7 @@ tr:hover td{background:#fafafa}
       <div class="ni" id="nav-desistidos"><span>❌</span>Desistidos</div>
       <div class="ns">Administración</div>
       <div class="ni hidden" id="nav-config"><span>⚙️</span>Configuración</div>
+      <div class="ni hidden" id="nav-simulador"><span>💰</span>Simulador comisiones</div>
       <div class="ni hidden" id="nav-usuarios"><span>👥</span>Usuarios</div>
     </div>
     <div class="mn">
@@ -940,6 +941,116 @@ tr:hover td{background:#fafafa}
 
       </div>
 
+      <div class="pg" id="page-simulador">
+        <div class="pt">💰 Simulador de comisiones</div>
+        <div class="ps">Cálculo de comisiones por desembolso bancario — uso exclusivo gerencia</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px">
+
+          <!-- PANEL CALCULADORA -->
+          <div class="card">
+            <div class="ct">🏦 Calculadora de comisión</div>
+
+            <div class="ff">
+              <label>Monto desembolsado</label>
+              <div style="position:relative">
+                <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#aaa;font-size:13px;font-weight:600">$</span>
+                <input type="number" id="simMonto" placeholder="0"
+                  style="width:100%;padding:12px 12px 12px 26px;border:1.5px solid #e0e0e0;border-radius:9px;font-size:16px;font-weight:600;outline:none"
+                  oninput="calcularComision()"
+                  onfocus="this.style.borderColor='#CC0001'"
+                  onblur="this.style.borderColor='#e0e0e0'">
+              </div>
+            </div>
+
+            <div class="ff">
+              <label>Entidad bancaria</label>
+              <select id="simBanco" onchange="calcularComision()"
+                style="padding:12px;border:1.5px solid #e0e0e0;border-radius:9px;font-size:14px;outline:none;width:100%;cursor:pointer">
+                <option value="">Selecciona el banco...</option>
+                <option value="Davivienda">🏦 Davivienda — $1.750 por millón</option>
+                <option value="Finandina">🏦 Finandina — $2.250 por millón</option>
+                <option value="Banco de Occidente">🏦 Banco de Occidente — $1.850 por millón</option>
+              </select>
+            </div>
+
+            <!-- RESULTADO -->
+            <div id="simResultado" style="display:none;margin-top:.5rem">
+              <div style="background:linear-gradient(135deg,#CC0001,#8B0000);border-radius:12px;padding:1.5rem;text-align:center;color:#fff;margin-top:.5rem">
+                <div style="font-size:12px;opacity:.8;text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem">Tu comisión estimada</div>
+                <div id="simComisionValor" style="font-size:42px;font-weight:900;line-height:1">$0</div>
+                <div id="simComisionDetalle" style="font-size:12px;opacity:.7;margin-top:.4rem"></div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+                <div style="background:#f8f8f8;border-radius:9px;padding:.85rem 1rem;text-align:center">
+                  <div style="font-size:11px;color:#aaa;margin-bottom:3px">Monto desembolsado</div>
+                  <div id="simMontoFmt" style="font-size:15px;font-weight:700;color:#333"></div>
+                </div>
+                <div style="background:#f8f8f8;border-radius:9px;padding:.85rem 1rem;text-align:center">
+                  <div style="font-size:11px;color:#aaa;margin-bottom:3px">Tasa aplicada</div>
+                  <div id="simTasa" style="font-size:15px;font-weight:700;color:#CC0001"></div>
+                </div>
+                <div style="background:#f8f8f8;border-radius:9px;padding:.85rem 1rem;text-align:center">
+                  <div style="font-size:11px;color:#aaa;margin-bottom:3px">Millones desembolsados</div>
+                  <div id="simMillones" style="font-size:15px;font-weight:700;color:#333"></div>
+                </div>
+                <div style="background:#f8f8f8;border-radius:9px;padding:.85rem 1rem;text-align:center">
+                  <div style="font-size:11px;color:#aaa;margin-bottom:3px">Fórmula aplicada</div>
+                  <div id="simFormula" style="font-size:11px;font-weight:600;color:#666;font-family:monospace"></div>
+                </div>
+              </div>
+
+              <button class="btn btnp" style="width:100%;margin-top:12px;padding:11px"
+                onclick="agregarSimulacion()">+ Agregar a historial</button>
+            </div>
+          </div>
+
+          <!-- COMPARADOR DE BANCOS -->
+          <div class="card">
+            <div class="ct">📊 Comparador de entidades</div>
+            <p style="font-size:12px;color:#888;margin-bottom:1rem">Compara cuánto generaría el mismo monto en cada banco</p>
+            <div id="simComparador">
+              <div style="text-align:center;color:#ccc;padding:2rem;font-size:13px">
+                Ingresa un monto para ver la comparación
+              </div>
+            </div>
+
+            <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f0f0f0">
+              <div style="font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.75rem">Tasas vigentes</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#fafafa;border-radius:8px;border:1px solid #f0f0f0">
+                  <span style="font-size:13px;font-weight:600">🏦 Davivienda</span>
+                  <span style="font-size:13px;font-weight:700;color:#CC0001">$1.750 / millón</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#fafafa;border-radius:8px;border:1px solid #f0f0f0">
+                  <span style="font-size:13px;font-weight:600">🏦 Finandina</span>
+                  <span style="font-size:13px;font-weight:700;color:#CC0001">$2.250 / millón</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#fafafa;border-radius:8px;border:1px solid #f0f0f0">
+                  <span style="font-size:13px;font-weight:600">🏦 Banco de Occidente</span>
+                  <span style="font-size:13px;font-weight:700;color:#CC0001">$1.850 / millón</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HISTORIAL -->
+          <div class="card" style="grid-column:1/-1">
+            <div class="ct">📋 Historial de simulaciones
+              <button class="btn btns btnsm" style="margin-left:auto" onclick="limpiarHistorial()">🗑️ Limpiar historial</button>
+            </div>
+            <div id="simHistorial">
+              <div style="text-align:center;color:#ccc;padding:1.5rem;font-size:13px">
+                Las simulaciones guardadas aparecerán aquí
+              </div>
+            </div>
+            <div id="simTotalHistorial" style="display:none;margin-top:.75rem;padding:.75rem 1rem;background:#faeeda;border-radius:9px;color:#7a4a0a;font-size:13px;font-weight:600"></div>
+          </div>
+
+        </div>
+      </div>
+
       <div class="pg" id="page-usuarios">
         <div class="pt">Gestión de usuarios</div>
         <div class="ps">Administra accesos y perfiles</div>
@@ -1566,6 +1677,7 @@ function doLogout(){
 // ── NAV ──
 function setupNav(){
   $('nav-usuarios').classList.toggle('hidden',!isGer());
+  $('nav-simulador').classList.toggle('hidden',!isGer());
   $('nav-metas').classList.toggle('hidden',!isGer());
   $('nav-config').classList.toggle('hidden',!isGer());
   // Show "ver facturados" toggle only for gerente
@@ -1608,6 +1720,7 @@ function showPage(p){
   }
   if(p==='leads') renderLeads();
   if(p==='seguimiento') renderSeg();
+  if(p==='simulador'){ /* page renders on demand */ }
   if(p==='usuarios') renderUsrs();
 }
 
@@ -1997,6 +2110,131 @@ async function confirmarEnt(){
   if(conf){const el=$('peConf');el.className='ib ibd';el.innerHTML=`⛔ Conflicto: entrega a las ${conf.entregaProg.hora} en ${p.sede}. Cada entrega dura 2h.`;el.style.display='flex';return;}
   await db.collection('procesos').doc(curProcId).update({entregaProg:{fecha,hora}});
   cm('mPE');toast('🎉 Entrega programada');
+}
+
+// ══════════════════════════════════════════
+// SIMULADOR DE COMISIONES
+// ══════════════════════════════════════════
+const TASAS_BANCOS = {
+  'Davivienda':         1750,
+  'Finandina':          2250,
+  'Banco de Occidente': 1850
+};
+
+let simHistorial = [];
+
+function calcularComision(){
+  const monto = parseFloat($('simMonto').value) || 0;
+  const banco  = $('simBanco').value;
+  const res    = $('simResultado');
+
+  if(!monto || !banco){ res.style.display='none'; renderComparador(monto); return; }
+
+  const tasa     = TASAS_BANCOS[banco];
+  const comision = (monto * tasa) / 1000000;
+  const millones = monto / 1000000;
+
+  res.style.display = 'block';
+  $('simComisionValor').textContent  = '$ ' + Math.round(comision).toLocaleString('es-CO');
+  $('simComisionDetalle').textContent = banco + ' · ' + tasa.toLocaleString('es-CO') + ' por millón';
+  $('simMontoFmt').textContent  = '$ ' + monto.toLocaleString('es-CO');
+  $('simTasa').textContent      = '$ ' + tasa.toLocaleString('es-CO');
+  $('simMillones').textContent  = millones.toFixed(4) + ' M';
+  $('simFormula').textContent   = `(${monto.toLocaleString('es-CO')} × ${tasa}) ÷ 1.000.000`;
+
+  renderComparador(monto);
+}
+
+function renderComparador(monto){
+  const el = $('simComparador');
+  if(!el) return;
+  if(!monto){ el.innerHTML='<div style="text-align:center;color:#ccc;padding:2rem;font-size:13px">Ingresa un monto para ver la comparación</div>'; return; }
+
+  const resultados = Object.entries(TASAS_BANCOS).map(([banco, tasa])=>({
+    banco, tasa, comision: Math.round((monto * tasa) / 1000000)
+  })).sort((a,b)=>b.comision - a.comision);
+
+  const maxCom = resultados[0].comision;
+
+  el.innerHTML = resultados.map((r,i)=>{
+    const pct   = Math.round((r.comision / maxCom) * 100);
+    const color = i===0 ? '#2d6011' : i===1 ? '#7a4a0a' : '#888';
+    const medal = i===0 ? '🥇' : i===1 ? '🥈' : '🥉';
+    return `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:12px;font-weight:600">${medal} ${r.banco}</span>
+          <span style="font-size:14px;font-weight:800;color:${color}">$ ${r.comision.toLocaleString('es-CO')}</span>
+        </div>
+        <div style="background:#f0f0f0;border-radius:10px;height:10px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${color};border-radius:10px;transition:width .4s"></div>
+        </div>
+        <div style="font-size:10px;color:#aaa;margin-top:2px">Tasa: $${r.tasa.toLocaleString('es-CO')} por millón</div>
+      </div>`;
+  }).join('');
+}
+
+function agregarSimulacion(){
+  const monto = parseFloat($('simMonto').value) || 0;
+  const banco  = $('simBanco').value;
+  if(!monto || !banco){ toast('⚠️ Completa monto y banco antes de guardar'); return; }
+
+  const tasa     = TASAS_BANCOS[banco];
+  const comision = Math.round((monto * tasa) / 1000000);
+
+  simHistorial.unshift({ monto, banco, tasa, comision, fecha: today(), hora: new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}) });
+  renderHistorial();
+  toast('✅ Simulación guardada en historial');
+}
+
+function renderHistorial(){
+  const el = $('simHistorial');
+  const totalEl = $('simTotalHistorial');
+  if(!el) return;
+
+  if(!simHistorial.length){
+    el.innerHTML='<div style="text-align:center;color:#ccc;padding:1.5rem;font-size:13px">Las simulaciones guardadas aparecerán aquí</div>';
+    if(totalEl) totalEl.style.display='none';
+    return;
+  }
+
+  const totalComisiones = simHistorial.reduce((a,s)=>a+s.comision,0);
+  const totalMonto      = simHistorial.reduce((a,s)=>a+s.monto,0);
+
+  el.innerHTML = `<div class="tw"><table>
+    <thead><tr>
+      <th>#</th><th>Fecha / Hora</th><th>Banco</th><th>Monto desembolsado</th>
+      <th>Tasa</th><th>Comisión</th><th></th>
+    </tr></thead>
+    <tbody>
+      ${simHistorial.map((s,i)=>`
+        <tr>
+          <td style="color:#aaa;font-size:11px">${simHistorial.length-i}</td>
+          <td style="font-size:11px">${s.fecha} ${s.hora}</td>
+          <td style="font-size:12px;font-weight:600">${s.banco}</td>
+          <td style="font-size:12px;font-weight:600">$ ${s.monto.toLocaleString('es-CO')}</td>
+          <td style="font-size:11px;color:#888">$ ${s.tasa.toLocaleString('es-CO')} / M</td>
+          <td style="font-size:14px;font-weight:800;color:#CC0001">$ ${s.comision.toLocaleString('es-CO')}</td>
+          <td><button class="btn btns btnsm" onclick="simHistorial.splice(${i},1);renderHistorial()" style="color:#9b2020">✕</button></td>
+        </tr>`).join('')}
+    </tbody>
+  </table>`;
+
+  if(totalEl){
+    totalEl.style.display='block';
+    totalEl.innerHTML=`
+      💰 Total comisiones del historial: <strong>$ ${totalComisiones.toLocaleString('es-CO')}</strong>
+      &nbsp;·&nbsp; Monto total desembolsado: <strong>$ ${totalMonto.toLocaleString('es-CO')}</strong>
+      &nbsp;·&nbsp; ${simHistorial.length} simulación${simHistorial.length!==1?'es':''}`;
+  }
+}
+
+function limpiarHistorial(){
+  if(!simHistorial.length){ toast('⚠️ El historial ya está vacío'); return; }
+  if(!confirm('¿Limpiar todo el historial de simulaciones?')) return;
+  simHistorial=[];
+  renderHistorial();
+  toast('🗑️ Historial limpiado');
 }
 
 // ── USUARIOS ──
@@ -4477,6 +4715,7 @@ document.addEventListener('DOMContentLoaded', function() {
   $('nav-metas').addEventListener('click', ()=>showPage('metas'));
   $('nav-entregados').addEventListener('click', ()=>showPage('entregados'));
   $('nav-desistidos').addEventListener('click', ()=>showPage('desistidos'));
+  $('nav-simulador').addEventListener('click', ()=>showPage('simulador'));
   $('nav-config').addEventListener('click', ()=>showPage('config'));
 
   // Ubicación
