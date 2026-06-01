@@ -1059,7 +1059,7 @@ tr:hover td{background:#fafafa}
             <button class="btn btnp btnsm" id="btnAddUsr" style="margin-left:auto">+ Nuevo usuario</button>
           </div>
           <div class="tw"><table>
-            <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Sede</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Sede</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody id="usrTb"></tbody>
           </table></div>
         </div>
@@ -1558,12 +1558,20 @@ function initFirebase(){
 
 // ── SEED DATA ──
 async function seedData(){
+  // Seed inventario and demos
   const snap=await db.collection('inventario').limit(1).get();
   if(snap.empty){
     const b=db.batch();
     INV0.forEach(v=>b.set(db.collection('inventario').doc(v.vin),v));
     DEMOS0.forEach(d=>b.set(db.collection('demos').doc(d.id),d));
     await b.commit();
+  }
+  // Seed base users to Firebase (only if not yet there)
+  const usersSnap=await db.collection('usuarios').limit(1).get();
+  if(usersSnap.empty){
+    const b2=db.batch();
+    USUARIOS.forEach(u=>b2.set(db.collection('usuarios').doc(u.id),u));
+    await b2.commit();
   }
 }
 
@@ -1584,11 +1592,30 @@ function startListeners(){
   unsubArr.push(db.collection('demos').onSnapshot(s=>{DEMOS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderDemos();renderCal();if(MAP_INIT&&document.getElementById('page-ubicacion').classList.contains('active'))renderMapa();}));
   unsubArr.push(db.collection('pruebas').orderBy('fecha').orderBy('hora').onSnapshot(s=>{PRUEBAS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderCal();}));
   unsubArr.push(db.collection('procesos').onSnapshot(s=>{PROCS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderEnts();}));
+  // Real-time users listener
+  unsubArr.push(db.collection('usuarios').onSnapshot(s=>{
+    if(!s.empty){
+      USERS.length=0;
+      s.docs.forEach(d=>USERS.push({...d.data(),id:d.id}));
+      if(document.getElementById('page-usuarios')&&document.getElementById('page-usuarios').classList.contains('active')) renderUsrs();
+    }
+  }));
   unsubArr.push(db.collection('leads').orderBy('createdAt','desc').onSnapshot(s=>{LEADS=s.docs.map(d=>{return{...d.data(),_id:d.id}});renderLeads();},err=>{
     // Fallback without orderBy if index not ready
     db.collection('leads').onSnapshot(s=>{LEADS=s.docs.map(d=>{return{...d.data(),_id:d.id}});LEADS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderLeads();});
   }));
   unsubArr.push(db.collection('seguimiento').onSnapshot(s=>{SEGS=s.docs.map(d=>{return{...d.data(),_id:d.id}});SEGS.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));renderSeg();renderInv();if($('segVin'))fillVinSelect();if(document.getElementById('page-entregados')&&document.getElementById('page-entregados').classList.contains('active'))renderEntregados();if(document.getElementById('page-desistidos')&&document.getElementById('page-desistidos').classList.contains('active'))renderDesistidos();if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();}));
+
+  // Listener usuarios en tiempo real
+  unsubArr.push(db.collection('usuarios').onSnapshot(snap=>{
+    if(!snap.empty){
+      USERS.length=0;
+      snap.docs.forEach(d=>USERS.push({...d.data(),id:d.id}));
+      if(document.getElementById('page-usuarios')&&document.getElementById('page-usuarios').classList.contains('active')){
+        renderUsrs();
+      }
+    }
+  }));
 
   // Listener metas en tiempo real
   unsubArr.push(db.collection('metas').onSnapshot(snap=>{
@@ -1619,11 +1646,26 @@ async function doLogin(){
   const email=$('lEmail').value.trim().toLowerCase();
   const pass=$('lPass').value;
   const err=$('lErr');err.style.display='none';
-  const u=USERS.find(x=>x.email.toLowerCase()===email&&x.pass===pass&&x.activo);
-  if(!u){err.textContent='⚠️ Correo o contraseña incorrectos';err.style.display='block';return;}
+  // Check local array first (fast)
+  let u=USERS.find(x=>x.email.toLowerCase()===email&&x.pass===pass&&x.activo);
   $('btnLogin').disabled=true;$('btnLogin').textContent='Conectando...';
   try{
     initFirebase();
+    // Always load fresh users from Firebase before checking auth
+    try{
+      const fbUsersSnap=await db.collection('usuarios').get();
+      if(!fbUsersSnap.empty){
+        USERS.length=0;
+        fbUsersSnap.docs.forEach(d=>USERS.push({...d.data(),id:d.id}));
+      }
+    }catch(eU){console.warn('FB users load:',eU);}
+    // Re-check with fresh user list from Firebase
+    u=USERS.find(x=>x.email.toLowerCase()===email&&x.pass===pass&&x.activo);
+    if(!u){
+      err.textContent='⚠️ Correo o contraseña incorrectos';err.style.display='block';
+      $('btnLogin').disabled=false;$('btnLogin').textContent='Ingresar';
+      return;
+    }
     await seedData();
 
     // ── Precargar TODOS los datos de configuración ──
@@ -2241,18 +2283,59 @@ function limpiarHistorial(){
 function renderUsrs(){
   $('usrTb').innerHTML=USERS.map((u,i)=>{
     const ini=u.nombre.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-    return `<tr><td><div style="display:flex;align-items:center;gap:9px"><div class="avt ${AVCLR[i%5]}">${ini}</div>${u.nombre}</div></td><td style="font-size:12px">${u.email}</td><td><span class="b bp">${rl(u.rol)}</span></td><td>${u.sede||'Todas'}</td><td><span class="b ${u.activo?'bg':'br'}">${u.activo?'Activo':'Inactivo'}</span></td><td>${u.id!==CU.id?`<button class="btn btnsm ${u.activo?'btnd':'btnok'}" onclick="togUsr('${u.id}')">${u.activo?'Desactivar':'Activar'}</button>`:'<span style="color:#ddd">Tú</span>'}</td></tr>`;
+    const esTu=u.id===CU.id;
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:9px">
+        <div class="avt ${AVCLR[i%5]}">${ini}</div>
+        <div><div style="font-size:12px;font-weight:600">${u.nombre}</div>
+        ${u.createdAt?`<div style="font-size:10px;color:#aaa">Creado: ${u.createdAt}</div>`:''}</div>
+      </div></td>
+      <td style="font-size:12px">${u.email}</td>
+      <td><span class="b bp">${rl(u.rol)}</span></td>
+      <td>${u.sede||'Todas'}</td>
+      <td><span class="b ${u.activo?'bg':'br'}">${u.activo?'Activo':'Inactivo'}</span></td>
+      <td style="white-space:nowrap;display:flex;flex-direction:column;gap:4px">
+        ${!esTu?`<button class="btn btnsm ${u.activo?'btnd':'btnok'}" onclick="togUsr('${u.id}')">${u.activo?'Desactivar':'Activar'}</button>`:''}
+        <button class="btn btnsm btns" onclick="resetPwd('${u.id}')">🔑 Cambiar clave</button>
+        ${esTu?'<span class="b bg" style="font-size:10px">Tú</span>':''}
+      </td>
+    </tr>`;
   }).join('');
 }
-function togUsr(id){const u=USERS.find(x=>x.id===id);u.activo=!u.activo;renderUsrs();toast(u.activo?'✅ Activado':'🚫 Desactivado');}
+
+async function resetPwd(id){
+  const u=USERS.find(x=>x.id===id);if(!u) return;
+  const nueva=prompt('Nueva contraseña para '+u.nombre+':');
+  if(!nueva||nueva.length<4){toast('⚠️ Mínimo 4 caracteres');return;}
+  try{
+    await db.collection('usuarios').doc(id).update({pass:nueva});
+    u.pass=nueva;
+    toast('✅ Contraseña actualizada para '+u.nombre);
+  }catch(err){toast('❌ Error: '+err.message);}
+}
+async function togUsr(id){
+  const u=USERS.find(x=>x.id===id);
+  if(!u) return;
+  u.activo=!u.activo;
+  try{
+    await db.collection('usuarios').doc(id).update({activo:u.activo});
+  }catch(e){console.warn('Error updating user:',e);}
+  renderUsrs();
+  toast(u.activo?'✅ Usuario activado':'🚫 Usuario desactivado');
+}
 function openAddUsr(){['uN','uE','uP'].forEach(i=>$(i).value='');$('uR').value='asesor';$('uSF').classList.add('hidden');om('mAddU');}
 function tglSede(){$('uSF').classList.toggle('hidden',$('uR').value!=='admin_sede');}
-function guardarUsr(){
+async function guardarUsr(){
   const n=$('uN').value.trim(),e=$('uE').value.trim(),pw=$('uP').value,r=$('uR').value,s=r==='admin_sede'?$('uS').value:'';
   if(!n||!e||!pw){toast('⚠️ Completa todos los campos');return;}
   if(USERS.find(u=>u.email.toLowerCase()===e.toLowerCase())){toast('⚠️ Correo ya existe');return;}
-  USERS.push({id:'u'+Date.now(),nombre:n,email:e,pass:pw,rol:r,sede:s,activo:true});
-  cm('mAddU');renderUsrs();toast('✅ Usuario creado');
+  const newUser={id:'u'+Date.now(),nombre:n,email:e,pass:pw,rol:r,sede:s,activo:true,createdAt:today()};
+  try{
+    await db.collection('usuarios').doc(newUser.id).set(newUser);
+    USERS.push(newUser);
+    cm('mAddU');renderUsrs();
+    toast('✅ Usuario creado y guardado en Firebase');
+  }catch(err){toast('❌ Error guardando usuario: '+err.message);}
 }
 
 // ── METAS ──
