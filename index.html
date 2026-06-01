@@ -121,6 +121,61 @@ tr:hover td{background:#fafafa}
 .sd{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:4px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
+/* ── EDIT MODE ── */
+.edit-mode-bar{display:none;background:linear-gradient(135deg,#0a0a0a,#1a1a1a);border-radius:10px;padding:.75rem 1.1rem;margin-bottom:1rem;align-items:center;gap:12px;border:2px solid #CC0001;flex-wrap:wrap}
+.edit-mode-bar.visible{display:flex}
+.edit-mode-label{font-size:12px;font-weight:700;color:#CC0001;letter-spacing:.5px;text-transform:uppercase}
+.edit-mode-hint{font-size:11px;color:rgba(255,255,255,.4)}
+
+.chart-card{position:relative;transition:box-shadow .2s}
+body.edit-mode .chart-card{cursor:default}
+body.edit-mode .chart-card:hover{box-shadow:0 0 0 2px #CC0001;border-radius:13px}
+body.edit-mode .chart-card:hover .card-edit-overlay{opacity:1;pointer-events:all}
+
+.card-edit-overlay{position:absolute;inset:0;border-radius:13px;background:rgba(10,10,10,0.0);display:flex;flex-direction:column;align-items:flex-end;padding:.5rem;gap:4px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+.card-edit-overlay::before{content:'';position:absolute;inset:0;background:rgba(204,0,1,0.04);border-radius:13px;border:2px dashed rgba(204,0,1,0.3)}
+
+.card-toolbar{display:flex;gap:4px;background:rgba(10,10,10,0.85);border-radius:8px;padding:4px;backdrop-filter:blur(4px);position:relative;z-index:11}
+.ct-btn{width:28px;height:28px;border-radius:6px;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(255,255,255,.1);transition:background .15s}
+.ct-btn:hover{background:rgba(255,255,255,.25)}
+.ct-btn.red:hover{background:#CC0001}
+.ct-btn.green:hover{background:#2d6011}
+
+/* ── INLINE CHART CONFIG PANEL ── */
+.chart-cfg-panel{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,10,10,.94);border-radius:13px;z-index:20;padding:1.1rem;overflow-y:auto;backdrop-filter:blur(6px)}
+.chart-cfg-panel.open{display:block}
+.cfg-panel-hdr{display:flex;align-items:center;gap:8px;margin-bottom:1rem;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:.75rem}
+.cfg-panel-title{font-size:13px;font-weight:700;color:#fff;flex:1}
+.cfg-panel-close{background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.cfg-panel-close:hover{background:#CC0001}
+.cfg-section{margin-bottom:1rem}
+.cfg-section-title{font-size:9px;font-weight:700;color:rgba(204,0,1,.9);text-transform:uppercase;letter-spacing:.8px;margin-bottom:.5rem}
+.cfg-chip-group{display:flex;flex-wrap:wrap;gap:5px}
+.cfg-chip{padding:4px 10px;border-radius:20px;border:1.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.55);font-size:11px;font-weight:600;cursor:pointer;background:transparent;transition:all .15s;white-space:nowrap}
+.cfg-chip:hover{border-color:#CC0001;color:#fff;background:rgba(204,0,1,.15)}
+.cfg-chip.active{background:#CC0001;border-color:#CC0001;color:#fff}
+.cfg-sep{height:1px;background:rgba(255,255,255,.08);margin:.75rem 0}
+.cfg-row-dark{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.75rem}
+.cfg-label-dark{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;font-weight:700}
+.cfg-select-dark{width:100%;padding:6px 9px;border:1.5px solid rgba(255,255,255,.15);border-radius:7px;font-size:11px;background:rgba(255,255,255,.07);color:#fff;outline:none;cursor:pointer}
+.cfg-select-dark:focus{border-color:#CC0001}
+.cfg-select-dark option{background:#1a1a1a;color:#fff}
+.cfg-apply-btn{width:100%;padding:9px;background:#CC0001;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-top:.5rem;transition:background .15s}
+.cfg-apply-btn:hover{background:#a30001}
+.cfg-preview-mini{background:rgba(255,255,255,.05);border-radius:8px;padding:.6rem;margin-bottom:.75rem;font-size:11px;color:rgba(255,255,255,.5);min-height:40px;display:flex;align-items:center;justify-content:center;font-style:italic}
+
+.card-size-bar{display:flex;gap:3px;background:rgba(10,10,10,0.85);border-radius:8px;padding:4px;position:relative;z-index:11}
+.cs-btn{padding:3px 8px;border-radius:5px;border:none;cursor:pointer;font-size:10px;font-weight:700;color:rgba(255,255,255,.5);background:none;transition:all .15s}
+.cs-btn:hover,.cs-btn.active{background:#CC0001;color:#fff}
+
+.card-label-badge{position:absolute;top:.5rem;left:.5rem;background:#CC0001;color:#fff;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;z-index:11;opacity:0;transition:opacity .2s;pointer-events:none}
+body.edit-mode .chart-card:hover .card-label-badge{opacity:1}
+
+.dash-section-edit{display:none;gap:6px;align-items:center;margin-left:auto}
+body.edit-mode .dash-section-edit{display:flex}
+.section-move-btn{width:24px;height:24px;border-radius:5px;border:1px solid rgba(204,0,1,.3);background:rgba(204,0,1,.05);cursor:pointer;font-size:12px;color:#CC0001;display:flex;align-items:center;justify-content:center}
+.section-move-btn:hover{background:#CC0001;color:#fff}
+
 /* ── UBICACIÓN ── */
 #mapContainer{height:460px;border-radius:12px;overflow:hidden;border:1px solid #e8e8e8;z-index:0}
 .leaflet-container{font-family:system-ui,sans-serif}
@@ -205,6 +260,50 @@ tr:hover td{background:#fafafa}
 .meta-input-wrap input{width:120px;padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;outline:none}
 .meta-input-wrap input:focus{border-color:#CC0001}
 .meta-input-wrap button{padding:7px 14px;background:#CC0001;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer}
+
+/* ── EDITOR DASHBOARD ── */
+.widget-grid{display:grid;gap:14px}
+.widget-card{background:#fff;border-radius:12px;border:2px solid #e8e8e8;overflow:hidden;transition:border-color .2s;position:relative}
+.widget-card.active{border-color:#CC0001}
+.widget-card.size-full{grid-column:1/-1}
+.widget-card.size-half{grid-column:span 1}
+.widget-card.size-third{grid-column:span 1}
+.widget-hdr{padding:.7rem 1rem;background:#fafafa;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:8px;cursor:grab}
+.widget-hdr:active{cursor:grabbing}
+.widget-icon{font-size:16px}
+.widget-name{font-size:12px;font-weight:700;color:#333;flex:1}
+.widget-badge{font-size:10px;background:#eaf3de;color:#2d6011;border-radius:20px;padding:2px 8px;font-weight:600}
+.widget-badge.off{background:#f1efe8;color:#aaa}
+.widget-controls{display:flex;gap:4px}
+.wbtn{background:none;border:1px solid #ddd;border-radius:5px;width:26px;height:26px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:#666}
+.wbtn:hover{background:#f0f0f0;border-color:#ccc}
+.wbtn.danger{border-color:#f0c0c0;color:#9b2020}
+.wbtn.danger:hover{background:#fcebeb}
+.wbtn.primary{background:#CC0001;border-color:#CC0001;color:#fff}
+.wbtn.primary:hover{background:#a30001}
+.widget-preview{padding:1rem;min-height:80px}
+.widget-config{padding:1rem;background:#fefefe;border-top:1px solid #f0f0f0;display:none}
+.widget-config.open{display:block}
+.cfg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.cfg-label{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.cfg-select,.cfg-input{width:100%;padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none}
+.cfg-select:focus,.cfg-input:focus{border-color:#CC0001}
+.size-tabs{display:flex;gap:4px}
+.size-tab{padding:5px 12px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:11px;cursor:pointer;background:#fff;font-weight:600}
+.size-tab.active{background:#CC0001;border-color:#CC0001;color:#fff}
+.drag-over{border-color:#CC0001;background:#fff9f9}
+.editor-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+.editor-cols{display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start}
+.widget-palette{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:1rem;position:sticky;top:70px}
+.palette-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:8px;cursor:grab;margin-bottom:6px;background:#fff;font-size:12px;font-weight:600;transition:all .15s}
+.palette-item:hover{border-color:#CC0001;background:#fff5f5}
+.palette-item:active{cursor:grabbing;opacity:.7}
+.canvas-area{background:#f2f2ee;border-radius:12px;min-height:400px;padding:1rem;border:2px dashed #ddd;transition:border-color .2s}
+.canvas-area.drag-active{border-color:#CC0001;background:#fff9f9}
+.preview-mini{height:60px;background:#f8f8f8;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:11px;margin-top:.5rem}
+.col-span-selector{display:flex;gap:4px;margin-top:.5rem}
+.col-span-btn{flex:1;padding:4px 0;border:1px solid #e0e0e0;border-radius:5px;font-size:10px;cursor:pointer;text-align:center;background:#fff;font-weight:600}
+.col-span-btn.active{background:#CC0001;color:#fff;border-color:#CC0001}
 
 /* METAS */
 .meta-input{width:80px;padding:6px 8px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;font-weight:600;outline:none;text-align:center}
@@ -298,6 +397,7 @@ tr:hover td{background:#fafafa}
       <div class="ni" id="nav-desistidos"><span>❌</span>Desistidos</div>
       <div class="ns">Administración</div>
       <div class="ni hidden" id="nav-config"><span>⚙️</span>Configuración</div>
+      <div class="ni hidden" id="nav-editor"><span>🎛️</span>Editor Dashboard</div>
       <div class="ni hidden" id="nav-simulador"><span>💰</span>Simulador comisiones</div>
       <div class="ni hidden" id="nav-usuarios"><span>👥</span>Usuarios</div>
     </div>
@@ -457,8 +557,30 @@ tr:hover td{background:#fafafa}
       </div>
 
       <div class="pg" id="page-dashboard">
-        <div class="pt">Dashboard comercial</div>
-        <div class="ps" id="dashSubtitle">Desempeño del equipo — actualizado en tiempo real</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.5rem">
+          <div>
+            <div class="pt">Dashboard comercial</div>
+            <div class="ps" id="dashSubtitle">Desempeño del equipo — actualizado en tiempo real</div>
+          </div>
+          <div id="editDashBtn" style="display:none">
+            <button onclick="toggleEditMode()" id="btnEditMode"
+              style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:#0a0a0a;color:#fff;border:2px solid #333;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s"
+              onmouseover="this.style.borderColor='#CC0001'" onmouseout="this.style.borderColor=document.body.classList.contains('edit-mode')?'#CC0001':'#333'">
+              <span id="editModeIcon">✏️</span>
+              <span id="editModeText">Editar dashboard</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- EDIT MODE BAR -->
+        <div class="edit-mode-bar" id="editModeBar">
+          <span class="edit-mode-label">✏️ Modo edición activo</span>
+          <span class="edit-mode-hint">Pasa el cursor sobre cualquier gráfica para ver sus controles</span>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn btns btnsm" onclick="guardarLayoutInline()">💾 Guardar cambios</button>
+            <button class="btn btnd btnsm" onclick="toggleEditMode()">✕ Salir del modo edición</button>
+          </div>
+        </div>
 
         <!-- FILTROS -->
         <div class="dash-filters">
@@ -523,7 +645,12 @@ tr:hover td{background:#fafafa}
           <div class="chart-card">
             <div class="chart-title">📅 Forecast y proyección del mes</div>
             <div class="forecast-grid" id="forecastGrid"></div>
-            <div style="font-size:11px;color:#aaa;margin-top:.5rem;border-top:1px solid #f0f0f0;padding-top:.75rem" id="forecastNote"></div>
+            <!-- ANÁLISIS HISTÓRICO FORECAST -->
+            <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid #f0f0f0">
+              <div style="font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.6rem">Análisis histórico de facturación</div>
+              <div id="forecastHistorico" style="display:flex;flex-direction:column;gap:5px"></div>
+            </div>
+            <div style="font-size:11px;color:#aaa;margin-top:.5rem;border-top:1px solid #f0f0f0;padding-top:.6rem" id="forecastNote"></div>
           </div>
         </div>
 
@@ -543,20 +670,20 @@ tr:hover td{background:#fafafa}
         <div class="dash-section">👤 Rendimiento por asesor</div>
         <div class="chart-grid">
           <div class="chart-card full">
-            <div class="chart-title">🏆 Ranking de asesores — Unidades facturadas</div>
+            <div class="chart-title">🏆 Ranking de asesores — Unidades facturadas <span style="font-size:10px;color:#aaa;font-weight:400">(prospectos, pruebas, sep, fact, mat = mes | calientes = acumulado)</span></div>
             <table class="rank-table" id="rankingTable">
-              <thead><tr><th>#</th><th>Asesor</th><th>Vitrina</th><th>Prospectos</th><th>Separados</th><th>Facturados</th><th>Matriculados</th><th>Conv. %</th><th>Progreso</th></tr></thead>
+              <thead><tr><th>#</th><th>Asesor</th><th>Vitrina</th><th>🔥 Calientes</th><th>Prospectos</th><th>🚗 Pruebas</th><th>🔒 Separados</th><th>📄 Facturados</th><th>✅ Matriculados</th><th>Conv. %</th><th>Progreso</th></tr></thead>
               <tbody id="rankingBody"></tbody>
             </table>
           </div>
         </div>
         <div class="chart-grid">
           <div class="chart-card">
-            <div class="chart-title">📊 Facturación por asesor</div>
+            <div class="chart-title">📊 Facturados y Matriculados por asesor — <span style="font-size:10px;color:#aaa;font-weight:400">${mesLabel}</span></div>
             <div class="chart-wrap"><canvas id="asesorChart"></canvas></div>
           </div>
           <div class="chart-card">
-            <div class="chart-title">🔥 Prospectos calientes por asesor</div>
+            <div class="chart-title">🔒 Separados por asesor — <span style="font-size:10px;color:#aaa;font-weight:400">${mesLabel} · incluye acumulado calientes</span></div>
             <div class="chart-wrap"><canvas id="calientesChart"></canvas></div>
           </div>
         </div>
@@ -565,30 +692,52 @@ tr:hover td{background:#fafafa}
         <div class="dash-section">🚗 Rendimiento por vehículo</div>
         <div class="chart-grid">
           <div class="chart-card">
-            <div class="chart-title">📊 Demanda por modelo</div>
+            <div class="chart-title">🏆 Facturados y Matriculados por modelo — <span style="font-size:10px;color:#aaa;font-weight:400">mes seleccionado</span></div>
             <div class="chart-wrap"><canvas id="vehiculoChart"></canvas></div>
           </div>
           <div class="chart-card">
-            <div class="chart-title">🎨 Mix de colores solicitados</div>
-            <div class="chart-wrap"><canvas id="colorChart"></canvas></div>
+            <div class="chart-title">🔒 Separados por modelo — <span style="font-size:10px;color:#aaa;font-weight:400">mes seleccionado</span></div>
+            <div class="chart-wrap"><canvas id="separadosModeloChart"></canvas></div>
+          </div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">🎨 Mix de colores — <span style="font-size:10px;color:#aaa;font-weight:400">facturados y matriculados</span></div>
+            <div class="chart-wrap-sm"><canvas id="colorChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">💳 Forma de pago — <span style="font-size:10px;color:#aaa;font-weight:400">facturados y matriculados</span></div>
+            <div class="chart-wrap-sm"><canvas id="pagoChart"></canvas></div>
           </div>
         </div>
 
         <!-- POR VITRINA -->
         <div class="dash-section">🏪 Rendimiento por vitrina</div>
         <div class="chart-grid">
-          <div class="chart-card">
-            <div class="chart-title">🏪 Facturación por vitrina</div>
+          <div class="chart-card full">
+            <div class="chart-title">🏪 Facturación por vitrina — <span style="font-size:10px;color:#aaa;font-weight:400">mes seleccionado</span></div>
             <div class="chart-wrap-sm"><canvas id="vitrinaChart"></canvas></div>
           </div>
-          <div class="chart-card">
-            <div class="chart-title">💳 Forma de pago más usada</div>
-            <div class="chart-wrap-sm"><canvas id="pagoChart"></canvas></div>
+        </div>
+
+        <!-- HISTORIAL ANUAL -->
+        <div class="dash-section">📅 Comportamiento histórico anual
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+            <select id="dashFiltAnio" onchange="renderDashboard()" style="padding:5px 10px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none">
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card full">
+            <div class="chart-title">📊 Facturación acumulada enero–diciembre — unidades facturadas vs meta por mes</div>
+            <div class="chart-wrap" style="height:280px"><canvas id="historialAnualChart"></canvas></div>
           </div>
         </div>
 
         <!-- POR MES -->
-        <div class="dash-section">📅 Tendencia mensual</div>
+        <div class="dash-section">📈 Tendencia mensual</div>
         <div class="chart-grid">
           <div class="chart-card full">
             <div class="chart-title">📈 Evolución mensual — Prospectos → Separados → Facturados → Matriculados</div>
@@ -941,6 +1090,51 @@ tr:hover td{background:#fafafa}
 
       </div>
 
+      <div class="pg" id="page-editor">
+        <div class="pt">🎛️ Editor del Dashboard</div>
+        <div class="ps">Personaliza qué gráficas ver, su tamaño y las variables que cruzan — exclusivo para gerencia</div>
+
+        <div class="editor-toolbar">
+          <button class="btn btnp" onclick="guardarLayoutDash()">💾 Guardar configuración</button>
+          <button class="btn btns" onclick="resetLayoutDash()">↩️ Restaurar por defecto</button>
+          <button class="btn btns" onclick="previewDash()">👁️ Ver Dashboard</button>
+          <span style="font-size:12px;color:#aaa;margin-left:auto" id="editorStatus">Los cambios se guardan en Firebase</span>
+        </div>
+
+        <div class="editor-cols">
+          <!-- PALETA DE WIDGETS -->
+          <div class="widget-palette">
+            <div style="font-size:12px;font-weight:700;color:#333;margin-bottom:.75rem">📦 Widgets disponibles</div>
+            <div style="font-size:11px;color:#aaa;margin-bottom:.75rem">Arrastra al área de diseño →</div>
+            <div id="widgetPalette"></div>
+          </div>
+
+          <!-- ÁREA DE DISEÑO -->
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+              <div style="font-size:12px;font-weight:700;color:#333">🖼️ Tu dashboard personalizado</div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <label style="font-size:11px;color:#888">Columnas:</label>
+                <select id="dashCols" onchange="updateCanvasCols()" style="padding:5px 8px;border:1px solid #ddd;border-radius:5px;font-size:11px">
+                  <option value="1">1 columna</option>
+                  <option value="2" selected>2 columnas</option>
+                  <option value="3">3 columnas</option>
+                </select>
+              </div>
+            </div>
+            <div class="canvas-area" id="dashCanvas"
+              ondragover="onCanvasDragOver(event)"
+              ondrop="onCanvasDrop(event)"
+              ondragleave="onCanvasDragLeave(event)">
+              <div id="canvasWidgets"></div>
+              <div id="canvasEmpty" style="text-align:center;color:#ccc;padding:3rem;font-size:13px">
+                📦 Arrastra widgets desde la paleta para empezar
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="pg" id="page-simulador">
         <div class="pt">💰 Simulador de comisiones</div>
         <div class="ps">Cálculo de comisiones por desembolso bancario — uso exclusivo gerencia</div>
@@ -1124,7 +1318,14 @@ tr:hover td{background:#fafafa}
   <div class="mt">👤 Nuevo usuario</div>
   <div class="fr"><div class="ff"><label>Nombre</label><input type="text" id="uN"></div><div class="ff"><label>Correo</label><input type="email" id="uE"></div></div>
   <div class="fr"><div class="ff"><label>Contraseña</label><input type="password" id="uP"></div><div class="ff"><label>Rol</label><select id="uR"><option value="gerente">Gerente</option><option value="admin_sede">Asistente Comercial</option><option value="asesor">Asesor</option></select></div></div>
-  <div class="ff hidden" id="uSF"><label>Sede</label><select id="uS"><option>Ciudad Jardín</option><option>Avenida 3ra Norte</option></select></div>
+  <div class="ff" id="uSF">
+    <label>Vitrina / Sede</label>
+    <select id="uS">
+      <option value="">Selecciona la vitrina...</option>
+      <option>Ciudad Jardín</option>
+      <option>Avenida 3ra Norte</option>
+    </select>
+  </div>
   <div class="mf"><button class="btn btns" id="btnCancelAddU">Cancelar</button><button class="btn btnp" id="btnSaveUsr">Crear usuario</button></div>
 </div></div>
 
@@ -1719,6 +1920,8 @@ function doLogout(){
 // ── NAV ──
 function setupNav(){
   $('nav-usuarios').classList.toggle('hidden',!isGer());
+  $('nav-editor').classList.toggle('hidden',!isGer());
+  if($('editDashBtn')) $('editDashBtn').style.display=isGer()?'block':'none';
   $('nav-simulador').classList.toggle('hidden',!isGer());
   $('nav-metas').classList.toggle('hidden',!isGer());
   $('nav-config').classList.toggle('hidden',!isGer());
@@ -1737,7 +1940,12 @@ function showPage(p){
   if(p==='demos') renderDemos();
   if(p==='cronograma') renderCal();
   if(p==='entregas') renderEnts();
-  if(p==='dashboard'){renderDashboard();}
+  if(p==='dashboard'){
+    // Auto-set current month
+    const selM=$('dashFiltMes');
+    if(selM&&!selM.value) selM.value=getMesActual();
+    renderDashboard();
+  }
   if(p==='metas'){
     // Auto-select current month always
     const hoy=new Date();
@@ -1762,6 +1970,10 @@ function showPage(p){
   }
   if(p==='leads') renderLeads();
   if(p==='seguimiento') renderSeg();
+  if(p==='editor'){
+    if(Object.keys(DASH_LAYOUT.widgets||{}).length===0) cargarLayoutDash().then(()=>renderEditor());
+    else renderEditor();
+  }
   if(p==='simulador'){ /* page renders on demand */ }
   if(p==='usuarios') renderUsrs();
 }
@@ -2155,6 +2367,280 @@ async function confirmarEnt(){
 }
 
 // ══════════════════════════════════════════
+// EDITOR DE DASHBOARD
+// ══════════════════════════════════════════
+
+// Widget catalog — all available dashboard widgets
+const WIDGET_CATALOG = [
+  {id:'kpis',        icon:'📊', nombre:'KPIs principales',          desc:'Tarjetas de métricas clave',            cat:'resumen', defaultSize:3},
+  {id:'gauge',       icon:'🎯', nombre:'Velocímetro cumplimiento',  desc:'% de meta alcanzada',                   cat:'resumen', defaultSize:2},
+  {id:'forecast',    icon:'📅', nombre:'Forecast del mes',          desc:'Proyección + histórico',                cat:'resumen', defaultSize:2},
+  {id:'funnel',      icon:'🔽', nombre:'Embudo de conversión',      desc:'Etapas del proceso comercial',          cat:'análisis',defaultSize:2},
+  {id:'pipeline',    icon:'🥧', nombre:'Estado del pipeline',       desc:'Distribución por estado',               cat:'análisis',defaultSize:2},
+  {id:'ranking',     icon:'🏆', nombre:'Ranking asesores',          desc:'Tabla de rendimiento por asesor',       cat:'asesores',defaultSize:3},
+  {id:'asesorChart', icon:'📊', nombre:'Facturación por asesor',    desc:'Barras fact+mat por asesor',            cat:'asesores',defaultSize:2},
+  {id:'calientesChart',icon:'🔒',nombre:'Separados y calientes',    desc:'Pipeline activo por asesor',            cat:'asesores',defaultSize:2},
+  {id:'vehiculoChart',icon:'🚗',nombre:'Fact/Mat por modelo',       desc:'Rendimiento por línea de vehículo',     cat:'vehículo',defaultSize:2},
+  {id:'separadosModelo',icon:'🔒',nombre:'Separados por modelo',    desc:'Separaciones del mes por modelo',       cat:'vehículo',defaultSize:2},
+  {id:'colorChart',  icon:'🎨', nombre:'Mix de colores',            desc:'Colores más facturados',                cat:'vehículo',defaultSize:2},
+  {id:'pagoChart',   icon:'💳', nombre:'Formas de pago',            desc:'Distribución de financiación',          cat:'vehículo',defaultSize:2},
+  {id:'vitrinaChart',icon:'🏪', nombre:'Por vitrina',               desc:'Facturados por sede/vitrina',           cat:'vitrina', defaultSize:2},
+  {id:'tendenciaChart',icon:'📈',nombre:'Tendencia mensual',        desc:'Evolución enero-diciembre',             cat:'tendencia',defaultSize:3},
+  {id:'historialAnualChart',icon:'📊',nombre:'Historial anual',     desc:'Barras+línea ene-dic vs meta',          cat:'tendencia',defaultSize:3},
+  {id:'desistChart', icon:'❌', nombre:'Motivos desistimiento',      desc:'Por qué pierden clientes',              cat:'análisis',defaultSize:2},
+  {id:'tempChart',   icon:'🌡️', nombre:'Temperatura del pipeline',  desc:'Calor del embudo',                      cat:'análisis',defaultSize:2},
+  {id:'cosechasChart',icon:'🌾',nombre:'Gráfica de cosechas',       desc:'Tiempo de cierre por cohorte',          cat:'tendencia',defaultSize:3},
+  {id:'tiempoCierreChart',icon:'⏱️',nombre:'Tiempo de cierre',      desc:'Días promedio por asesor',              cat:'asesores',defaultSize:2},
+  {id:'mixFacturasGrid',icon:'📋',nombre:'Mix facturas mes',        desc:'Origen de matrículas vigentes',         cat:'análisis',defaultSize:2},
+];
+
+// Layout state
+let DASH_LAYOUT = {
+  cols: 2,
+  widgets: [] // {id, catalogId, size(1|2|3), config:{xVar,yVar,filter}}
+};
+let DRAGGING_CATALOG_ID = null;
+let DRAGGING_WIDGET_IDX = null;
+
+const CAT_COLORS = {
+  resumen:'#CC0001',análisis:'#1457a0',asesores:'#2d6011',
+  vehículo:'#7a4a0a',vitrina:'#3a2e8f',tendencia:'#0d6048'
+};
+
+async function cargarLayoutDash(){
+  if(!db) return;
+  try{
+    const snap=await db.collection('config').doc('dash_layout').get();
+    if(snap.exists&&snap.data().widgets){
+      DASH_LAYOUT={...DASH_LAYOUT,...snap.data()};
+    } else {
+      // Default layout
+      DASH_LAYOUT.widgets=['kpis','gauge','forecast','funnel','pipeline','ranking','asesorChart','calientesChart','vehiculoChart','separadosModelo','colorChart','pagoChart','vitrinaChart','tendenciaChart','desistChart','tempChart'].map((id,i)=>({
+        id:'w'+i,catalogId:id,size:WIDGET_CATALOG.find(w=>w.id===id)?.defaultSize||2,config:{}
+      }));
+    }
+  }catch(e){console.warn('Layout load error:',e);}
+}
+
+async function guardarLayoutDash(){
+  if(!db){toast('⚠️ Sin conexión');return;}
+  try{
+    await db.collection('config').doc('dash_layout').set({...DASH_LAYOUT,updatedAt:today(),updatedBy:CU?CU.nombre:''});
+    $('editorStatus').textContent='✅ Guardado — '+today();
+    toast('✅ Configuración del dashboard guardada');
+  }catch(e){toast('❌ Error guardando: '+e.message);}
+}
+
+function resetLayoutDash(){
+  if(!confirm('¿Restaurar el dashboard por defecto? Se perderá tu configuración actual.')) return;
+  DASH_LAYOUT.cols=2;
+  DASH_LAYOUT.widgets=['kpis','gauge','forecast','funnel','pipeline','ranking','asesorChart','calientesChart','vehiculoChart','separadosModelo','colorChart','pagoChart','vitrinaChart','tendenciaChart','desistChart','tempChart'].map((id,i)=>({
+    id:'w'+i,catalogId:id,size:WIDGET_CATALOG.find(w=>w.id===id)?.defaultSize||2,config:{}
+  }));
+  renderEditor();
+  toast('↩️ Layout restaurado');
+}
+
+function previewDash(){
+  showPage('dashboard');
+}
+
+function updateCanvasCols(){
+  const cols=parseInt($('dashCols').value)||2;
+  DASH_LAYOUT.cols=cols;
+  const canvas=$('canvasWidgets');
+  if(canvas) canvas.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+}
+
+function renderEditor(){
+  if(!$('widgetPalette')) return;
+
+  // Fill palette grouped by category
+  const cats=[...new Set(WIDGET_CATALOG.map(w=>w.cat))];
+  $('widgetPalette').innerHTML=cats.map(cat=>{
+    const items=WIDGET_CATALOG.filter(w=>w.cat===cat);
+    const color=CAT_COLORS[cat]||'#888';
+    return `<div style="margin-bottom:.75rem">
+      <div style="font-size:9px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">${cat}</div>
+      ${items.map(w=>`
+        <div class="palette-item" draggable="true"
+          ondragstart="onPaletteDragStart(event,'${w.id}')"
+          onclick="addWidgetFromPalette('${w.id}')">
+          <span style="font-size:14px">${w.icon}</span>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700">${w.nombre}</div>
+            <div style="font-size:10px;color:#aaa">${w.desc}</div>
+          </div>
+          <span style="font-size:10px;color:${color};font-weight:700;background:${color}22;padding:2px 6px;border-radius:10px">${w.defaultSize===3?'Full':w.defaultSize===2?'½':'⅓'}</span>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+
+  // Render canvas
+  renderCanvas();
+}
+
+function renderCanvas(){
+  const cw=$('canvasWidgets');
+  const ce=$('canvasEmpty');
+  if(!cw) return;
+  const cols=DASH_LAYOUT.cols||2;
+  cw.style.cssText=`display:grid;grid-template-columns:repeat(${cols},1fr);gap:12px`;
+  if($('dashCols')) $('dashCols').value=String(cols);
+
+  if(!DASH_LAYOUT.widgets||!DASH_LAYOUT.widgets.length){
+    cw.innerHTML='';
+    if(ce) ce.style.display='block';
+    return;
+  }
+  if(ce) ce.style.display='none';
+
+  cw.innerHTML=DASH_LAYOUT.widgets.map((w,i)=>{
+    const cat=WIDGET_CATALOG.find(x=>x.id===w.catalogId);
+    if(!cat) return '';
+    const color=CAT_COLORS[cat.cat]||'#888';
+    const sizeLabel=w.size===3?'Ancho completo':w.size===2?'Medio':'Tercio';
+    const colSpan=w.size>=3?cols:w.size===2?Math.min(2,cols):1;
+    return `<div class="widget-card" id="wcard_${i}" style="grid-column:span ${Math.min(colSpan,cols)}"
+      draggable="true" ondragstart="onWidgetDragStart(event,${i})" ondragover="onWidgetDragOver(event,${i})" ondrop="onWidgetDropReorder(event,${i})">
+      <div class="widget-hdr">
+        <span class="widget-icon">${cat.icon}</span>
+        <span class="widget-name">${cat.nombre}</span>
+        <span class="widget-badge" style="background:${color}22;color:${color}">${sizeLabel}</span>
+        <div class="widget-controls">
+          <button class="wbtn" onclick="moveWidget(${i},-1)" title="Subir">↑</button>
+          <button class="wbtn" onclick="moveWidget(${i},1)" title="Bajar">↓</button>
+          <button class="wbtn" onclick="toggleWidgetConfig(${i})" title="Configurar">⚙️</button>
+          <button class="wbtn danger" onclick="removeWidget(${i})" title="Eliminar">✕</button>
+        </div>
+      </div>
+      <div class="widget-preview">
+        <div style="font-size:11px;color:#888;margin-bottom:.5rem">${cat.desc}</div>
+        <div class="col-span-selector">
+          ${[['1','⅓'],[String(Math.min(2,cols)),'½'],['3','Full']].filter(([v])=>cols===1?(v==='1'):(cols===2?(v!=='3'):(true))).map(([v,lbl])=>`
+            <div class="col-span-btn ${String(w.size)===v?'active':''}"
+              onclick="setWidgetSize(${i},${v})">${lbl}</div>`).join('')}
+          ${cols>=2?`<div class="col-span-btn ${w.size===cols?'active':''}" onclick="setWidgetSize(${i},${cols})">Full</div>`:''}
+        </div>
+      </div>
+      <div class="widget-config" id="wcfg_${i}">
+        <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.3px">⚙️ Configuración del widget</div>
+        <div class="cfg-row">
+          <div>
+            <div class="cfg-label">Eje X / Variable principal</div>
+            <select class="cfg-select" onchange="setWidgetConfig(${i},'xVar',this.value)">
+              ${getVarOptions(w.config?.xVar)}
+            </select>
+          </div>
+          <div>
+            <div class="cfg-label">Eje Y / Métrica</div>
+            <select class="cfg-select" onchange="setWidgetConfig(${i},'yVar',this.value)">
+              ${getMetricOptions(w.config?.yVar)}
+            </select>
+          </div>
+        </div>
+        <div>
+          <div class="cfg-label">Filtro adicional</div>
+          <select class="cfg-select" onchange="setWidgetConfig(${i},'filter',this.value)">
+            ${getFilterOptions(w.config?.filter)}
+          </select>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getVarOptions(current){
+  const opts=[
+    ['','(Por defecto)'],['asesor','Por asesor'],['modelo','Por modelo'],
+    ['vitrina','Por vitrina'],['mes','Por mes'],['color','Por color'],
+    ['pago','Por forma de pago'],['entidad','Por entidad'],['fuente','Por fuente'],
+    ['temperatura','Por temperatura']
+  ];
+  return opts.map(([v,l])=>`<option value="${v}" ${current===v?'selected':''}>${l}</option>`).join('');
+}
+
+function getMetricOptions(current){
+  const opts=[
+    ['','(Por defecto)'],['calientes','Calientes'],['separados','Separados'],
+    ['facturados','Facturados'],['matriculados','Matriculados'],
+    ['desistidos','Desistidos'],['testDrives','Test drives'],
+    ['prospectos','Prospectos'],['precio','Facturación $'],['conversion','Conversión %']
+  ];
+  return opts.map(([v,l])=>`<option value="${v}" ${current===v?'selected':''}>${l}</option>`).join('');
+}
+
+function getFilterOptions(current){
+  const opts=[
+    ['','Sin filtro adicional'],['soloMes','Solo mes seleccionado'],
+    ['acumulado','Acumulado (todos los meses)'],
+    ['calientes','Solo calientes'],['separados','Solo separados'],
+    ['facturados','Solo facturados'],['matriculados','Solo matriculados']
+  ];
+  return opts.map(([v,l])=>`<option value="${v}" ${current===v?'selected':''}>${l}</option>`).join('');
+}
+
+function addWidgetFromPalette(catalogId){
+  const cat=WIDGET_CATALOG.find(w=>w.id===catalogId);
+  if(!cat) return;
+  DASH_LAYOUT.widgets.push({id:'w'+Date.now(),catalogId,size:cat.defaultSize||2,config:{}});
+  renderCanvas();
+  toast('✅ Widget agregado: '+cat.nombre);
+}
+
+function removeWidget(i){
+  DASH_LAYOUT.widgets.splice(i,1);
+  renderCanvas();
+}
+
+function moveWidget(i,dir){
+  const arr=DASH_LAYOUT.widgets;
+  const j=i+dir;
+  if(j<0||j>=arr.length) return;
+  [arr[i],arr[j]]=[arr[j],arr[i]];
+  renderCanvas();
+}
+
+function setWidgetSize(i,size){
+  DASH_LAYOUT.widgets[i].size=parseInt(size);
+  renderCanvas();
+}
+
+function setWidgetConfig(i,key,val){
+  if(!DASH_LAYOUT.widgets[i].config) DASH_LAYOUT.widgets[i].config={};
+  DASH_LAYOUT.widgets[i].config[key]=val;
+}
+
+function toggleWidgetConfig(i){
+  const el=document.getElementById('wcfg_'+i);
+  if(el) el.classList.toggle('open');
+}
+
+// Drag & drop — palette to canvas
+function onPaletteDragStart(e,cid){DRAGGING_CATALOG_ID=cid;e.dataTransfer.effectAllowed='copy';}
+function onCanvasDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='copy';$('dashCanvas').classList.add('drag-active');}
+function onCanvasDragLeave(e){$('dashCanvas').classList.remove('drag-active');}
+function onCanvasDrop(e){
+  e.preventDefault();$('dashCanvas').classList.remove('drag-active');
+  if(DRAGGING_CATALOG_ID){addWidgetFromPalette(DRAGGING_CATALOG_ID);DRAGGING_CATALOG_ID=null;}
+}
+
+// Drag & drop — reorder within canvas
+function onWidgetDragStart(e,i){DRAGGING_WIDGET_IDX=i;e.dataTransfer.effectAllowed='move';}
+function onWidgetDragOver(e,i){e.preventDefault();e.dataTransfer.dropEffect='move';const el=document.getElementById('wcard_'+i);if(el)el.classList.add('drag-over');}
+function onWidgetDropReorder(e,i){
+  e.preventDefault();
+  document.querySelectorAll('.widget-card').forEach(el=>el.classList.remove('drag-over'));
+  if(DRAGGING_WIDGET_IDX!==null&&DRAGGING_WIDGET_IDX!==i){
+    const arr=DASH_LAYOUT.widgets;
+    const item=arr.splice(DRAGGING_WIDGET_IDX,1)[0];
+    arr.splice(i,0,item);
+    DRAGGING_WIDGET_IDX=null;
+    renderCanvas();
+  }
+}
+
+// ══════════════════════════════════════════
 // SIMULADOR DE COMISIONES
 // ══════════════════════════════════════════
 const TASAS_BANCOS = {
@@ -2323,11 +2809,46 @@ async function togUsr(id){
   renderUsrs();
   toast(u.activo?'✅ Usuario activado':'🚫 Usuario desactivado');
 }
-function openAddUsr(){['uN','uE','uP'].forEach(i=>$(i).value='');$('uR').value='asesor';$('uSF').classList.add('hidden');om('mAddU');}
-function tglSede(){$('uSF').classList.toggle('hidden',$('uR').value!=='admin_sede');}
+function openAddUsr(){
+  ['uN','uE','uP'].forEach(i=>$(i).value='');
+  $('uR').value='asesor';
+  // Populate sedes from config
+  const sel=$('uS');
+  if(sel){
+    const sedes=(LISTAS_DATA&&LISTAS_DATA.sedes&&LISTAS_DATA.sedes.length)
+      ? LISTAS_DATA.sedes
+      : ['Ciudad Jardín','Avenida 3ra Norte'];
+    sel.innerHTML='<option value="">Selecciona la vitrina...</option>'+
+      sedes.map(s=>`<option value="${s}">${s}</option>`).join('');
+    sel.value='';
+  }
+  tglSede();
+  om('mAddU');
+}
+function tglSede(){
+  // Sede visible for all roles — just mark it required for asesor/admin
+  const r=$('uR').value;
+  const label=$('uSF').querySelector('label');
+  if(label){
+    if(r==='gerente'){
+      label.textContent='Vitrina / Sede (opcional para gerente)';
+    } else {
+      label.textContent='Vitrina / Sede';
+    }
+  }
+  // Populate from config if available
+  const sel=$('uS');
+  if(sel&&LISTAS_DATA&&LISTAS_DATA.sedes&&LISTAS_DATA.sedes.length){
+    const prev=sel.value;
+    sel.innerHTML='<option value="">Selecciona la vitrina...</option>'+
+      LISTAS_DATA.sedes.map(s=>`<option value="${s}">${s}</option>`).join('');
+    if(prev) sel.value=prev;
+  }
+}
 async function guardarUsr(){
-  const n=$('uN').value.trim(),e=$('uE').value.trim(),pw=$('uP').value,r=$('uR').value,s=r==='admin_sede'?$('uS').value:'';
+  const n=$('uN').value.trim(),e=$('uE').value.trim(),pw=$('uP').value,r=$('uR').value,s=$('uS').value||'';
   if(!n||!e||!pw){toast('⚠️ Completa todos los campos');return;}
+  if(r!=='gerente'&&!s){toast('⚠️ Selecciona la vitrina del asesor');return;}
   if(USERS.find(u=>u.email.toLowerCase()===e.toLowerCase())){toast('⚠️ Correo ya existe');return;}
   const newUser={id:'u'+Date.now(),nombre:n,email:e,pass:pw,rol:r,sede:s,activo:true,createdAt:today()};
   try{
@@ -2508,6 +3029,571 @@ function renderMetasHist(){
 // ── DASHBOARD ──
 let dashCharts={};
 let metaUnidades=10;
+let EDIT_MODE=false;
+
+// INLINE LAYOUT STATE — tracks order and size of each chart-card
+let INLINE_LAYOUT=null;
+
+function toggleEditMode(){
+  EDIT_MODE=!EDIT_MODE;
+  document.body.classList.toggle('edit-mode',EDIT_MODE);
+  const bar=$('editModeBar');
+  const icon=$('editModeIcon');
+  const text=$('editModeText');
+  const btn=$('btnEditMode');
+  if(bar) bar.classList.toggle('visible',EDIT_MODE);
+  if(icon) icon.textContent=EDIT_MODE?'✅':'✏️';
+  if(text) text.textContent=EDIT_MODE?'Salir de edición':'Editar dashboard';
+  if(btn) btn.style.borderColor=EDIT_MODE?'#CC0001':'#333';
+  if(EDIT_MODE){
+    injectEditOverlays();
+    toast('✏️ Modo edición activado — pasa el cursor sobre las gráficas');
+  } else {
+    toast('Modo edición desactivado');
+  }
+}
+
+function injectEditOverlays(){
+  // Add overlays to all chart-cards in dashboard
+  const dashPage=document.getElementById('page-dashboard');
+  if(!dashPage) return;
+  const cards=dashPage.querySelectorAll('.chart-card');
+  cards.forEach((card,i)=>{
+    if(card.querySelector('.card-edit-overlay')) return; // already injected
+    const title=card.querySelector('.chart-title');
+    const titleText=title?title.textContent.trim().replace(/[⚙️✕↑↓]/g,'').trim():'Gráfica '+(i+1);
+
+    // Label badge
+    const badge=document.createElement('div');
+    badge.className='card-label-badge';
+    badge.textContent=titleText.substring(0,30);
+    card.appendChild(badge);
+
+    // Overlay
+    const overlay=document.createElement('div');
+    overlay.className='card-edit-overlay';
+    overlay.innerHTML=`
+      <div class="card-toolbar">
+        <button class="ct-btn" onclick="moveCardUp(this)" title="Subir">↑</button>
+        <button class="ct-btn" onclick="moveCardDown(this)" title="Bajar">↓</button>
+        <button class="ct-btn green" onclick="toggleCardFull(this)" title="Expandir/Contraer">⇔</button>
+        <button class="ct-btn" onclick="openChartConfig(this)" title="Configurar variables" style="background:rgba(255,200,0,.2)">⚙️</button>
+        <button class="ct-btn red" onclick="hideCard(this)" title="Ocultar">✕</button>
+      </div>
+      <div class="card-size-bar">
+        <button class="cs-btn" onclick="setCardCols(this,1)" title="Tercio">⅓</button>
+        <button class="cs-btn" onclick="setCardCols(this,2)" title="Medio">½</button>
+        <button class="cs-btn active" onclick="setCardCols(this,3)" title="Completo">⬛ Full</button>
+      </div>`;
+    card.appendChild(overlay);
+
+    // Update size buttons active state based on current colspan
+    const cs=window.getComputedStyle(card).gridColumn||'';
+    updateSizeBtns(overlay,cs);
+  });
+}
+
+function getCard(btn){return btn.closest('.chart-card');}
+function getGrid(btn){return btn.closest('.chart-grid,.chart-grid-3');}
+
+function moveCardUp(btn){
+  const card=getCard(btn);const grid=getGrid(btn);if(!grid) return;
+  const cards=[...grid.children];const i=cards.indexOf(card);
+  if(i>0){grid.insertBefore(card,cards[i-1]);}
+  else{
+    // Move to previous grid
+    const grids=[...card.closest('.pg').querySelectorAll('.chart-grid,.chart-grid-3')];
+    const gi=grids.indexOf(grid);
+    if(gi>0){grids[gi-1].appendChild(card);}
+  }
+}
+
+function moveCardDown(btn){
+  const card=getCard(btn);const grid=getGrid(btn);if(!grid) return;
+  const cards=[...grid.children];const i=cards.indexOf(card);
+  if(i<cards.length-1){grid.insertBefore(cards[i+1],card);}
+  else{
+    const grids=[...card.closest('.pg').querySelectorAll('.chart-grid,.chart-grid-3')];
+    const gi=grids.indexOf(grid);
+    if(gi<grids.length-1){grids[gi+1].prepend(card);}
+  }
+}
+
+function toggleCardFull(btn){
+  const card=getCard(btn);
+  const isFull=card.classList.contains('full');
+  card.classList.toggle('full',!isFull);
+  card.style.gridColumn=isFull?'':'1/-1';
+  btn.title=isFull?'Expandir':'Contraer';
+  btn.textContent=isFull?'⇔':'⇥';
+}
+
+function hideCard(btn){
+  const card=getCard(btn);
+  card.style.display='none';
+  toast('Gráfica ocultada — guarda para conservar el cambio');
+}
+
+function setCardCols(btn,cols){
+  const card=getCard(btn);
+  const overlay=btn.closest('.card-edit-overlay');
+  // col span: 1=third, 2=half, 3=full
+  if(cols===3){
+    card.style.gridColumn='1/-1';
+    card.classList.add('full');
+  } else if(cols===2){
+    card.style.gridColumn='span 2';
+    card.classList.remove('full');
+  } else {
+    card.style.gridColumn='span 1';
+    card.classList.remove('full');
+  }
+  updateSizeBtns(overlay,cols);
+  // Redraw chart inside to fit new size
+  setTimeout(()=>{
+    const canvas=card.querySelector('canvas');
+    if(canvas&&dashCharts[canvas.id]){dashCharts[canvas.id].resize();}
+  },150);
+}
+
+function updateSizeBtns(overlay,cols){
+  const btns=overlay.querySelectorAll('.cs-btn');
+  btns.forEach(b=>b.classList.remove('active'));
+  const idx=cols===3||cols==='1/-1'?2:cols===2||String(cols).includes('span 2')?1:0;
+  if(btns[idx]) btns[idx].classList.add('active');
+}
+
+// ══════════════════════════════════════════
+// CHART CONFIG — inline variable editor
+// ══════════════════════════════════════════
+
+// Per-chart config state persisted in Firebase
+let CHART_CONFIGS = {};
+
+// Chart definitions — what variables each chart can use
+const CHART_DEFS = {
+  gaugeChart:{
+    nombre:'Velocímetro',
+    metrica:{label:'Métrica principal',opts:[
+      ['facturados','📄 Facturados del mes'],['matriculados','✅ Matriculados del mes'],
+      ['separados_mes','🔒 Separados del mes'],['calientes','🔥 Calientes (acumulado)']
+    ]},
+  },
+  funnelChart:{
+    nombre:'Embudo de conversión',
+    etapas:{label:'Etapas visibles',multi:true,opts:[
+      ['cotizados','📋 Cotizados'],['prueba','🚗 Prueba de ruta'],
+      ['credito','✅ Crédito aprobado'],['separados','🔒 Separaciones'],
+      ['facturados','📄 Facturados'],['matriculados','✅ Matriculados']
+    ]},
+    fechaRef:{label:'Fecha de referencia',opts:[
+      ['propia','Fecha propia de cada etapa'],['mes','Creados en el mes']
+    ]},
+  },
+  pipelineChart:{
+    nombre:'Estado del pipeline',
+    estados:{label:'Estados visibles',multi:true,opts:[
+      ['Caliente','🔥 Caliente'],['Separado','🔒 Separado'],
+      ['Facturado','📄 Facturado'],['Matriculado','✅ Matriculado'],['Desistido','❌ Desistido']
+    ]},
+    alcance:{label:'Alcance temporal',opts:[
+      ['mixto','Calientes/Sep acumulado + Fact/Mat del mes'],
+      ['mes','Todo del mes seleccionado'],['acumulado','Todo acumulado']
+    ]},
+  },
+  asesorChart:{
+    nombre:'Facturación por asesor',
+    metricas:{label:'Métricas a mostrar',multi:true,opts:[
+      ['facturados','📄 Facturados'],['matriculados','✅ Matriculados'],
+      ['separados','🔒 Separados'],['calientes','🔥 Calientes']
+    ]},
+    alcance:{label:'Alcance temporal',opts:[
+      ['mes','Del mes seleccionado'],['acumulado','Acumulado todo el año']
+    ]},
+  },
+  calientesChart:{
+    nombre:'Separados y calientes por asesor',
+    metricas:{label:'Métricas',multi:true,opts:[
+      ['separados','🔒 Separados del mes'],['calientes','🔥 Calientes acumulado'],
+      ['pruebas','🚗 Pruebas del mes']
+    ]},
+  },
+  vehiculoChart:{
+    nombre:'Rendimiento por modelo',
+    metricas:{label:'Métricas',multi:true,opts:[
+      ['facturados','📄 Facturados'],['matriculados','✅ Matriculados'],['separados','🔒 Separados']
+    ]},
+    agrupacion:{label:'Agrupación',opts:[
+      ['modelo','Por modelo de vehículo'],['vitrina','Por vitrina'],['asesor','Por asesor']
+    ]},
+    alcance:{label:'Mes de referencia',opts:[
+      ['mes','Solo mes seleccionado'],['acumulado','Acumulado anual']
+    ]},
+  },
+  separadosModeloChart:{
+    nombre:'Separados por modelo',
+    agrupacion:{label:'Agrupar por',opts:[
+      ['modelo','Por modelo'],['vitrina','Por vitrina'],['asesor','Por asesor'],['color','Por color']
+    ]},
+    alcance:{label:'Alcance',opts:[
+      ['mes','Del mes'],['acumulado','Acumulado']
+    ]},
+  },
+  colorChart:{
+    nombre:'Mix de colores',
+    fuente:{label:'Qué registros incluir',opts:[
+      ['fact_mat','Facturados + Matriculados del mes'],
+      ['todos','Todos los estados del mes'],['separados','Separados del mes']
+    ]},
+  },
+  pagoChart:{
+    nombre:'Forma de pago',
+    fuente:{label:'Qué registros incluir',opts:[
+      ['fact_mat','Facturados + Matriculados del mes'],
+      ['todos','Todos del mes'],['separados','Solo separados']
+    ]},
+  },
+  vitrinaChart:{
+    nombre:'Por vitrina',
+    metrica:{label:'Métrica',opts:[
+      ['facturados','📄 Facturados'],['separados','🔒 Separados'],['calientes','🔥 Calientes']
+    ]},
+    alcance:{label:'Alcance',opts:[
+      ['mes','Del mes'],['acumulado','Acumulado']
+    ]},
+  },
+  tendenciaChart:{
+    nombre:'Tendencia mensual',
+    series:{label:'Series a mostrar',multi:true,opts:[
+      ['prosp','Prospectos creados'],['sep','Separados'],
+      ['fact','Facturados'],['mat','Matriculados'],['desist','Desistidos']
+    ]},
+    anio:{label:'Año',opts:[['2026','2026'],['2025','2025'],['ambos','2025 + 2026']]},
+  },
+  historialAnualChart:{
+    nombre:'Historial anual',
+    anio:{label:'Año base',opts:[['2026','2026'],['2025','2025']]},
+    series:{label:'Series',multi:true,opts:[
+      ['facMes','📄 Facturados mes'],['matMes','✅ Matriculados mes'],
+      ['metaMes','🎯 Meta mes'],['facAcum','📈 Acumulado fact.'],['metaAcum','📈 Acumulado meta']
+    ]},
+  },
+  desistChart:{
+    nombre:'Motivos desistimiento',
+    fuente:{label:'Alcance',opts:[
+      ['mes','Del mes seleccionado'],['acumulado','Todos']
+    ]},
+  },
+  tempChart:{
+    nombre:'Temperatura del pipeline',
+    estados:{label:'Estados incluidos',multi:true,opts:[
+      ['Caliente','🔥 Caliente'],['Separado','🔒 Separado']
+    ]},
+  },
+};
+
+function openChartConfig(btn){
+  const card=getCard(btn);
+  // Find canvas id
+  const canvas=card.querySelector('canvas');
+  const chartId=canvas?canvas.id:'';
+  const def=CHART_DEFS[chartId];
+
+  // Remove existing panel if any
+  const existing=card.querySelector('.chart-cfg-panel');
+  if(existing){existing.classList.toggle('open');return;}
+
+  const cfg=CHART_CONFIGS[chartId]||{};
+  const title=def?def.nombre:(card.querySelector('.chart-title')||{}).textContent||'Gráfica';
+
+  const panel=document.createElement('div');
+  panel.className='chart-cfg-panel open';
+  panel.dataset.chartId=chartId;
+
+  let fieldsHtml='';
+
+  if(!def){
+    fieldsHtml=`<div class="cfg-preview-mini">Esta gráfica no tiene opciones configurables aún</div>`;
+  } else {
+    Object.entries(def).forEach(([key,fieldDef])=>{
+      if(key==='nombre') return;
+      if(fieldDef.multi){
+        // Multi-select chips
+        const current=cfg[key]||(fieldDef.opts||[]).map(o=>o[0]);
+        fieldsHtml+=`<div class="cfg-section">
+          <div class="cfg-section-title">${fieldDef.label}</div>
+          <div class="cfg-chip-group">
+            ${fieldDef.opts.map(([val,lbl])=>`
+              <button class="cfg-chip ${current.includes(val)?'active':''}"
+                onclick="toggleChip(this,'${chartId}','${key}','${val}')">${lbl}</button>`).join('')}
+          </div>
+        </div>`;
+      } else {
+        // Single select
+        const current=cfg[key]||(fieldDef.opts[0]||[''])[0];
+        fieldsHtml+=`<div class="cfg-section">
+          <div class="cfg-section-title">${fieldDef.label}</div>
+          <div class="cfg-chip-group">
+            ${fieldDef.opts.map(([val,lbl])=>`
+              <button class="cfg-chip ${current===val?'active':''}"
+                onclick="selectChip(this,'${chartId}','${key}','${val}')">${lbl}</button>`).join('')}
+          </div>
+        </div>`;
+      }
+      fieldsHtml+=`<div class="cfg-sep"></div>`;
+    });
+  }
+
+  panel.innerHTML=`
+    <div class="cfg-panel-hdr">
+      <span style="font-size:16px">⚙️</span>
+      <span class="cfg-panel-title">${title}</span>
+      <button class="cfg-panel-close" onclick="closeChartConfig(this)">✕</button>
+    </div>
+    <div class="cfg-preview-mini" id="cfgPreview_${chartId}">
+      Modifica las opciones y presiona Aplicar
+    </div>
+    ${fieldsHtml}
+    <button class="cfg-apply-btn" onclick="applyChartConfig('${chartId}',this)">
+      ✅ Aplicar y actualizar gráfica
+    </button>
+    <button class="cfg-apply-btn" onclick="saveChartConfig('${chartId}')"
+      style="background:rgba(255,255,255,.1);margin-top:5px">
+      💾 Guardar configuración
+    </button>`;
+
+  card.appendChild(panel);
+}
+
+function closeChartConfig(btn){
+  const panel=btn.closest('.chart-cfg-panel');
+  if(panel) panel.classList.remove('open');
+}
+
+function toggleChip(btn,chartId,key,val){
+  btn.classList.toggle('active');
+  if(!CHART_CONFIGS[chartId]) CHART_CONFIGS[chartId]={};
+  const cfg=CHART_CONFIGS[chartId];
+  if(!cfg[key]) cfg[key]=[];
+  const i=cfg[key].indexOf(val);
+  if(i>=0) cfg[key].splice(i,1); else cfg[key].push(val);
+  updateConfigPreview(chartId);
+}
+
+function selectChip(btn,chartId,key,val){
+  // Deselect siblings
+  const group=btn.closest('.cfg-chip-group');
+  if(group) group.querySelectorAll('.cfg-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(!CHART_CONFIGS[chartId]) CHART_CONFIGS[chartId]={};
+  CHART_CONFIGS[chartId][key]=val;
+  updateConfigPreview(chartId);
+}
+
+function updateConfigPreview(chartId){
+  const prev=document.getElementById('cfgPreview_'+chartId);
+  if(!prev) return;
+  const cfg=CHART_CONFIGS[chartId]||{};
+  const entries=Object.entries(cfg).filter(([k])=>k!=='nombre');
+  if(!entries.length){prev.textContent='Sin configuración personalizada';return;}
+  prev.innerHTML=entries.map(([k,v])=>`<span style="color:rgba(255,255,255,.6)">${k}:</span> <strong style="color:#fff">${Array.isArray(v)?v.join(', '):v}</strong>`).join(' &nbsp;·&nbsp; ');
+}
+
+function applyChartConfig(chartId,btn){
+  const cfg=CHART_CONFIGS[chartId]||{};
+  // Re-render the specific chart with new config
+  applyConfigToChart(chartId,cfg);
+  toast('✅ Gráfica actualizada');
+  // Animate button
+  const orig=btn.textContent;btn.textContent='✅ Aplicado!';
+  setTimeout(()=>btn.textContent=orig,1500);
+}
+
+async function saveChartConfig(chartId){
+  if(!db){toast('⚠️ Sin conexión');return;}
+  try{
+    const allCfgs=CHART_CONFIGS;
+    await db.collection('config').doc('chart_configs').set({...allCfgs,updatedAt:today()},{merge:true});
+    toast('💾 Configuración guardada para '+chartId);
+  }catch(e){toast('❌ Error: '+e.message);}
+}
+
+async function cargarChartConfigs(){
+  if(!db) return;
+  try{
+    const snap=await db.collection('config').doc('chart_configs').get();
+    if(snap.exists){
+      const data=snap.data();
+      delete data.updatedAt;
+      CHART_CONFIGS={...data};
+    }
+  }catch(e){}
+}
+
+function applyConfigToChart(chartId,cfg){
+  // Apply config changes to the live chart
+  const fMes=getDashMes();
+  const enMes=(f)=>f&&f.startsWith(fMes);
+  let allSegs=filtrarSegs();
+
+  if(chartId==='vehiculoChart'){
+    const metricas=cfg.metricas||['facturados','matriculados'];
+    const alcance=cfg.alcance||'mes';
+    const agrupacion=cfg.agrupacion||'modelo';
+    const datasets=[];
+    const getKey=(s)=>agrupacion==='modelo'?s.vehiculo:agrupacion==='vitrina'?(USERS.find(u=>u.id===s.asesorId)||{}).sede||'—':(USERS.find(u=>u.id===s.asesorId)||{}).nombre||'—';
+    const inScope=(s,fecha)=>alcance==='acumulado'?!!fecha:enMes(fecha);
+    const colors=['#CC0001','#2d6011','#fac775','#1457a0'];
+    metricas.forEach((m,i)=>{
+      const cnt={};
+      const fecha=m==='facturados'?'fechaFact':m==='matriculados'?'fechaMat':'fechaSep';
+      allSegs.filter(s=>inScope(s,s[fecha])).forEach(s=>{const k=getKey(s);if(k)cnt[k]=(cnt[k]||0)+1;});
+      const sorted=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+      // Update labels and add dataset
+      if(dashCharts[chartId]){
+        dashCharts[chartId].data.labels=sorted.map(v=>v[0]);
+        datasets.push({label:m,data:sorted.map(v=>v[1]),backgroundColor:colors[i]||'#888',borderRadius:4});
+      }
+    });
+    if(dashCharts[chartId]){
+      dashCharts[chartId].data.datasets=datasets;
+      dashCharts[chartId].update();
+    }
+  }
+  else if(chartId==='asesorChart'){
+    const metricas=cfg.metricas||['facturados','matriculados'];
+    const alcance=cfg.alcance||'mes';
+    const asesoresList=USERS.filter(u=>u.rol==='asesor'&&u.activo);
+    const colors=['#CC0001','#2d6011','#fac775','rgba(255,107,53,0.7)'];
+    const labels=asesoresList.map(u=>u.nombre.split(' ').slice(0,2).join(' '));
+    const datasets=metricas.map((m,i)=>{
+      const fecha=m==='facturados'?'fechaFact':m==='matriculados'?'fechaMat':m==='separados'?'fechaSep':null;
+      const data=asesoresList.map(u=>{
+        if(m==='calientes') return allSegs.filter(s=>s.asesorId===u.id&&s.estado==='Caliente').length;
+        return allSegs.filter(s=>s.asesorId===u.id&&(alcance==='mes'?enMes(s[fecha]):!!s[fecha])).length;
+      });
+      return{label:m,data,backgroundColor:colors[i]||'#888',borderRadius:5};
+    });
+    if(dashCharts[chartId]){
+      dashCharts[chartId].data.labels=labels;
+      dashCharts[chartId].data.datasets=datasets;
+      dashCharts[chartId].update();
+    }
+  }
+  else if(chartId==='tendenciaChart'){
+    const series=cfg.series||['prosp','sep','fact','mat'];
+    const seriesMap={
+      prosp:{label:'Prospectos',color:'#1457a0',fecha:'createdAt'},
+      sep:{label:'Separados',color:'#fac775',fecha:'fechaSep'},
+      fact:{label:'Facturados',color:'#CC0001',fecha:'fechaFact'},
+      mat:{label:'Matriculados',color:'#2d6011',fecha:'fechaMat'},
+      desist:{label:'Desistidos',color:'#888',fecha:'updatedAt',filter:s=>s.estado==='Desistido'}
+    };
+    const mesesL=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const datasets=series.map(k=>{
+      const sm=seriesMap[k];if(!sm) return null;
+      const arr=new Array(12).fill(0);
+      allSegs.filter(s=>sm.filter?sm.filter(s):true).forEach(s=>{
+        const f=s[sm.fecha]||'';if(!f) return;
+        const m=parseInt(f.split('-')[1])-1;if(m>=0&&m<12) arr[m]++;
+      });
+      return{label:sm.label,data:arr,borderColor:sm.color,backgroundColor:sm.color+'14',tension:.4,fill:true,pointRadius:4};
+    }).filter(Boolean);
+    if(dashCharts[chartId]){
+      dashCharts[chartId].data.labels=mesesL;
+      dashCharts[chartId].data.datasets=datasets;
+      dashCharts[chartId].update();
+    }
+  }
+  else if(chartId==='colorChart'||chartId==='pagoChart'){
+    const fuente=cfg.fuente||'fact_mat';
+    const field=chartId==='colorChart'?'color':'pago';
+    const filtered=allSegs.filter(s=>{
+      if(fuente==='fact_mat') return enMes(s.fechaFact)||enMes(s.fechaMat);
+      if(fuente==='separados') return enMes(s.fechaSep);
+      return s.createdAt&&s.createdAt.startsWith(fMes);
+    });
+    const cnt={};
+    filtered.forEach(s=>{if(s[field]){const k=s[field].trim().toUpperCase();cnt[k]=(cnt[k]||0)+1;}});
+    const sorted=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    if(dashCharts[chartId]){
+      dashCharts[chartId].data.labels=sorted.map(v=>v[0]);
+      dashCharts[chartId].data.datasets[0].data=sorted.map(v=>v[1]);
+      dashCharts[chartId].update();
+    }
+  }
+  else if(chartId==='pipelineChart'){
+    const estados=cfg.estados||['Caliente','Separado','Facturado','Matriculado','Desistido'];
+    const alcance=cfg.alcance||'mixto';
+    const colorMap={'Caliente':'#FF6B35','Separado':'#fac775','Facturado':'#CC0001','Matriculado':'#2d6011','Desistido':'#ddd','Entregado':'#0d6048'};
+    const counts=estados.map(e=>{
+      if(alcance==='acumulado') return allSegs.filter(s=>s.estado===e).length;
+      if(alcance==='mes') return allSegs.filter(s=>s.estado===e&&enMes(s.fechaFact||s.fechaSep||s.updatedAt||s.createdAt)).length;
+      // mixto
+      if(e==='Caliente'||e==='Separado') return allSegs.filter(s=>s.estado===e).length;
+      return allSegs.filter(s=>s.estado===e&&enMes(s.fechaFact||s.fechaSep||s.updatedAt)).length;
+    });
+    if(dashCharts[chartId]){
+      dashCharts[chartId].data.labels=estados;
+      dashCharts[chartId].data.datasets[0].data=counts;
+      dashCharts[chartId].data.datasets[0].backgroundColor=estados.map(e=>colorMap[e]||'#888');
+      dashCharts[chartId].update();
+    }
+  }
+  else{
+    // Generic: just re-render dashboard with updated config
+    renderDashboard();
+  }
+}
+
+async function guardarLayoutInline(){
+  // Snapshot current DOM order and visibility
+  const dashPage=document.getElementById('page-dashboard');
+  if(!dashPage){toast('⚠️ Abre el dashboard primero');return;}
+  const snapshot=[];
+  dashPage.querySelectorAll('.chart-card').forEach(card=>{
+    const canvas=card.querySelector('canvas');
+    const chartId=canvas?canvas.id:'';
+    const gridCol=card.style.gridColumn||'';
+    const hidden=card.style.display==='none';
+    snapshot.push({chartId,gridCol,hidden});
+  });
+  INLINE_LAYOUT=snapshot;
+  if(db){
+    try{
+      await db.collection('config').doc('dash_inline_layout').set({
+        snapshot,updatedAt:today(),updatedBy:CU?CU.nombre:''
+      });
+      toast('✅ Layout del dashboard guardado');
+    }catch(e){toast('❌ Error guardando: '+e.message);}
+  }
+}
+
+async function cargarLayoutInline(){
+  if(!db) return;
+  try{
+    const snap=await db.collection('config').doc('dash_inline_layout').get();
+    if(snap.exists&&snap.data().snapshot){
+      INLINE_LAYOUT=snap.data().snapshot;
+    }
+  }catch(e){}
+}
+
+function aplicarLayoutInline(){
+  if(!INLINE_LAYOUT||!INLINE_LAYOUT.length) return;
+  const dashPage=document.getElementById('page-dashboard');
+  if(!dashPage) return;
+  // Apply saved visibility and sizes
+  INLINE_LAYOUT.forEach(({chartId,gridCol,hidden})=>{
+    if(!chartId) return;
+    const canvas=dashPage.querySelector('#'+chartId);
+    if(!canvas) return;
+    const card=canvas.closest('.chart-card');
+    if(!card) return;
+    if(hidden) card.style.display='none';
+    if(gridCol) card.style.gridColumn=gridCol;
+  });
+}
 
 function resetDashFilters(){
   $('dashFiltMes').value='';
@@ -2537,38 +3623,52 @@ function getAsesoresPorSede(sede){
   return USERS.filter(u=>u.rol==='asesor'&&u.activo&&(sede===''||u.sede===sede));
 }
 
+function getMesActual(){
+  const h=new Date();
+  return `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}`;
+}
+
+function getDashMes(){
+  const sel=$('dashFiltMes');
+  if(sel&&sel.value) return sel.value;
+  return getMesActual();
+}
+
 function filtrarSegs(){
-  const fMes=$('dashFiltMes')?$('dashFiltMes').value:'';
+  // Returns ALL segs filtered by asesor/veh/vitrina (no month filter here)
+  // Month filtering happens in renderDashboard for specific KPIs
   const fAs=$('dashFiltAsesor2')?$('dashFiltAsesor2').value:'';
   const fVeh=$('dashFiltVeh2')?$('dashFiltVeh2').value:'';
   const fVit=$('dashFiltVitrina')?$('dashFiltVitrina').value:'';
-
   let data=[...SEGS];
-
-  // Si es asesor, solo sus datos
   if(CU&&CU.rol==='asesor') data=data.filter(s=>s.asesorId===CU.id);
-
-  if(fMes) data=data.filter(s=>{
-    const fechaRef=s.fechaFact||s.fechaSep||s.createdAt||'';
-    return fechaRef.startsWith(fMes);
-  });
   if(fAs) data=data.filter(s=>s.asesorId===fAs);
   if(fVeh) data=data.filter(s=>s.vehiculo===fVeh);
-  if(fVit){
-    const asIds=USERS.filter(u=>u.sede===fVit&&u.rol==='asesor').map(u=>u.id);
-    data=data.filter(s=>asIds.includes(s.asesorId));
-  }
+  if(fVit){const asIds=USERS.filter(u=>u.sede===fVit&&u.rol==='asesor').map(u=>u.id);data=data.filter(s=>asIds.includes(s.asesorId));}
   return data;
+}
+
+function filtrarSegsMes(mes){
+  let all=[...SEGS];
+  if(CU&&CU.rol==='asesor') all=all.filter(s=>s.asesorId===CU.id);
+  return all.filter(s=>{const ref=s.fechaFact||s.fechaSep||s.createdAt||'';return ref.startsWith(mes);});
 }
 
 function destroyChart(id){
   if(dashCharts[id]){dashCharts[id].destroy();delete dashCharts[id];}
+}
+function destroyAllCharts(){
+  Object.keys(dashCharts).forEach(id=>destroyChart(id));
 }
 
 const CHART_COLORS=['#CC0001','#1457a0','#2d6011','#7a4a0a','#3a2e8f','#0d6048','#b84c00','#555','#9b2020','#185FA5','#854F0B','#3B6D11'];
 
 function renderDashboard(){
   if(!CU||!db) return;
+
+  // ── Set default month to current if not set ──
+  const selMes=$('dashFiltMes');
+  if(selMes&&!selMes.value) selMes.value=getMesActual();
 
   // Fill filter selects
   const sa=$('dashFiltAsesor2');
@@ -2585,39 +3685,62 @@ function renderDashboard(){
     sv.value=prev;
   }
 
-  const data=filtrarSegs();
-  const fMes=$('dashFiltMes')?$('dashFiltMes').value:'';
+  const fMes=getDashMes();
+  // allFiltered = todos los seguimientos filtrados por asesor/veh/vitrina (sin mes)
+  const allFiltered=filtrarSegs();
 
-  const prospectos=data.length;
-  const calientes=data.filter(s=>s.estado==='Caliente').length;
-  const separados=data.filter(s=>s.estado==='Separado'||s.fechaSep).length;
-  const facturados=data.filter(s=>s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact).length;
-  const matriculados=data.filter(s=>s.estado==='Matriculado'||s.fechaMat).length;
-  const desistidos=data.filter(s=>s.estado==='Desistido').length;
-  const estaSemana=data.filter(s=>s.temperatura==='Esta semana').length;
+  // ── Helper: check if a date field belongs to selected month ──
+  const enMes=(fecha)=>fecha&&fecha.startsWith(fMes);
+
+  // ── ACUMULADO — independiente del mes seleccionado ──
+  const calientes=allFiltered.filter(s=>s.estado==='Caliente').length;
+  const separados=allFiltered.filter(s=>s.estado==='Separado').length;
+  const estaSemana=allFiltered.filter(s=>s.temperatura==='Esta semana'&&(s.estado==='Caliente'||s.estado==='Separado')).length;
+
+  // ── DEL MES SELECCIONADO — cada KPI usa su propia fecha ──
+  // Prospectos creados en el mes
+  const prospectos=allFiltered.filter(s=>enMes(s.createdAt)).length;
+  // Test drives realizados en el mes
+  const testDrives=allFiltered.filter(s=>s.pruebaRuta&&enMes(s.fechaPrueba)).length;
+  // Separaciones del mes (fecha de separación)
+  const separadosMes=allFiltered.filter(s=>enMes(s.fechaSep)).length;
+  // Facturados del mes (fecha de factura)
+  const facturados=allFiltered.filter(s=>enMes(s.fechaFact)).length;
+  // Matriculados del mes (fecha de matrícula)
+  const matriculados=allFiltered.filter(s=>enMes(s.fechaMat)).length;
+  // Desistidos del mes (updatedAt cuando pasó a Desistido)
+  const desistidos=allFiltered.filter(s=>s.estado==='Desistido'&&enMes(s.updatedAt)).length;
+  // Facturación total del mes
+  const facturacionTotal=allFiltered.filter(s=>enMes(s.fechaFact)&&s.precio).reduce((a,s)=>a+(s.precio||0),0);
+  const carteraPend=allFiltered.filter(s=>enMes(s.fechaFact)&&s.precio&&(s.precio-(s.abonos||0))>0).reduce((a,s)=>a+(s.precio-(s.abonos||0)),0);
 
   const convRate=prospectos>0?Math.round((facturados/prospectos)*100):0;
-  const sepRate=prospectos>0?Math.round((separados/prospectos)*100):0;
+  const sepRate=prospectos>0?Math.round((separadosMes/prospectos)*100):0;
 
   // ── KPIs ──
+  const mesLabel=MESES[parseInt(fMes.split('-')[1])-1]||fMes;
+  const myLeads=CU.rol==='asesor'?LEADS.filter(l=>l.asesorId===CU.id):LEADS;
+  const myLeadsConv=myLeads.filter(l=>l.estado==='Convertido');
   $('dashKpis').innerHTML=`
-    <div class="kpi-card" style="--kc:#CC0001"><div class="kpi-num">${prospectos}</div><div class="kpi-label">Total prospectos</div><div class="kpi-sub">En el período</div></div>
-    <div class="kpi-card" style="--kc:#b84c00"><div class="kpi-num">${calientes}</div><div class="kpi-label">🔥 Calientes</div><div class="kpi-sub">Activos sin cerrar</div></div>
-    <div class="kpi-card" style="--kc:#7a4a0a"><div class="kpi-num">${estaSemana}</div><div class="kpi-label">🔴 Cierran esta semana</div><div class="kpi-sub">Temperatura alta</div></div>
-    <div class="kpi-card" style="--kc:#1457a0"><div class="kpi-num">${separados}</div><div class="kpi-label">🔒 Separaciones</div><div class="kpi-sub">Tasa: ${sepRate}%</div></div>
-    <div class="kpi-card" style="--kc:#CC0001"><div class="kpi-num">${facturados}</div><div class="kpi-label">📄 Facturados</div><div class="kpi-sub">Conv: ${convRate}%</div></div>
-    <div class="kpi-card" style="--kc:#2d6011"><div class="kpi-num">${matriculados}</div><div class="kpi-label">✅ Matriculados</div><div class="kpi-sub">Entregados</div></div>
-    <div class="kpi-card" style="--kc:#888"><div class="kpi-num">${desistidos}</div><div class="kpi-label">❌ Desistidos</div><div class="kpi-sub">${prospectos>0?Math.round((desistidos/prospectos)*100):0}% del total</div></div>
-    <div class="kpi-card" style="--kc:#3a2e8f"><div class="kpi-num">${convRate}%</div><div class="kpi-label">📈 Conversión total</div><div class="kpi-sub">Prospectos→Facturas</div></div>
-    <div class="kpi-card" style="--kc:#CC0001"><div class="kpi-num">${fmtMillones(data.reduce((a,s)=>a+(s.precio||0),0))}</div><div class="kpi-label">💰 Facturación total</div><div class="kpi-sub">Suma precios fact.</div></div>
-    <div class="kpi-card" style="--kc:#9b2020"><div class="kpi-num">${fmtMillones(data.filter(s=>s.precio&&(s.precio-(s.abonos||0))>0).reduce((a,s)=>a+(s.precio-(s.abonos||0)),0))}</div><div class="kpi-label">💳 Cartera pendiente</div><div class="kpi-sub">Saldos sin pagar</div></div>
-    <div class="kpi-card" style="--kc:#1457a0"><div class="kpi-num">${(CU.rol==='asesor'?LEADS.filter(l=>l.asesorId===CU.id):LEADS).length}</div><div class="kpi-label">📋 Total leads</div><div class="kpi-sub">Conv: ${LEADS.length>0?Math.round(((CU.rol==='asesor'?LEADS.filter(l=>l.asesorId===CU.id&&l.estado==='Convertido'):LEADS.filter(l=>l.estado==='Convertido')).length/Math.max((CU.rol==='asesor'?LEADS.filter(l=>l.asesorId===CU.id):LEADS).length,1))*100):0}%</div></div>
+    <div class="kpi-card" style="--kc:#CC0001"><div class="kpi-num">${prospectos}</div><div class="kpi-label">Prospectos nuevos</div><div class="kpi-sub">${mesLabel}</div></div>
+    <div class="kpi-card" style="--kc:#b84c00"><div class="kpi-num">${calientes}</div><div class="kpi-label">🔥 Calientes</div><div class="kpi-sub">⚡ Acumulado pipeline</div></div>
+    <div class="kpi-card" style="--kc:#1457a0"><div class="kpi-num">${separados}</div><div class="kpi-label">🔒 Separaciones vigentes</div><div class="kpi-sub">⚡ Acumulado pipeline</div></div>
+    <div class="kpi-card" style="--kc:#7a4a0a"><div class="kpi-num">${estaSemana}</div><div class="kpi-label">🔴 Esta semana</div><div class="kpi-sub">Temperatura crítica</div></div>
+    <div class="kpi-card" style="--kc:#3a2e8f"><div class="kpi-num">${separadosMes}</div><div class="kpi-label">🔒 Separados</div><div class="kpi-sub">${mesLabel}</div></div>
+    <div class="kpi-card" style="--kc:#CC0001"><div class="kpi-num">${facturados}</div><div class="kpi-label">📄 Facturados</div><div class="kpi-sub">${mesLabel} · Conv: ${convRate}%</div></div>
+    <div class="kpi-card" style="--kc:#2d6011"><div class="kpi-num">${matriculados}</div><div class="kpi-label">✅ Matriculados</div><div class="kpi-sub">${mesLabel}</div></div>
+    <div class="kpi-card" style="--kc:#888"><div class="kpi-num">${desistidos}</div><div class="kpi-label">❌ Desistidos</div><div class="kpi-sub">${mesLabel}</div></div>
+    <div class="kpi-card" style="--kc:#3a2e8f"><div class="kpi-num">${testDrives}</div><div class="kpi-label">🚗 Test drives</div><div class="kpi-sub">${mesLabel}</div></div>
+    <div class="kpi-card" style="--kc:#3a2e8f"><div class="kpi-num">${convRate}%</div><div class="kpi-label">📈 Conversión</div><div class="kpi-sub">${mesLabel}</div></div>
+    <div class="kpi-card" style="--kc:#CC0001"><div class="kpi-num">${fmtMillones(facturacionTotal)}</div><div class="kpi-label">💰 Facturación</div><div class="kpi-sub">${mesLabel}</div></div>
+    <div class="kpi-card" style="--kc:#9b2020"><div class="kpi-num">${fmtMillones(carteraPend)}</div><div class="kpi-label">💳 Cartera pendiente</div><div class="kpi-sub">${mesLabel}</div></div>
+    <div class="kpi-card" style="--kc:#1457a0"><div class="kpi-num">${myLeads.length}</div><div class="kpi-label">📋 Total leads</div><div class="kpi-sub">Conv: ${myLeads.length>0?Math.round((myLeadsConv.length/myLeads.length)*100):0}%</div></div>
   `;
 
   // ── VELOCÍMETRO ──
-  const pct=Math.min(Math.round((facturados/metaUnidades)*100),100);
+  const pct=Math.min(metaUnidades>0?Math.round((facturados/metaUnidades)*100):0,100);
   $('gaugeNum').textContent=pct+'%';
-  $('gaugeLabel').textContent=`${facturados} de ${metaUnidades} unidades facturadas`;
+  $('gaugeLabel').textContent=`${facturados} de ${metaUnidades} uds. facturadas`;
   $('gFacturadas').textContent=facturados;
   $('gMeta').textContent=metaUnidades;
   $('gFaltantes').textContent=Math.max(0,metaUnidades-facturados);
@@ -2643,27 +3766,89 @@ function renderDashboard(){
     options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},cutout:'72%'}
   });
 
-  // ── FORECAST ──
-  const ritmoActual=diasMes>0?facturados/Math.max(1,hoy.getDate()):0;
-  const proyeccionMes=Math.round(ritmoActual*diasMes);
-  const faltaForecast=Math.max(0,metaUnidades-facturados);
-  const ritmoNecesario=diasRest>0?Math.round(faltaForecast/diasRest*10)/10:0;
+  // ── FORECAST MEJORADO ──
+  // Días hábiles = días de lunes a viernes restantes en el mes
+  function diasHabilesRestantes(fecha){
+    let count=0;
+    const d=new Date(fecha);
+    d.setDate(d.getDate()+1);
+    const last=new Date(d.getFullYear(),d.getMonth()+1,0);
+    while(d<=last){const dw=d.getDay();if(dw>0&&dw<6)count++;d.setDate(d.getDate()+1);}
+    return count;
+  }
+  function diasHabilesTotales(anio,mes){
+    let count=0;
+    const d=new Date(anio,mes-1,1);
+    const last=new Date(anio,mes,0);
+    while(d<=last){const dw=d.getDay();if(dw>0&&dw<6)count++;d.setDate(d.getDate()+1);}
+    return count;
+  }
+  function semanasRestantes(fecha){
+    const d=new Date(fecha);
+    const last=new Date(d.getFullYear(),d.getMonth()+1,0);
+    return Math.max(0,Math.ceil((last-d)/(1000*60*60*24*7)*10)/10);
+  }
+
+  const diasHabilesRest=diasHabilesRestantes(hoy);
+  const diasHabilesTot=diasHabilesTotales(hoy.getFullYear(),hoy.getMonth()+1);
+  const diasHabilesTransc=Math.max(1,diasHabilesTot-diasHabilesRest);
+  const semanasRest=Math.round(semanasRestantes(hoy)*10)/10;
+
+  const ritmoXdia=facturados/diasHabilesTransc;
+  const ritmoXsemana=facturados/Math.max(1,Math.ceil(diasHabilesTransc/5));
+  const proyeccionFin=Math.round(ritmoXdia*diasHabilesTot);
+  const faltaMeta=Math.max(0,metaUnidades-facturados);
+  const necesarioXdia=diasHabilesRest>0?Math.round((faltaMeta/diasHabilesRest)*10)/10:0;
+  const necesarioXsemana=semanasRest>0?Math.round((faltaMeta/semanasRest)*10)/10:0;
+
   $('forecastGrid').innerHTML=`
-    <div class="fc-card"><div class="fc-num" style="color:#CC0001">${proyeccionMes}</div><div class="fc-label">Proyección fin de mes</div><div class="fc-detail">Al ritmo actual</div></div>
-    <div class="fc-card"><div class="fc-num" style="color:#1457a0">${ritmoNecesario}</div><div class="fc-label">Unidades/día necesarias</div><div class="fc-detail">Para alcanzar la meta</div></div>
-    <div class="fc-card"><div class="fc-num" style="color:#2d6011">${diasRest}</div><div class="fc-label">Días restantes</div><div class="fc-detail">Del mes en curso</div></div>
-    <div class="fc-card"><div class="fc-num" style="color:${proyeccionMes>=metaUnidades?'#2d6011':'#9b2020'}">${proyeccionMes>=metaUnidades?'✅':'⚠️'}</div><div class="fc-label">${proyeccionMes>=metaUnidades?'Meta alcanzable':'Meta en riesgo'}</div><div class="fc-detail">${proyeccionMes>=metaUnidades?'Al ritmo actual':'Acelerar ventas'}</div></div>
+    <div class="fc-card"><div class="fc-num" style="color:#CC0001">${proyeccionFin}</div><div class="fc-label">Proyección fin de mes</div><div class="fc-detail">Al ritmo actual</div></div>
+    <div class="fc-card"><div class="fc-num" style="color:#1457a0">${necesarioXdia}</div><div class="fc-label">Uds/día hábil necesarias</div><div class="fc-detail">Para alcanzar meta</div></div>
+    <div class="fc-card"><div class="fc-num" style="color:#7a4a0a">${necesarioXsemana}</div><div class="fc-label">Uds/semana necesarias</div><div class="fc-detail">Para alcanzar meta</div></div>
+    <div class="fc-card"><div class="fc-num" style="color:#2d6011">${diasHabilesRest}</div><div class="fc-label">Días hábiles restantes</div><div class="fc-detail">${semanasRest} semanas aprox.</div></div>
+    <div class="fc-card"><div class="fc-num" style="color:${Math.round(ritmoXdia*10)/10>=necesarioXdia?'#2d6011':'#9b2020'}">${Math.round(ritmoXdia*10)/10}</div><div class="fc-label">Ritmo actual/día hábil</div><div class="fc-detail">${Math.round(ritmoXsemana*10)/10} uds/semana</div></div>
+    <div class="fc-card"><div class="fc-num" style="color:${proyeccionFin>=metaUnidades?'#2d6011':'#9b2020'}">${proyeccionFin>=metaUnidades?'✅':'⚠️'}</div><div class="fc-label">${proyeccionFin>=metaUnidades?'Meta alcanzable':'Meta en riesgo'}</div><div class="fc-detail">${proyeccionFin>=metaUnidades?'Al ritmo actual':'Aceleración requerida'}</div></div>
   `;
-  $('forecastNote').textContent=`Ritmo actual: ${Math.round(ritmoActual*10)/10} unidades/día. Proyección basada en el avance del mes.`;
+  $('forecastNote').textContent=`Ritmo: ${Math.round(ritmoXdia*10)/10} uds/día hábil · ${Math.round(ritmoXsemana*10)/10} uds/semana · ${diasHabilesTot} días hábiles en el mes`;
+
+  // ── ANÁLISIS HISTÓRICO DE FACTURACIÓN (últimos 6 meses) ──
+  const histEl=$('forecastHistorico');
+  if(histEl){
+    const histMeses=[];
+    for(let i=5;i>=0;i--){
+      const d=new Date(hoy.getFullYear(),hoy.getMonth()-i,1);
+      const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      const label=MESES[d.getMonth()].substring(0,3)+' '+String(d.getFullYear()).substring(2);
+      const fact=SEGS.filter(s=>(s.fechaFact||'').startsWith(key)||(s.estado==='Facturado'&&(s.createdAt||'').startsWith(key))).length;
+      const meta=(METAS[key]?Object.values(METAS[key]).reduce((a,b)=>a+b,0):0)||metaUnidades;
+      const pct=meta>0?Math.round((fact/meta)*100):0;
+      const color=pct>=100?'#2d6011':pct>=70?'#7a4a0a':pct>=50?'#CC0001':'#9b2020';
+      const esActual=key===fMes;
+      histMeses.push({label,fact,meta,pct,color,esActual});
+    }
+    const maxFact=Math.max(...histMeses.map(h=>h.fact),1);
+    histEl.innerHTML=histMeses.map(h=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 0;${h.esActual?'background:#fff9f9;border-radius:6px;padding:5px 6px;margin:-1px -2px;border:1px solid #fde8e8;':''}" >
+        <span style="font-size:11px;color:#888;min-width:45px;font-weight:${h.esActual?'700':'400'}">${h.label}${h.esActual?' 📍':''}</span>
+        <div style="flex:1;background:#f0f0f0;border-radius:6px;height:14px;overflow:hidden">
+          <div style="width:${Math.round((h.fact/maxFact)*100)}%;height:100%;background:${h.color};border-radius:6px;display:flex;align-items:center;padding-left:5px">
+            ${h.fact>0?`<span style="font-size:9px;color:#fff;font-weight:700">${h.fact}</span>`:''}
+          </div>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${h.color};min-width:28px;text-align:right">${h.pct}%</span>
+        <span style="font-size:10px;color:#bbb;min-width:30px">/${h.meta}</span>
+      </div>`).join('');
+  }
 
   // ── EMBUDO COMERCIAL REAL ──
   // Count each stage using actual fields
-  const eCotizados   = data.filter(s=>s.cotizado).length;
-  const ePrueba      = data.filter(s=>s.pruebaRuta).length;
-  const eCredito     = data.filter(s=>s.creditoAprobado).length;
-  const eSeparados   = data.filter(s=>s.fechaSep).length;
-  const eFacturados  = data.filter(s=>s.fechaFact||s.estado==='Facturado'||s.estado==='Matriculado').length;
-  const eMatriculados= data.filter(s=>s.fechaMat||s.estado==='Matriculado').length;
+  // Embudo: cada etapa usa su fecha correspondiente al mes
+  const eCotizados   = allFiltered.filter(s=>enMes(s.fechaCotizado)||s.cotizado&&enMes(s.createdAt)).length;
+  const ePrueba      = allFiltered.filter(s=>enMes(s.fechaPrueba)).length;
+  const eCredito     = allFiltered.filter(s=>s.creditoAprobado&&enMes(s.fechaCredito||s.updatedAt)).length;
+  const eSeparados   = allFiltered.filter(s=>enMes(s.fechaSep)).length;
+  const eFacturados  = allFiltered.filter(s=>enMes(s.fechaFact)).length;
+  const eMatriculados= allFiltered.filter(s=>enMes(s.fechaMat)).length;
 
   const funnelLabels=['📋 Cotizados','🚗 Prueba de ruta','✅ Crédito aprobado','🔒 Separaciones','📄 Facturados','🏆 Matriculados'];
   const funnelData=[eCotizados,ePrueba,eCredito,eSeparados,eFacturados,eMatriculados];
@@ -2702,19 +3887,21 @@ function renderDashboard(){
     }
   });
 
-  // ── PIPELINE DOUGHNUT ──
+  // ── PIPELINE DOUGHNUT — spec: calientes/separados acumulado, rest del mes ──
+  // Pipeline: calientes/separados acumulado, rest del mes por fecha propia
+  const pipCalientes=calientes;
+  const pipSeparados=separados;
+  const pipFacturados=facturados;
+  const pipMatriculados=matriculados;
+  const pipDesistidos=desistidos;
   destroyChart('pipeline');
   const pCtx=$('pipelineChart').getContext('2d');
   dashCharts['pipeline']=new Chart(pCtx,{
     type:'doughnut',
     data:{
-      labels:['🔥 Caliente','🔒 Separado','📄 Facturado','✅ Matriculado','❌ Desistido'],
+      labels:['🔥 Caliente (acum.)','🔒 Separado (acum.)',`📄 Facturado ${mesLabel}`,`✅ Matriculado ${mesLabel}`,`❌ Desistido ${mesLabel}`],
       datasets:[{
-        data:[calientes,
-          data.filter(s=>s.estado==='Separado').length,
-          data.filter(s=>s.estado==='Facturado').length,
-          data.filter(s=>s.estado==='Matriculado').length,
-          desistidos],
+        data:[pipCalientes,pipSeparados,pipFacturados,pipMatriculados,pipDesistidos],
         backgroundColor:['#FF6B35','#fac775','#CC0001','#2d6011','#ddd'],
         borderWidth:2,borderColor:'#fff'
       }]
@@ -2724,15 +3911,17 @@ function renderDashboard(){
 
   // ── RANKING ASESORES ──
   const asesoresFiltro=CU.rol==='asesor'?USERS.filter(u=>u.id===CU.id):USERS.filter(u=>u.rol==='asesor'&&u.activo);
+  // Ranking: calientes acumulado, pruebas/separados/facturados/matriculados del mes
   const rankData=asesoresFiltro.map(u=>{
-    const aSegs=data.filter(s=>s.asesorId===u.id);
-    const aFact=aSegs.filter(s=>s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact).length;
-    const aProsp=aSegs.length;
-    const aSep=aSegs.filter(s=>s.estado==='Separado'||s.fechaSep).length;
-    const aMat=aSegs.filter(s=>s.estado==='Matriculado'||s.fechaMat).length;
-    const aCal=aSegs.filter(s=>s.estado==='Caliente').length;
+    const aAll=allFiltered.filter(s=>s.asesorId===u.id);
+    const aCal=aAll.filter(s=>s.estado==='Caliente').length; // ACUMULADO
+    const aPrueba=aAll.filter(s=>enMes(s.fechaPrueba)).length; // del mes
+    const aSep=aAll.filter(s=>enMes(s.fechaSep)).length; // del mes
+    const aFact=aAll.filter(s=>enMes(s.fechaFact)).length; // del mes
+    const aMat=aAll.filter(s=>enMes(s.fechaMat)).length; // del mes
+    const aProsp=aAll.filter(s=>enMes(s.createdAt)).length; // del mes
     const aConv=aProsp>0?Math.round((aFact/aProsp)*100):0;
-    return{u,aProsp,aSep,aFact,aMat,aCal,aConv};
+    return{u,aProsp,aSep,aFact,aMat,aCal,aPrueba,aConv};
   }).sort((a,b)=>b.aFact-a.aFact);
 
   const maxFact=rankData.length?Math.max(...rankData.map(r=>r.aFact),1):1;
@@ -2762,9 +3951,10 @@ function renderDashboard(){
     data:{
       labels:rankData.map(r=>r.u.nombre.split(' ')[0]+' '+r.u.nombre.split(' ')[1]),
       datasets:[
-        {label:'Facturados',data:rankData.map(r=>r.aFact),backgroundColor:'#CC0001',borderRadius:5},
-        {label:'Separados',data:rankData.map(r=>r.aSep),backgroundColor:'#fac775',borderRadius:5},
-        {label:'Matriculados',data:rankData.map(r=>r.aMat),backgroundColor:'#2d6011',borderRadius:5}
+        {label:'Facturados mes',data:rankData.map(r=>r.aFact),backgroundColor:'#CC0001',borderRadius:5},
+        {label:'Separados mes',data:rankData.map(r=>r.aSep),backgroundColor:'#fac775',borderRadius:5},
+        {label:'Matriculados mes',data:rankData.map(r=>r.aMat),backgroundColor:'#2d6011',borderRadius:5},
+        {label:'🔥 Calientes (acum.)',data:rankData.map(r=>r.aCal),backgroundColor:'rgba(184,76,0,0.3)',borderRadius:5}
       ]
     },
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}
@@ -2776,30 +3966,69 @@ function renderDashboard(){
   dashCharts['calientes']=new Chart(cCtx,{
     type:'bar',
     data:{
-      labels:rankData.map(r=>r.u.nombre.split(' ')[0]+' '+r.u.nombre.split(' ')[1]),
-      datasets:[{label:'Calientes',data:rankData.map(r=>r.aCal),backgroundColor:'#FF6B35',borderRadius:5}]
+      labels:rankData.map(r=>r.u.nombre.split(' ').slice(0,2).join(' ')),
+      datasets:[
+        {label:'🔒 Separados '+mesLabel,data:rankData.map(r=>r.aSep),backgroundColor:'#fac775',borderRadius:5},
+        {label:'🔥 Calientes (acum.)',data:rankData.map(r=>r.aCal),backgroundColor:'rgba(255,107,53,0.7)',borderRadius:5}
+      ]
     },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},
+      scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}
+    }
   });
 
-  // ── VEHÍCULOS ──
-  const vehCount={};
-  data.forEach(s=>{if(s.vehiculo)vehCount[s.vehiculo]=(vehCount[s.vehiculo]||0)+1;});
-  const vehSorted=Object.entries(vehCount).sort((a,b)=>b[1]-a[1]);
+  // ── RENDIMIENTO POR MODELO — facturados+matriculados del mes ──
+  const vehFact={},vehMat={},vehSep={};
+  allFiltered.filter(s=>enMes(s.fechaFact)).forEach(s=>{if(s.vehiculo)vehFact[s.vehiculo]=(vehFact[s.vehiculo]||0)+1;});
+  allFiltered.filter(s=>enMes(s.fechaMat)).forEach(s=>{if(s.vehiculo)vehMat[s.vehiculo]=(vehMat[s.vehiculo]||0)+1;});
+  allFiltered.filter(s=>enMes(s.fechaSep)).forEach(s=>{if(s.vehiculo)vehSep[s.vehiculo]=(vehSep[s.vehiculo]||0)+1;});
+  const vehModelos=[...new Set([...Object.keys(vehFact),...Object.keys(vehMat)])].sort((a,b)=>((vehFact[b]||0)+(vehMat[b]||0))-((vehFact[a]||0)+(vehMat[a]||0)));
   destroyChart('vehiculo');
   const vCtx=$('vehiculoChart').getContext('2d');
   dashCharts['vehiculo']=new Chart(vCtx,{
     type:'bar',
     data:{
-      labels:vehSorted.map(v=>v[0]),
-      datasets:[{label:'Prospectos',data:vehSorted.map(v=>v[1]),backgroundColor:CHART_COLORS,borderRadius:5}]
+      labels:vehModelos.length?vehModelos:['Sin datos'],
+      datasets:[
+        {label:'Facturados',data:vehModelos.map(v=>vehFact[v]||0),backgroundColor:'#CC0001',borderRadius:4,borderSkipped:false},
+        {label:'Matriculados',data:vehModelos.map(v=>vehMat[v]||0),backgroundColor:'#2d6011',borderRadius:4,borderSkipped:false}
+      ]
     },
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#f5f5f5'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}},
+        tooltip:{callbacks:{footer:ctx=>{
+          const idx=ctx[0].dataIndex;const m=vehModelos[idx];
+          return `Total: ${(vehFact[m]||0)+(vehMat[m]||0)} vehículos`;
+        }}}
+      },
+      scales:{x:{beginAtZero:true,grid:{color:'#f5f5f5'},stacked:false},y:{grid:{display:false},ticks:{font:{size:10}},stacked:false}}
+    }
   });
 
-  // ── COLORES ──
+  // ── SEPARADOS POR MODELO del mes ──
+  const vehSepSorted=Object.entries(vehSep).sort((a,b)=>b[1]-a[1]);
+  destroyChart('separadosModelo');
+  const smCtx=document.getElementById('separadosModeloChart');
+  if(smCtx){
+    dashCharts['separadosModelo']=new Chart(smCtx.getContext('2d'),{
+      type:'bar',
+      data:{
+        labels:vehSepSorted.length?vehSepSorted.map(v=>v[0]):['Sin separaciones'],
+        datasets:[{label:'Separados',data:vehSepSorted.length?vehSepSorted.map(v=>v[1]):[0],backgroundColor:'#fac775',borderRadius:4,borderSkipped:false}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+        plugins:{legend:{display:false}},
+        scales:{x:{beginAtZero:true,grid:{color:'#f5f5f5'}},y:{grid:{display:false},ticks:{font:{size:10}}}}
+      }
+    });
+  }
+
+  // ── COLORES — facturados+matriculados del mes ──
   const colCount={};
-  data.forEach(s=>{if(s.color){const c=s.color.trim().toUpperCase();colCount[c]=(colCount[c]||0)+1;}});
+  allFiltered.filter(s=>enMes(s.fechaFact)||enMes(s.fechaMat)).forEach(s=>{
+    if(s.color){const c=s.color.trim().toUpperCase();colCount[c]=(colCount[c]||0)+1;}
+  });
   const colSorted=Object.entries(colCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
   destroyChart('color');
   const coCtx=$('colorChart').getContext('2d');
@@ -2816,7 +4045,7 @@ function renderDashboard(){
   const vitrinaData=USERS.filter(u=>u.rol==='asesor'&&u.activo).reduce((acc,u)=>{
     const sede=u.sede||'Sin sede';
     if(!acc[sede]) acc[sede]=0;
-    acc[sede]+=data.filter(s=>s.asesorId===u.id&&(s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact)).length;
+    acc[sede]+=allFiltered.filter(s=>s.asesorId===u.id&&enMes(s.fechaFact)).length;
     return acc;
   },{});
   destroyChart('vitrina');
@@ -2830,9 +4059,11 @@ function renderDashboard(){
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}}}
   });
 
-  // ── FORMA DE PAGO ──
+  // ── FORMA DE PAGO — facturados+matriculados del mes ──
   const pagoCount={};
-  data.forEach(s=>{if(s.pago)pagoCount[s.pago]=(pagoCount[s.pago]||0)+1;});
+  allFiltered.filter(s=>enMes(s.fechaFact)||enMes(s.fechaMat)).forEach(s=>{
+    if(s.pago)pagoCount[s.pago]=(pagoCount[s.pago]||0)+1;
+  });
   destroyChart('pago');
   const pgCtx=$('pagoChart').getContext('2d');
   dashCharts['pago']=new Chart(pgCtx,{
@@ -2899,8 +4130,84 @@ function renderDashboard(){
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}}}
   });
 
+  // ── HISTORIAL ANUAL ──
+  renderHistorialAnual(allFiltered);
+  // Apply saved layout after all charts rendered
+  setTimeout(aplicarLayoutInline,300);
+  // Re-inject overlays if edit mode was active
+  if(EDIT_MODE) setTimeout(injectEditOverlays,350);
+
   // ── COSECHAS ──
-  renderCosechas(data);
+  renderCosechas(allFiltered);
+}
+
+function renderHistorialAnual(allSegs){
+  if(!$('historialAnualChart')) return;
+  const anio=parseInt(($('dashFiltAnio')?$('dashFiltAnio').value:'2026')||'2026');
+
+  const mesesLabels=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  // Facturados por mes del año
+  const facPorMes=new Array(12).fill(0);
+  const matPorMes=new Array(12).fill(0);
+  const metaPorMes=new Array(12).fill(0);
+
+  allSegs.forEach(s=>{
+    // Facturados
+    const fFact=s.fechaFact||'';
+    if(fFact.startsWith(anio+'-')){
+      const m=parseInt(fFact.split('-')[1])-1;
+      if(m>=0&&m<12) facPorMes[m]++;
+    }
+    // Matriculados
+    const fMat=s.fechaMat||'';
+    if(fMat.startsWith(anio+'-')){
+      const m=parseInt(fMat.split('-')[1])-1;
+      if(m>=0&&m<12) matPorMes[m]++;
+    }
+  });
+
+  // Load metas por mes del año
+  for(let m=0;m<12;m++){
+    const mesKey=`${anio}-${String(m+1).padStart(2,'0')}`;
+    const metaMes=METAS[mesKey];
+    if(metaMes){
+      const tot=Object.values(metaMes).reduce((a,b)=>a+b,0);
+      metaPorMes[m]=tot;
+    }
+  }
+
+  // Acumulados
+  const facAcum=facPorMes.reduce((acc,v,i)=>{acc.push((acc[i-1]||0)+v);return acc;},[]);
+  const metaAcum=metaPorMes.reduce((acc,v,i)=>{acc.push((acc[i-1]||0)+v);return acc;},[]);
+
+  destroyChart('historialAnual');
+  const ctx=$('historialAnualChart').getContext('2d');
+  dashCharts['historialAnual']=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:mesesLabels,
+      datasets:[
+        {label:'Facturados mes',data:facPorMes,backgroundColor:'rgba(204,0,1,0.7)',borderRadius:5,order:2},
+        {label:'Matriculados mes',data:matPorMes,backgroundColor:'rgba(45,96,17,0.7)',borderRadius:5,order:2},
+        {label:'Meta mes',data:metaPorMes,type:'line',borderColor:'#7a4a0a',borderWidth:2,borderDash:[6,3],pointRadius:4,pointBackgroundColor:'#7a4a0a',fill:false,tension:.3,order:1},
+        {label:'Fact. acumulado',data:facAcum,type:'line',borderColor:'#CC0001',borderWidth:3,pointRadius:5,pointBackgroundColor:'#CC0001',fill:false,tension:.3,order:0,yAxisID:'yAcum'},
+        {label:'Meta acumulada',data:metaAcum,type:'line',borderColor:'#fac775',borderWidth:2,borderDash:[4,4],pointRadius:3,fill:false,tension:.3,order:0,yAxisID:'yAcum'},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'top',labels:{font:{size:10},boxWidth:12}},
+        tooltip:{mode:'index',intersect:false}
+      },
+      scales:{
+        y:{beginAtZero:true,grid:{color:'#f5f5f5'},title:{display:true,text:'Unidades mes',font:{size:10}},position:'left'},
+        yAcum:{beginAtZero:true,grid:{display:false},title:{display:true,text:'Acumulado',font:{size:10}},position:'right'},
+        x:{grid:{display:false}}
+      }
+    }
+  });
 }
 
 function renderCosechas(data){
@@ -4798,6 +6105,7 @@ document.addEventListener('DOMContentLoaded', function() {
   $('nav-metas').addEventListener('click', ()=>showPage('metas'));
   $('nav-entregados').addEventListener('click', ()=>showPage('entregados'));
   $('nav-desistidos').addEventListener('click', ()=>showPage('desistidos'));
+  $('nav-editor').addEventListener('click', ()=>showPage('editor'));
   $('nav-simulador').addEventListener('click', ()=>showPage('simulador'));
   $('nav-config').addEventListener('click', ()=>showPage('config'));
 
