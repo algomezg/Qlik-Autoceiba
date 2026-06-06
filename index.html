@@ -3400,13 +3400,20 @@ function updateConfigPreview(chartId){
 }
 
 function applyChartConfig(chartId,btn){
+  // CHART_CONFIGS is already updated by toggleChip/selectChip on each click
+  // Just apply what's stored and show feedback
   const cfg=CHART_CONFIGS[chartId]||{};
-  // Re-render the specific chart with new config
+  if(Object.keys(cfg).length===0){
+    toast('⚠️ Selecciona al menos una opción antes de aplicar');
+    return;
+  }
   applyConfigToChart(chartId,cfg);
-  toast('✅ Gráfica actualizada');
-  // Animate button
-  const orig=btn.textContent;btn.textContent='✅ Aplicado!';
-  setTimeout(()=>btn.textContent=orig,1500);
+  toast('✅ Gráfica actualizada con nueva configuración');
+  updateConfigPreview(chartId);
+  const orig=btn.textContent;
+  btn.textContent='✅ Aplicado!';
+  btn.style.background='#2d6011';
+  setTimeout(()=>{btn.textContent=orig;btn.style.background='';},2000);
 }
 
 async function saveChartConfig(chartId){
@@ -3540,8 +3547,53 @@ function applyConfigToChart(chartId,cfg){
       dashCharts[chartId].update();
     }
   }
+  else if(chartId==='gaugeChart'){
+    // Re-run gauge with config metrica
+    const metrica=cfg.metrica||'facturados';
+    const fMes2=getDashMes();
+    const en2=(f)=>f&&f.startsWith(fMes2);
+    let gCount=0;
+    const af=filtrarSegs();
+    if(metrica==='facturados') gCount=af.filter(s=>en2(s.fechaFact)).length;
+    else if(metrica==='matriculados') gCount=af.filter(s=>en2(s.fechaMat)).length;
+    else if(metrica==='separados_mes') gCount=af.filter(s=>en2(s.fechaSep)).length;
+    else gCount=af.filter(s=>s.estado==='Caliente').length;
+    const pct2=Math.min(metaUnidades>0?Math.round((gCount/metaUnidades)*100):0,100);
+    $('gaugeNum').textContent=pct2+'%';
+    $('gaugeLabel').textContent=gCount+' de '+metaUnidades+' ('+metrica+')';
+    $('gFacturadas').textContent=gCount;
+    if(dashCharts['gauge']){
+      const gColor=pct2>=100?'#2d6011':pct2>=70?'#7a4a0a':pct2>=40?'#CC0001':'#9b2020';
+      dashCharts['gauge'].data.datasets[0].data=[Math.max(pct2,0),Math.max(100-pct2,0)];
+      dashCharts['gauge'].data.datasets[0].backgroundColor=[gColor,'#f0f0f0'];
+      dashCharts['gauge'].update();
+    }
+  }
+  else if(chartId==='funnelChart'){
+    const etapas=cfg.etapas||['cotizados','prueba','credito','separados','facturados','matriculados'];
+    const fMes2=getDashMes();const en2=(f)=>f&&f.startsWith(fMes2);
+    const af=filtrarSegs();
+    const etapaMap={
+      cotizados:{label:'📋 Cotizados',color:'#4a90d9',fn:(s)=>en2(s.fechaCotizado)||s.cotizado&&en2(s.createdAt)},
+      prueba:{label:'🚗 Prueba',color:'#FF9500',fn:(s)=>en2(s.fechaPrueba)},
+      credito:{label:'✅ Crédito',color:'#34C759',fn:(s)=>s.creditoAprobado&&en2(s.fechaCredito||s.updatedAt)},
+      separados:{label:'🔒 Separados',color:'#fac775',fn:(s)=>en2(s.fechaSep)},
+      facturados:{label:'📄 Facturados',color:'#CC0001',fn:(s)=>en2(s.fechaFact)},
+      matriculados:{label:'✅ Matriculados',color:'#2d6011',fn:(s)=>en2(s.fechaMat)},
+    };
+    const labels=etapas.map(e=>etapaMap[e]?.label||e);
+    const datos=etapas.map(e=>af.filter(etapaMap[e]?.fn||(()=>false)).length);
+    const colors=etapas.map(e=>etapaMap[e]?.color||'#888');
+    if(dashCharts['funnel']){
+      dashCharts['funnel'].data.labels=labels;
+      dashCharts['funnel'].data.datasets[0].data=datos;
+      dashCharts['funnel'].data.datasets[0].backgroundColor=colors;
+      dashCharts['funnel'].update();
+    }
+  }
   else{
-    // Generic: just re-render dashboard with updated config
+    // For charts without specific handler, just re-run full dashboard render
+    // which will apply configs via the post-render hook
     renderDashboard();
   }
 }
@@ -3738,10 +3790,15 @@ function renderDashboard(){
   `;
 
   // ── VELOCÍMETRO ──
-  const pct=Math.min(metaUnidades>0?Math.round((facturados/metaUnidades)*100):0,100);
+  // Velocímetro: suma facturados + matriculados del mes (sin duplicar)
+  const gaugeVins=new Set();
+  allFiltered.filter(s=>enMes(s.fechaFact)).forEach(s=>gaugeVins.add(s._id));
+  allFiltered.filter(s=>enMes(s.fechaMat)).forEach(s=>gaugeVins.add(s._id));
+  const gaugeTotal=gaugeVins.size;
+  const pct=Math.min(metaUnidades>0?Math.round((gaugeTotal/metaUnidades)*100):0,100);
   $('gaugeNum').textContent=pct+'%';
-  $('gaugeLabel').textContent=`${facturados} de ${metaUnidades} uds. facturadas`;
-  $('gFacturadas').textContent=facturados;
+  $('gaugeLabel').textContent=`${gaugeTotal} de ${metaUnidades} uds. (fact+mat)`;
+  $('gFacturadas').textContent=gaugeTotal;
   $('gMeta').textContent=metaUnidades;
   $('gFaltantes').textContent=Math.max(0,metaUnidades-facturados);
   const hoy=new Date();
@@ -3794,22 +3851,24 @@ function renderDashboard(){
   const diasHabilesTransc=Math.max(1,diasHabilesTot-diasHabilesRest);
   const semanasRest=Math.round(semanasRestantes(hoy)*10)/10;
 
-  const ritmoXdia=facturados/diasHabilesTransc;
-  const ritmoXsemana=facturados/Math.max(1,Math.ceil(diasHabilesTransc/5));
+  // Use gaugeTotal (fact+mat) for all forecast calculations
+  const ritmoXdia=gaugeTotal/diasHabilesTransc;
+  const ritmoXsemana=gaugeTotal/Math.max(1,Math.ceil(diasHabilesTransc/5));
   const proyeccionFin=Math.round(ritmoXdia*diasHabilesTot);
-  const faltaMeta=Math.max(0,metaUnidades-facturados);
+  const faltaMeta=Math.max(0,metaUnidades-gaugeTotal);
   const necesarioXdia=diasHabilesRest>0?Math.round((faltaMeta/diasHabilesRest)*10)/10:0;
   const necesarioXsemana=semanasRest>0?Math.round((faltaMeta/semanasRest)*10)/10:0;
 
   $('forecastGrid').innerHTML=`
+    <div class="fc-card"><div class="fc-num" style="color:#CC0001">${gaugeTotal}</div><div class="fc-label">Fact + Mat del mes</div><div class="fc-detail">${mesLabel}</div></div>
     <div class="fc-card"><div class="fc-num" style="color:#CC0001">${proyeccionFin}</div><div class="fc-label">Proyección fin de mes</div><div class="fc-detail">Al ritmo actual</div></div>
     <div class="fc-card"><div class="fc-num" style="color:#1457a0">${necesarioXdia}</div><div class="fc-label">Uds/día hábil necesarias</div><div class="fc-detail">Para alcanzar meta</div></div>
     <div class="fc-card"><div class="fc-num" style="color:#7a4a0a">${necesarioXsemana}</div><div class="fc-label">Uds/semana necesarias</div><div class="fc-detail">Para alcanzar meta</div></div>
-    <div class="fc-card"><div class="fc-num" style="color:#2d6011">${diasHabilesRest}</div><div class="fc-label">Días hábiles restantes</div><div class="fc-detail">${semanasRest} semanas aprox.</div></div>
+    <div class="fc-card"><div class="fc-num" style="color:#2d6011">${diasHabilesRest}</div><div class="fc-label">Días hábiles restantes</div><div class="fc-detail">${semanasRest} sem. aprox.</div></div>
     <div class="fc-card"><div class="fc-num" style="color:${Math.round(ritmoXdia*10)/10>=necesarioXdia?'#2d6011':'#9b2020'}">${Math.round(ritmoXdia*10)/10}</div><div class="fc-label">Ritmo actual/día hábil</div><div class="fc-detail">${Math.round(ritmoXsemana*10)/10} uds/semana</div></div>
     <div class="fc-card"><div class="fc-num" style="color:${proyeccionFin>=metaUnidades?'#2d6011':'#9b2020'}">${proyeccionFin>=metaUnidades?'✅':'⚠️'}</div><div class="fc-label">${proyeccionFin>=metaUnidades?'Meta alcanzable':'Meta en riesgo'}</div><div class="fc-detail">${proyeccionFin>=metaUnidades?'Al ritmo actual':'Aceleración requerida'}</div></div>
   `;
-  $('forecastNote').textContent=`Ritmo: ${Math.round(ritmoXdia*10)/10} uds/día hábil · ${Math.round(ritmoXsemana*10)/10} uds/semana · ${diasHabilesTot} días hábiles en el mes`;
+  $('forecastNote').textContent=`Fact+Mat: ${gaugeTotal} · Ritmo: ${Math.round(ritmoXdia*10)/10} uds/día hábil · ${Math.round(ritmoXsemana*10)/10} uds/semana · ${diasHabilesTot} días hábiles en el mes`;
 
   // ── ANÁLISIS HISTÓRICO DE FACTURACIÓN (últimos 6 meses) ──
   const histEl=$('forecastHistorico');
@@ -4134,8 +4193,14 @@ function renderDashboard(){
   renderHistorialAnual(allFiltered);
   // Apply saved layout after all charts rendered
   setTimeout(aplicarLayoutInline,300);
+  // Apply saved chart configs
+  setTimeout(()=>{
+    Object.entries(CHART_CONFIGS).forEach(([chartId,cfg])=>{
+      if(Object.keys(cfg).length>0) applyConfigToChart(chartId,cfg);
+    });
+  },400);
   // Re-inject overlays if edit mode was active
-  if(EDIT_MODE) setTimeout(injectEditOverlays,350);
+  if(EDIT_MODE) setTimeout(injectEditOverlays,500);
 
   // ── COSECHAS ──
   renderCosechas(allFiltered);
@@ -5932,8 +5997,14 @@ function editSeg(id){
   $('segFechaFact').value=s.fechaFact||'';
   $('segFechaMat').value=s.fechaMat||'';
   $('segDesistidoField').style.display=s.estado==='Desistido'?'block':'none';
-  fillVinSelect();
-  setTimeout(()=>{if($('segVin'))$('segVin').value=s.vin||'';updateVinStatus();},100);
+  // Populate vehicle list first, then set value
+  fillVehicleSelects();
+  setTimeout(()=>{
+    if($('segVehiculo')&&s.vehiculo) $('segVehiculo').value=s.vehiculo;
+    fillVinSelect();
+    if($('segVin'))$('segVin').value=s.vin||'';
+    updateVinStatus();
+  },80);
   cm('mDetSeg');
   om('mNewSeg');
 }
@@ -5980,7 +6051,25 @@ async function guardarSeg(){
   let savedId=editId;
 
   if(editId){
-    await db.collection('seguimiento').doc(editId).update(data);
+    // ── PRESERVE existing values — only overwrite if field has a real value ──
+    // This prevents losing data when editing Facturado/Matriculado records
+    const existing=SEGS.find(s=>s._id===editId)||{};
+    const safeData={};
+    // Fields that should NEVER be cleared when editing
+    const neverClear=['vin','vehiculo','color','cedula','celular','nombre','createdAt',
+      'fechaSep','fechaFact','fechaMat','precio','abonos','cotizado','pruebaRuta',
+      'creditoAprobado','fechaCotizado','fechaPrueba','fechaCredito'];
+    Object.entries(data).forEach(([k,v])=>{
+      const isEmpty=(v===null||v===''||v===undefined||v===false&&!['cotizado','pruebaRuta','creditoAprobado'].includes(k));
+      const existingHasValue=existing[k]!=null&&existing[k]!=='';
+      // Never clear protected fields OR any field with existing value that's being cleared
+      if(isEmpty&&existingHasValue&&neverClear.includes(k)){
+        safeData[k]=existing[k];
+      } else {
+        safeData[k]=v;
+      }
+    });
+    await db.collection('seguimiento').doc(editId).update(safeData);
     toast('✅ Seguimiento actualizado');
   } else {
     data.createdAt=today();
