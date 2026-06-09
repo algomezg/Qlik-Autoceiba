@@ -672,7 +672,7 @@ body.edit-mode .dash-section-edit{display:flex}
           <div class="chart-card full">
             <div class="chart-title">🏆 Ranking de asesores — Unidades facturadas <span style="font-size:10px;color:#aaa;font-weight:400">(prospectos, pruebas, sep, fact, mat = mes | calientes = acumulado)</span></div>
             <table class="rank-table" id="rankingTable">
-              <thead><tr><th>#</th><th>Asesor</th><th>Vitrina</th><th>🔥 Calientes</th><th>Prospectos</th><th>🚗 Pruebas</th><th>🔒 Separados</th><th>📄 Facturados</th><th>✅ Matriculados</th><th style="color:#CC0001">🏆 Total</th><th>Conv. %</th><th>Progreso</th></tr></thead>
+              <thead><tr><th>#</th><th>Asesor</th><th>Vitrina</th><th>🔥 Calientes</th><th>Prospectos</th><th>🚗 Pruebas</th><th>🔒 Separados</th><th>📄 Facturados</th><th>✅ Matriculados</th><th>Conv. %</th><th>Progreso</th></tr></thead>
               <tbody id="rankingBody"></tbody>
             </table>
           </div>
@@ -3683,6 +3683,13 @@ function getMesActual(){
 function getDashMes(){
   const sel=$('dashFiltMes');
   if(sel&&sel.value) return sel.value;
+  // Auto-detect: find last month with actual data
+  if(SEGS&&SEGS.length>0){
+    const meses=SEGS.map(s=>s.fechaFact||s.fechaSep||s.createdAt||'')
+      .filter(f=>f).map(f=>f.substring(0,7))
+      .filter(f=>f).sort().reverse();
+    if(meses.length>0) return meses[0];
+  }
   return getMesActual();
 }
 
@@ -3718,9 +3725,15 @@ const CHART_COLORS=['#CC0001','#1457a0','#2d6011','#7a4a0a','#3a2e8f','#0d6048',
 function renderDashboard(){
   if(!CU||!db) return;
 
-  // ── Set default month to current if not set ──
+  // ── Set default month to last month with data ──
   const selMes=$('dashFiltMes');
-  if(selMes&&!selMes.value) selMes.value=getMesActual();
+  if(selMes&&!selMes.value){
+    // Auto-detect last month with facturados or createdAt data
+    const mesesConDatos=SEGS.map(s=>s.fechaFact||s.fechaSep||s.createdAt||'')
+      .filter(f=>f).map(f=>f.substring(0,7)).filter(f=>f).sort().reverse();
+    const autoMes=mesesConDatos.length>0?mesesConDatos[0]:getMesActual();
+    selMes.value=autoMes;
+  }
 
   // Fill filter selects
   const sa=$('dashFiltAsesor2');
@@ -3779,9 +3792,8 @@ function renderDashboard(){
     <div class="kpi-card" style="--kc:#1457a0"><div class="kpi-num">${separados}</div><div class="kpi-label">🔒 Separaciones vigentes</div><div class="kpi-sub">⚡ Acumulado pipeline</div></div>
     <div class="kpi-card" style="--kc:#7a4a0a"><div class="kpi-num">${estaSemana}</div><div class="kpi-label">🔴 Esta semana</div><div class="kpi-sub">Temperatura crítica</div></div>
     <div class="kpi-card" style="--kc:#3a2e8f"><div class="kpi-num">${separadosMes}</div><div class="kpi-label">🔒 Separados</div><div class="kpi-sub">${mesLabel}</div></div>
-    <div class="kpi-card" style="--kc:#CC0001"><div class="kpi-num">${facturados}</div><div class="kpi-label">📄 Facturados</div><div class="kpi-sub">${mesLabel}</div></div>
+    <div class="kpi-card" style="--kc:#CC0001"><div class="kpi-num">${facturados}</div><div class="kpi-label">📄 Facturados</div><div class="kpi-sub">${mesLabel} · Conv: ${convRate}%</div></div>
     <div class="kpi-card" style="--kc:#2d6011"><div class="kpi-num">${matriculados}</div><div class="kpi-label">✅ Matriculados</div><div class="kpi-sub">${mesLabel}</div></div>
-    <div class="kpi-card" style="--kc:#CC0001;border:2px solid #CC0001"><div class="kpi-num" style="font-size:36px">${gaugeTotal}</div><div class="kpi-label">🏆 Total Fact+Mat</div><div class="kpi-sub">${mesLabel} · Conv: ${convRate}%</div></div>
     <div class="kpi-card" style="--kc:#888"><div class="kpi-num">${desistidos}</div><div class="kpi-label">❌ Desistidos</div><div class="kpi-sub">${mesLabel}</div></div>
     <div class="kpi-card" style="--kc:#3a2e8f"><div class="kpi-num">${testDrives}</div><div class="kpi-label">🚗 Test drives</div><div class="kpi-sub">${mesLabel}</div></div>
     <div class="kpi-card" style="--kc:#3a2e8f"><div class="kpi-num">${convRate}%</div><div class="kpi-label">📈 Conversión</div><div class="kpi-sub">${mesLabel}</div></div>
@@ -3979,35 +3991,27 @@ function renderDashboard(){
     const aSep=aAll.filter(s=>enMes(s.fechaSep)).length; // del mes
     const aFact=aAll.filter(s=>enMes(s.fechaFact)).length; // del mes
     const aMat=aAll.filter(s=>enMes(s.fechaMat)).length; // del mes
-    // aTotal = fact + mat deduplicado (un registro puede tener ambas fechas)
-    const aTotalIds=new Set();
-    aAll.filter(s=>enMes(s.fechaFact)).forEach(s=>aTotalIds.add(s._id));
-    aAll.filter(s=>enMes(s.fechaMat)).forEach(s=>aTotalIds.add(s._id));
-    const aTotal=aTotalIds.size;
     const aProsp=aAll.filter(s=>enMes(s.createdAt)).length; // del mes
-    const aConv=aProsp>0?Math.round((aTotal/aProsp)*100):0;
-    return{u,aProsp,aSep,aFact,aMat,aTotal,aCal,aPrueba,aConv};
-  }).sort((a,b)=>b.aTotal-a.aTotal);
+    const aConv=aProsp>0?Math.round((aFact/aProsp)*100):0;
+    return{u,aProsp,aSep,aFact,aMat,aCal,aPrueba,aConv};
+  }).sort((a,b)=>b.aFact-a.aFact);
 
-  const maxFact=rankData.length?Math.max(...rankData.map(r=>r.aTotal),1):1;
+  const maxFact=rankData.length?Math.max(...rankData.map(r=>r.aFact),1):1;
   $('rankingBody').innerHTML=rankData.map((r,i)=>{
     const pos=i+1;
     const posCls=pos===1?'pos-1':pos===2?'pos-2':pos===3?'pos-3':'pos-n';
-    const barW=Math.round((r.aTotal/maxFact)*100);
+    const barW=Math.round((r.aFact/maxFact)*100);
     const nombre=r.u.nombre.split(' ').slice(0,2).join(' ');
     return `<tr>
       <td><div class="rank-pos ${posCls}">${pos}</div></td>
       <td><strong style="font-size:12px">${nombre}</strong></td>
       <td><span class="b bgy" style="font-size:10px">${r.u.sede||'—'}</span></td>
-      <td style="text-align:center;font-weight:700;color:#b84c00">${r.aCal}</td>
       <td style="text-align:center">${r.aProsp}</td>
-      <td style="text-align:center;color:#3a2e8f;font-weight:600">${r.aPrueba}</td>
-      <td style="text-align:center;color:#1457a0;font-weight:600">${r.aSep}</td>
+      <td style="text-align:center">${r.aSep}</td>
       <td style="text-align:center;font-weight:700;color:#CC0001">${r.aFact}</td>
       <td style="text-align:center;color:#2d6011;font-weight:700">${r.aMat}</td>
-      <td style="text-align:center;font-weight:900;color:#CC0001;font-size:15px;background:#fff5f5;border-radius:6px">${r.aTotal}</td>
       <td style="text-align:center"><span class="b ${r.aConv>=30?'bg':r.aConv>=15?'ba':'br'}">${r.aConv}%</span></td>
-      <td style="min-width:110px"><div style="display:flex;align-items:center;gap:6px"><div class="rank-bar-wrap" style="flex:1"><div class="rank-bar" style="width:${barW}%"></div></div><span style="font-size:10px;color:#aaa;white-space:nowrap">${r.aTotal}/${metaUnidades}</span></div></td>
+      <td style="min-width:100px"><div style="display:flex;align-items:center;gap:6px"><div class="rank-bar-wrap"><div class="rank-bar" style="width:${barW}%"></div></div><span style="font-size:10px;color:#aaa;white-space:nowrap">${r.aFact}/${metaUnidades}</span></div></td>
     </tr>`;
   }).join('');
 
@@ -4019,11 +4023,10 @@ function renderDashboard(){
     data:{
       labels:rankData.map(r=>r.u.nombre.split(' ')[0]+' '+r.u.nombre.split(' ')[1]),
       datasets:[
-        {label:'🏆 Total (Fact+Mat)',data:rankData.map(r=>r.aTotal),backgroundColor:'#CC0001',borderRadius:5},
-        {label:'📄 Facturados',data:rankData.map(r=>r.aFact),backgroundColor:'rgba(204,0,1,0.45)',borderRadius:5},
-        {label:'✅ Matriculados',data:rankData.map(r=>r.aMat),backgroundColor:'#2d6011',borderRadius:5},
-        {label:'🔒 Separados',data:rankData.map(r=>r.aSep),backgroundColor:'#fac775',borderRadius:5},
-        {label:'🔥 Calientes (acum.)',data:rankData.map(r=>r.aCal),backgroundColor:'rgba(184,76,0,0.25)',borderRadius:5}
+        {label:'Facturados mes',data:rankData.map(r=>r.aFact),backgroundColor:'#CC0001',borderRadius:5},
+        {label:'Separados mes',data:rankData.map(r=>r.aSep),backgroundColor:'#fac775',borderRadius:5},
+        {label:'Matriculados mes',data:rankData.map(r=>r.aMat),backgroundColor:'#2d6011',borderRadius:5},
+        {label:'🔥 Calientes (acum.)',data:rankData.map(r=>r.aCal),backgroundColor:'rgba(184,76,0,0.3)',borderRadius:5}
       ]
     },
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}
