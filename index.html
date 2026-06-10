@@ -2051,17 +2051,17 @@ function showPage(p){
   if(p==='leads') renderLeads();
   if(p==='seguimiento') renderSeg();
   if(p==='notificaciones'){
-    // Refresh checkboxes from current NOTIF_PREFS state
     Object.keys(NOTIF_PREFS).forEach(k=>{
       const cb=document.getElementById('notif_'+k);
       if(cb) cb.checked=NOTIF_PREFS[k];
     });
-    // Refresh emailjs status badge
     const st=$('emailjsStatus');
     if(st&&EJS_CONFIG.publicKey){
       st.textContent='✅ Configurado';
       st.style.background='#eaf3de';st.style.color='#2d6011';
     }
+    // Load notification history from Firebase
+    cargarNotifLog();
   }
   if(p==='editor'){
     if(Object.keys(DASH_LAYOUT.widgets||{}).length===0) cargarLayoutDash().then(()=>renderEditor());
@@ -3445,10 +3445,13 @@ function showNotifBadge(msg){
   setTimeout(()=>b.classList.remove('show'),4000);
 }
 
-function logNotif(entry){
-  NOTIF_LOG.unshift(entry);
+function renderNotifLog(){
   const el=$('notifLog');
   if(!el) return;
+  if(!NOTIF_LOG.length){
+    el.innerHTML='<div style="text-align:center;color:#ccc;padding:1.5rem">Sin notificaciones enviadas aún</div>';
+    return;
+  }
   el.innerHTML=NOTIF_LOG.slice(0,50).map(e=>`
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:12px">
       <span style="color:${e.status==='enviado'?'#2d6011':'#9b2020'};font-size:16px">${e.status==='enviado'?'✅':'❌'}</span>
@@ -3457,10 +3460,55 @@ function logNotif(entry){
     </div>`).join('');
 }
 
-function limpiarLogNotif(){
+async function logNotif(entry){
+  NOTIF_LOG.unshift(entry);
+  renderNotifLog();
+  // Persist to Firebase
+  if(db){
+    try{
+      await db.collection('notif_log').add({
+        ...entry,
+        uid: CU?CU.id:'',
+        savedAt: new Date().toISOString()
+      });
+    }catch(e){console.warn('Log save error:',e);}
+  }
+}
+
+async function cargarNotifLog(){
+  if(!db) return;
+  try{
+    const snap=await db.collection('notif_log')
+      .orderBy('savedAt','desc')
+      .limit(50)
+      .get();
+    NOTIF_LOG=snap.docs.map(d=>d.data());
+    renderNotifLog();
+  }catch(e){
+    // If index not ready, fallback without orderBy
+    try{
+      const snap2=await db.collection('notif_log').limit(50).get();
+      NOTIF_LOG=snap2.docs.map(d=>d.data());
+      NOTIF_LOG.sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
+      renderNotifLog();
+    }catch(e2){}
+  }
+}
+
+async function limpiarLogNotif(){
+  if(!confirm('¿Limpiar todo el historial de notificaciones?')) return;
   NOTIF_LOG=[];
-  const el=$('notifLog');
-  if(el) el.innerHTML='<div style="text-align:center;color:#ccc;padding:1.5rem">Sin notificaciones</div>';
+  renderNotifLog();
+  // Delete from Firebase
+  if(db){
+    try{
+      const snap=await db.collection('notif_log').limit(500).get();
+      const batch=db.batch();
+      snap.docs.forEach(d=>batch.delete(d.ref));
+      await batch.commit();
+      toast('🗑️ Historial eliminado');
+    }catch(e){toast('⚠️ Error limpiando: '+e.message);}
+  }
 }
 
 // ══════════════════════════════════════════
@@ -7147,19 +7195,48 @@ function importXL(inp){
       const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+
+      // Helper: get first matching column value
+      const col=(r,...keys)=>{for(const k of keys){if(r[k]!==undefined&&r[k]!=='')return String(r[k]).trim();}return '';};
+
       let added=0;const nuevosVins=[];
       for(const r of rows){
-        const vin=(r['VIN']||r['vin']||'').toString().trim();
-        if(!vin||INV.find(v=>v.vin===vin))continue;
-        await db.collection('inventario').doc(vin).set({vin,producto:(r['Producto']||r['PRODUCTO']||'').toString().trim(),mod:parseInt(r['Mod']||r['Año']||2026),color:(r['Color']||'').toString().trim(),colorInt:(r['Color Interior']||'').toString().trim(),chasis:(r['Chasis']||'').toString().trim(),motor:(r['Motor']||'').toString().trim(),ubicacion:(r['Ubicación']||r['Ubicacion']||'CEIBA').toString().trim(),estado:(r['ESTADO']||'DISPONIBLE').toString().trim().toUpperCase(),estadoUNOE:(r['Estado UNOE']||'Disponible').toString().trim(),diasInv:parseInt(r['Días inventario']||0)||0,sepAsesorId:null,sepFecha:null,sepObs:''});
-        nuevosVins.push({vin,producto:leadData?leadData.producto:(r['Producto']||r['PRODUCTO']||'').toString().trim(),color:(r['Color']||'').toString().trim(),ubicacion:(r['Ubicación']||r['Ubicacion']||'CEIBA').toString().trim(),mod:parseInt(r['Mod']||r['Año']||2026)||2026});
+        const vin=col(r,'VIN','vin','Vin');
+        if(!vin) continue;
+        if(INV.find(v=>v.vin===vin)) continue;
+
+        const producto = col(r,'Producto','PRODUCTO','producto');
+        const mod      = parseInt(col(r,'Mod','Año','mod')||'2026')||2026;
+        const color    = col(r,'Color','COLOR','color');
+        const colorInt = col(r,'Color Interior','ColorInterior');
+        const ubicacion= col(r,'Ubicación','Ubicacion','UBICACION','Agencia asignada a 09 de Junio','Agencia asignada')||'CEIBA';
+        const chasis   = col(r,'Chasis','CHASIS','chasis');
+        const motor    = col(r,'Motor','MOTOR','motor');
+        const diasInv  = parseInt(col(r,'Días inventario','Dias inventario')||'0')||0;
+        const diasSep  = parseInt(col(r,'Días separación','Dias separacion')||'0')||0;
+        const estadoUnoe= col(r,'Estado UNOE','EstadoUNOE')||'Disponible';
+        const separado  = col(r,'Separado','separado')==='1';
+        const estado    = separado?'SEPARADO':'DISPONIBLE';
+
+        await db.collection('inventario').doc(vin).set({
+          vin,producto,mod,color,colorInt,chasis,motor,
+          ubicacion,estado,estadoUNOE:estadoUnoe,
+          diasInv,diasSep,oculto:false,
+          sepAsesorId:null,sepFecha:null,sepObs:'',
+          importadoEn:today()
+        });
+        nuevosVins.push({vin,producto,color,ubicacion,mod});
         added++;
       }
-      toast(`✅ ${added} vehículos importados`);
-      if(added>0){try{await notifNuevoInventario(nuevosVins);}catch(e){}}
-    }catch{toast('❌ Error al leer Excel');}
+      toast('✅ '+added+' vehículo'+(added!==1?'s':'')+' importado'+(added!==1?'s':'')+' correctamente');
+      if(added>0){try{await notifNuevoInventario(nuevosVins);}catch(eN){}}
+    }catch(err){
+      console.error('Import error:',err);
+      toast('❌ Error al leer Excel: '+err.message);
+    }
+    inp.value='';
   };
-  reader.readAsArrayBuffer(file);inp.value='';
+  reader.readAsArrayBuffer(file);
 }
 </script>
 </body>
