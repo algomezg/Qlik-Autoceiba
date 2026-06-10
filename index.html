@@ -121,6 +121,11 @@ tr:hover td{background:#fafafa}
 .sd{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:4px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
+/* ── NOTIFICACIONES ── */
+.notif-badge{position:fixed;bottom:5rem;right:1.5rem;background:#2d6011;color:#fff;border-radius:12px;padding:.6rem 1rem;font-size:12px;font-weight:600;z-index:8888;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;display:flex;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.notif-badge.show{opacity:1;transform:translateY(0)}
+.notif-badge.error{background:#9b2020}
+
 /* ── EDIT MODE ── */
 .edit-mode-bar{display:none;background:linear-gradient(135deg,#0a0a0a,#1a1a1a);border-radius:10px;padding:.75rem 1.1rem;margin-bottom:1rem;align-items:center;gap:12px;border:2px solid #CC0001;flex-wrap:wrap}
 .edit-mode-bar.visible{display:flex}
@@ -397,6 +402,7 @@ body.edit-mode .dash-section-edit{display:flex}
       <div class="ni" id="nav-desistidos"><span>❌</span>Desistidos</div>
       <div class="ns">Administración</div>
       <div class="ni hidden" id="nav-config"><span>⚙️</span>Configuración</div>
+      <div class="ni hidden" id="nav-notificaciones"><span>🔔</span>Notificaciones</div>
       <div class="ni hidden" id="nav-editor"><span>🎛️</span>Editor Dashboard</div>
       <div class="ni hidden" id="nav-simulador"><span>💰</span>Simulador comisiones</div>
       <div class="ni hidden" id="nav-usuarios"><span>👥</span>Usuarios</div>
@@ -1090,6 +1096,104 @@ body.edit-mode .dash-section-edit{display:flex}
 
       </div>
 
+      <div class="pg" id="page-notificaciones">
+        <div class="pt">🔔 Configuración de notificaciones</div>
+        <div class="ps">Sistema de alertas por correo electrónico — powered by EmailJS</div>
+
+        <!-- SETUP EMAILJS -->
+        <div class="card" id="emailjsSetupCard">
+          <div class="ct">⚙️ Configuración EmailJS
+            <span id="emailjsStatus" style="margin-left:8px;font-size:11px;padding:3px 10px;border-radius:20px;background:#f1efe8;color:#888">Sin configurar</span>
+          </div>
+          <div class="ib ibi" style="margin-bottom:1rem">
+            ℹ️ <div>EmailJS permite enviar correos gratis (200/mes) sin servidor.
+            <strong>Pasos:</strong> 1) Crea cuenta en <a href="https://www.emailjs.com" target="_blank" style="color:#CC0001">emailjs.com</a> →
+            2) Conecta tu correo <strong>@autoceiba.com.co</strong> (Microsoft/Outlook → selecciona "Outlook" como servicio) →
+            3) Copia el Service ID → 4) Crea un template con ID exacto <strong>template_qlik_notif</strong>
+            con variables: <code>{{to_email}}</code>, <code>{{subject}}</code>, <code>{{html_content}}</code>, <code>{{from_name}}</code>.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:1rem">
+            <div class="ff">
+              <label>Public Key (Account → API Keys)</label>
+              <input type="text" id="ejsPublicKey" placeholder="user_XXXXXXXXXXXXXXX">
+            </div>
+            <div class="ff">
+              <label>Service ID (Email Services)</label>
+              <input type="text" id="ejsServiceId" placeholder="service_XXXXXXX">
+            </div>
+            <div class="ff">
+              <label>Correo remitente (tu Gmail conectado)</label>
+              <input type="email" id="ejsFromEmail" placeholder="notificaciones@autoceiba.com.co">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btnp" onclick="guardarConfigEmailJS()">💾 Guardar configuración</button>
+            <button class="btn btns" onclick="testEmailJS()">📧 Enviar correo de prueba</button>
+          </div>
+        </div>
+
+        <!-- ACTIVAR / DESACTIVAR POR EVENTO -->
+        <div class="card">
+          <div class="ct">🔔 Eventos que disparan notificaciones</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;background:#fafafa;border-radius:9px;border:1px solid #ebebeb">
+              <div>
+                <div style="font-size:13px;font-weight:600">🚗 Nueva etapa de alistamiento</div>
+                <div style="font-size:11px;color:#888;margin-top:2px">✉️ Solo al asesor del vehículo: "VIN en nueva etapa — mide los tiempos para la fecha de entrega"</div>
+              </div>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="checkbox" id="notif_alistamiento" checked style="accent-color:#CC0001;width:18px;height:18px">
+                <span style="font-size:12px;color:#888">Activo</span>
+              </label>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;background:#fafafa;border-radius:9px;border:1px solid #ebebeb">
+              <div>
+                <div style="font-size:13px;font-weight:600">📍 Cambio de ubicación de vehículo separado</div>
+                <div style="font-size:11px;color:#888;margin-top:2px">Alerta cuando un vehículo asignado a un asesor cambia de sede</div>
+              </div>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="checkbox" id="notif_ubicacion" checked style="accent-color:#CC0001;width:18px;height:18px">
+                <span style="font-size:12px;color:#888">Activo</span>
+              </label>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;background:#fafafa;border-radius:9px;border:1px solid #ebebeb">
+              <div>
+                <div style="font-size:13px;font-weight:600">📦 Nuevos vehículos en inventario</div>
+                <div style="font-size:11px;color:#888;margin-top:2px">✉️ A todos los asesores: "IMPORTANTE Nuevo inventario disponible — revisa e inicia prospección"</div>
+              </div>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="checkbox" id="notif_nuevo_inv" checked style="accent-color:#CC0001;width:18px;height:18px">
+                <span style="font-size:12px;color:#888">Activo</span>
+              </label>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;background:#fafafa;border-radius:9px;border:1px solid #ebebeb">
+              <div>
+                <div style="font-size:13px;font-weight:600">🔒 Vehículo separado</div>
+                <div style="font-size:11px;color:#888;margin-top:2px">✉️ Al asesor: "¡Felicitaciones! VIN asignado, tienes 8 días para facturar" · ✉️ A los demás: "Revisa el inventario, un compañero separó un VIN"</div>
+              </div>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="checkbox" id="notif_separado" checked style="accent-color:#CC0001;width:18px;height:18px">
+                <span style="font-size:12px;color:#888">Activo</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOG DE NOTIFICACIONES -->
+        <div class="card">
+          <div class="ct">📋 Historial de notificaciones enviadas
+            <button class="btn btns btnsm" style="margin-left:auto" onclick="limpiarLogNotif()">🗑️ Limpiar</button>
+          </div>
+          <div id="notifLog" style="max-height:300px;overflow-y:auto;font-size:12px">
+            <div style="text-align:center;color:#ccc;padding:1.5rem">No hay notificaciones enviadas aún</div>
+          </div>
+        </div>
+      </div>
+
       <div class="pg" id="page-editor">
         <div class="pt">🎛️ Editor del Dashboard</div>
         <div class="ps">Personaliza qué gráficas ver, su tamaño y las variables que cruzan — exclusivo para gerencia</div>
@@ -1662,10 +1766,12 @@ body.edit-mode .dash-section-edit{display:flex}
 </div></div>
 
 <div class="toast" id="toast"></div>
+<div class="notif-badge" id="notifBadge">📧 <span id="notifBadgeText"></span></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -1921,6 +2027,7 @@ function doLogout(){
 function setupNav(){
   $('nav-usuarios').classList.toggle('hidden',!isGer());
   $('nav-editor').classList.toggle('hidden',!isGer());
+  $('nav-notificaciones').classList.toggle('hidden',!isGer());
   if($('editDashBtn')) $('editDashBtn').style.display=isGer()?'block':'none';
   $('nav-simulador').classList.toggle('hidden',!isGer());
   $('nav-metas').classList.toggle('hidden',!isGer());
@@ -1970,6 +2077,7 @@ function showPage(p){
   }
   if(p==='leads') renderLeads();
   if(p==='seguimiento') renderSeg();
+  if(p==='notificaciones'){/* loads on demand */}
   if(p==='editor'){
     if(Object.keys(DASH_LAYOUT.widgets||{}).length===0) cargarLayoutDash().then(()=>renderEditor());
     else renderEditor();
@@ -2045,8 +2153,13 @@ function renderInv(){
 }
 function openSep(vin){curVin=vin;$('sepAs').innerHTML=USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');$('sepOb').value='';om('mSep');}
 async function confirmarSep(){
-  await db.collection('inventario').doc(curVin).update({estado:'SEPARADO',sepAsesorId:$('sepAs').value,sepFecha:today(),sepObs:$('sepOb').value});
+  const vin=curVin;
+  await db.collection('inventario').doc(vin).update({estado:'SEPARADO',sepAsesorId:$('sepAs').value,sepFecha:today(),sepObs:$('sepOb').value});
   cm('mSep');toast('✅ Vehículo separado');
+  // Notify asesor (felicitaciones) and otros asesores (inventario)
+  // Find cliente from seguimiento if linked
+  const segCliente=(SEGS.find(s=>s.vin===vin)||{}).nombre||'';
+  setTimeout(async()=>{try{await notifSeparado(vin,segCliente);}catch(e){}},500);
 }
 async function libVeh(vin){
   await db.collection('inventario').doc(vin).update({estado:'DISPONIBLE',sepAsesorId:null,sepFecha:null,sepObs:''});
@@ -2348,6 +2461,8 @@ async function markEt(pid,idx){
   const etapas=[...p.etapas];etapas[idx]={...etapas[idx],done:true,fecha:today()};
   await db.collection('procesos').doc(pid).update({etapas});
   verDet(pid);toast('✅ Etapa completada');
+  // Notify asesor
+  try{await notifAlistamiento({...p,etapas},idx);}catch(e){}
 }
 function openNuevaEnt(){om('mNE');}
 async function crearProc(){
@@ -2638,6 +2753,513 @@ function onWidgetDropReorder(e,i){
     DRAGGING_WIDGET_IDX=null;
     renderCanvas();
   }
+}
+
+// ══════════════════════════════════════════
+// SISTEMA DE NOTIFICACIONES — EmailJS
+// ══════════════════════════════════════════
+let EJS_CONFIG = { publicKey:'', serviceId:'', fromEmail:'' };
+let NOTIF_LOG = [];
+let NOTIF_PREFS = { alistamiento:true, ubicacion:true, nuevo_inv:true, separado:true };
+
+// ── EmailJS HTML TEMPLATES ──
+const EMAIL_TEMPLATES = {
+
+  // ── 1. ALISTAMIENTO — solo al asesor del vehículo ──
+  alistamiento: (data) => `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nueva etapa de alistamiento</title></head>
+<body style="margin:0;padding:0;background:#f2f2ee;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2ee;padding:24px 0">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px">
+
+  <!-- HEADER -->
+  <tr><td style="background:#0a0a0a;padding:24px 32px;text-align:center">
+    <p style="margin:0;font-size:26px;font-weight:900;color:#ffffff;letter-spacing:-1px">Q<span style="color:#CC0001">l</span>ik · Auto Ceiba</p>
+    <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:3px;text-transform:uppercase">Portal Comercial Honda</p>
+  </td></tr>
+
+  <!-- BANNER -->
+  <tr><td style="background:#CC0001;padding:20px 32px">
+    <p style="margin:0;font-size:18px;font-weight:700;color:#ffffff">🚗 Nueva etapa de alistamiento</p>
+    <p style="margin:4px 0 0;font-size:13px;color:rgba(255,255,255,0.85)">Tu vehículo avanza en el proceso de entrega</p>
+  </td></tr>
+
+  <!-- BODY -->
+  <tr><td style="padding:28px 32px">
+    <p style="margin:0 0 16px;font-size:15px;color:#333">Hola <strong>${data.asesor}</strong>,</p>
+    <p style="margin:0 0 20px;font-size:14px;color:#555;line-height:1.6">
+      El VIN <strong style="color:#CC0001">${data.vin}</strong> del cliente <strong>${data.cliente}</strong>
+      está en esta nueva etapa del proceso, recuerda medir muy bien los tiempos para calcular
+      la fecha de entrega.
+    </p>
+
+    <!-- VEH CARD -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f8f8;border-radius:10px;border-left:4px solid #CC0001;margin-bottom:20px">
+    <tr><td style="padding:16px 20px">
+      <p style="margin:0;font-size:15px;font-weight:700;color:#1a1a1a">${data.vehiculo}</p>
+      <p style="margin:3px 0 0;font-size:12px;color:#888;font-family:Courier New,monospace">VIN: ${data.vin}</p>
+    </td></tr></table>
+
+    <!-- ETAPA COMPLETADA -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eaf3de;border-radius:10px;margin-bottom:20px">
+    <tr><td style="padding:14px 20px">
+      <p style="margin:0;font-size:13px;color:#2d6011;font-weight:700">✅ Etapa completada: ${data.etapaCompletada}</p>
+      <p style="margin:4px 0 0;font-size:12px;color:#2d6011">Fecha: ${data.fecha} &nbsp;·&nbsp; ${data.etapasDone} de ${data.etapasTotal} etapas (${data.pct}%)</p>
+    </td></tr></table>
+
+    <!-- BARRA PROGRESO (tabla) -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px">
+    <tr>
+      <td width="${data.pct}%" style="background:#CC0001;height:8px;border-radius:20px 0 0 20px"></td>
+      <td style="background:#ebebeb;height:8px;border-radius:0 20px 20px 0"></td>
+    </tr></table>
+    <p style="margin:0 0 20px;font-size:11px;color:#aaa;text-align:right">${data.pct}% completado</p>
+
+    ${data.pct===100?'<table width="100%" cellpadding="0" cellspacing="0" style="background:#eaf3de;border-radius:10px;margin-bottom:20px"><tr><td style="padding:16px 20px"><p style="margin:0;font-size:14px;font-weight:700;color:#2d6011">🎉 ¡Vehículo listo para entrega! Coordina con tu cliente la fecha.</p></td></tr></table>':''}
+
+    <!-- CTA -->
+    <table cellpadding="0" cellspacing="0"><tr><td style="background:#CC0001;border-radius:9px">
+      <a href="https://algomezg.github.io/Qlik-Autoceiba" style="display:inline-block;padding:13px 28px;color:#ffffff;font-weight:700;font-size:14px;text-decoration:none">Ver proceso de entrega →</a>
+    </td></tr></table>
+  </td></tr>
+
+  <!-- FOOTER -->
+  <tr><td style="background:#0a0a0a;padding:18px 32px;text-align:center">
+    <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.3)">Auto Ceiba · Honda · Cali, Colombia · Qlik Portal Comercial</p>
+  </td></tr>
+
+</table>
+</td></tr></table>
+</body></html>`,
+
+  // ── 2. SEPARADO — al asesor del vehículo: ¡Felicitaciones! ──
+  separado_asesor: (data) => `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Asignación VIN ${data.vin}</title></head>
+<body style="margin:0;padding:0;background:#f2f2ee;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2ee;padding:24px 0">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px">
+
+  <!-- HEADER -->
+  <tr><td style="background:#0a0a0a;padding:24px 32px;text-align:center">
+    <p style="margin:0;font-size:26px;font-weight:900;color:#ffffff;letter-spacing:-1px">Q<span style="color:#CC0001">l</span>ik · Auto Ceiba</p>
+    <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:3px;text-transform:uppercase">Portal Comercial Honda</p>
+  </td></tr>
+
+  <!-- BANNER CELEBRACIÓN -->
+  <tr><td style="background:linear-gradient(135deg,#CC0001,#8B0000);padding:28px 32px;text-align:center">
+    <p style="margin:0;font-size:32px">🎉</p>
+    <p style="margin:8px 0 0;font-size:20px;font-weight:700;color:#ffffff">¡Felicitaciones, ${data.asesor}!</p>
+    <p style="margin:6px 0 0;font-size:13px;color:rgba(255,255,255,0.85)">Se te ha asignado un nuevo VIN</p>
+  </td></tr>
+
+  <!-- BODY -->
+  <tr><td style="padding:28px 32px">
+    <p style="margin:0 0 20px;font-size:14px;color:#555;line-height:1.7">
+      El VIN <strong style="color:#CC0001">${data.vin}</strong> ha sido asignado a tu cliente
+      <strong>${data.cliente}</strong>. Tienes <strong>8 días</strong> para avanzar en la
+      negociación y facturarlo. ¡Estás más cerca de cumplir tu objetivo del mes!
+    </p>
+
+    <!-- VEH INFO -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f8f8;border-radius:10px;border-left:4px solid #CC0001;margin-bottom:20px">
+    <tr><td style="padding:18px 22px">
+      <p style="margin:0;font-size:16px;font-weight:700;color:#1a1a1a">${data.vehiculo}</p>
+      <p style="margin:4px 0 0;font-size:12px;color:#888;font-family:Courier New,monospace">VIN: ${data.vin}</p>
+      <p style="margin:4px 0 0;font-size:12px;color:#888">Color: ${data.color} &nbsp;·&nbsp; Ubicación: ${data.ubicacion}</p>
+      <p style="margin:4px 0 0;font-size:12px;color:#888">Cliente: ${data.cliente}</p>
+    </td></tr></table>
+
+    <!-- COUNTDOWN -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#faeeda;border-radius:10px;margin-bottom:20px">
+    <tr><td style="padding:16px 22px;text-align:center">
+      <p style="margin:0;font-size:36px;font-weight:900;color:#7a4a0a">8</p>
+      <p style="margin:2px 0 0;font-size:13px;color:#7a4a0a;font-weight:600">días para facturar</p>
+      <p style="margin:4px 0 0;font-size:11px;color:#b07040">Fecha límite sugerida: ${data.fechaLimite}</p>
+    </td></tr></table>
+
+    <!-- CTA -->
+    <table cellpadding="0" cellspacing="0"><tr><td style="background:#CC0001;border-radius:9px">
+      <a href="https://algomezg.github.io/Qlik-Autoceiba" style="display:inline-block;padding:13px 28px;color:#ffffff;font-weight:700;font-size:14px;text-decoration:none">Ver mi seguimiento →</a>
+    </td></tr></table>
+  </td></tr>
+
+  <!-- FOOTER -->
+  <tr><td style="background:#0a0a0a;padding:18px 32px;text-align:center">
+    <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.3)">Auto Ceiba · Honda · Cali, Colombia · Qlik Portal Comercial</p>
+  </td></tr>
+
+</table>
+</td></tr></table>
+</body></html>`,
+
+  // ── 3. NUEVO INVENTARIO — todos los asesores ──
+  nuevo_inventario: (data) => `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nuevo inventario disponible</title></head>
+<body style="margin:0;padding:0;background:#f2f2ee;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2ee;padding:24px 0">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px">
+
+  <!-- HEADER -->
+  <tr><td style="background:#0a0a0a;padding:24px 32px;text-align:center">
+    <p style="margin:0;font-size:26px;font-weight:900;color:#ffffff;letter-spacing:-1px">Q<span style="color:#CC0001">l</span>ik · Auto Ceiba</p>
+    <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:3px;text-transform:uppercase">Portal Comercial Honda</p>
+  </td></tr>
+
+  <!-- BANNER -->
+  <tr><td style="background:#CC0001;padding:24px 32px;text-align:center">
+    <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:2px">⚠️ IMPORTANTE</p>
+    <p style="margin:8px 0 0;font-size:22px;font-weight:700;color:#ffffff">Nuevo inventario disponible</p>
+    <table cellpadding="0" cellspacing="0" align="center" style="margin-top:12px">
+    <tr><td style="background:rgba(255,255,255,0.2);border-radius:50px;padding:8px 24px;text-align:center">
+      <span style="font-size:32px;font-weight:900;color:#ffffff">${data.cantidad}</span>
+      <span style="font-size:14px;color:rgba(255,255,255,0.9);margin-left:6px">vehículo${data.cantidad!==1?'s':''} nuevo${data.cantidad!==1?'s':''}</span>
+    </td></tr></table>
+  </td></tr>
+
+  <!-- BODY -->
+  <tr><td style="padding:28px 32px">
+    <p style="margin:0 0 8px;font-size:15px;color:#333">¡Hola <strong>${data.asesor}</strong>!</p>
+    <p style="margin:0 0 20px;font-size:14px;color:#555;line-height:1.7">
+      Hemos agregado nuevos inventarios disponibles para que puedas alcanzar tus objetivos comerciales.
+      Revisa el nuevo inventario e inicia con el proceso de prospección. ¡Muchos éxitos!
+    </p>
+
+    <!-- LISTA VEHÍCULOS -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f8f8;border-radius:10px;margin-bottom:20px">
+    <tr><td style="padding:14px 18px 6px">
+      ${data.vehiculos.slice(0,10).map(v=>`
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;border-bottom:1px solid #ebebeb;padding-bottom:10px">
+      <tr>
+        <td width="10" style="vertical-align:top;padding-top:3px"><span style="display:inline-block;width:8px;height:8px;background:#CC0001;border-radius:50%"></span></td>
+        <td style="padding-left:10px">
+          <p style="margin:0;font-size:13px;font-weight:700;color:#333">${v.producto} ${v.mod}</p>
+          <p style="margin:2px 0 0;font-size:11px;color:#888">${v.color} · ${v.ubicacion} · <span style="font-family:Courier New,monospace">VIN: ${v.vin}</span></p>
+        </td>
+      </tr></table>`).join('')}
+      ${data.vehiculos.length>10?`<p style="text-align:center;font-size:12px;color:#aaa;padding:8px 0">+${data.vehiculos.length-10} vehículos más en el portal</p>`:''}
+    </td></tr></table>
+
+    <!-- CTA -->
+    <table cellpadding="0" cellspacing="0"><tr><td style="background:#CC0001;border-radius:9px">
+      <a href="https://algomezg.github.io/Qlik-Autoceiba" style="display:inline-block;padding:13px 28px;color:#ffffff;font-weight:700;font-size:14px;text-decoration:none">Ver inventario completo →</a>
+    </td></tr></table>
+  </td></tr>
+
+  <!-- FOOTER -->
+  <tr><td style="background:#0a0a0a;padding:18px 32px;text-align:center">
+    <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.3)">Auto Ceiba · Honda · Cali, Colombia · Qlik Portal Comercial</p>
+  </td></tr>
+
+</table>
+</td></tr></table>
+</body></html>`,
+
+  // ── 4. SEPARADO COMPAÑERO — todos los demás asesores ──
+  separado_equipo: (data) => `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modificación inventario</title></head>
+<body style="margin:0;padding:0;background:#f2f2ee;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2ee;padding:24px 0">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px">
+
+  <!-- HEADER -->
+  <tr><td style="background:#0a0a0a;padding:24px 32px;text-align:center">
+    <p style="margin:0;font-size:26px;font-weight:900;color:#ffffff;letter-spacing:-1px">Q<span style="color:#CC0001">l</span>ik · Auto Ceiba</p>
+    <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:3px;text-transform:uppercase">Portal Comercial Honda</p>
+  </td></tr>
+
+  <!-- BANNER -->
+  <tr><td style="background:#7a4a0a;padding:20px 32px">
+    <p style="margin:0;font-size:18px;font-weight:700;color:#ffffff">🔒 Modificación de inventario</p>
+    <p style="margin:4px 0 0;font-size:13px;color:rgba(255,255,255,0.85)">Hay cambios en el inventario disponible</p>
+  </td></tr>
+
+  <!-- BODY -->
+  <tr><td style="padding:28px 32px">
+    <p style="margin:0 0 16px;font-size:15px;color:#333">Hola <strong>${data.asesor}</strong>,</p>
+    <p style="margin:0 0 20px;font-size:14px;color:#555;line-height:1.7">
+      Revisa los nuevos vehículos disponibles, un compañero tuyo acaba de separar un VIN.
+    </p>
+
+    <!-- VEH INFO -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#faeeda;border-radius:10px;border-left:4px solid #7a4a0a;margin-bottom:20px">
+    <tr><td style="padding:16px 20px">
+      <p style="margin:0;font-size:13px;font-weight:700;color:#7a4a0a">VIN separado:</p>
+      <p style="margin:6px 0 0;font-size:15px;font-weight:700;color:#333">${data.vehiculo}</p>
+      <p style="margin:3px 0 0;font-size:12px;color:#888;font-family:Courier New,monospace">VIN: ${data.vin}</p>
+      <p style="margin:3px 0 0;font-size:12px;color:#888">${data.color} · ${data.ubicacion}</p>
+    </td></tr></table>
+
+    <p style="margin:0 0 20px;font-size:13px;color:#777;line-height:1.6">
+      Accede al portal para ver qué otros vehículos siguen disponibles y ofrécelos a tus prospectos calientes.
+    </p>
+
+    <!-- CTA -->
+    <table cellpadding="0" cellspacing="0"><tr><td style="background:#CC0001;border-radius:9px">
+      <a href="https://algomezg.github.io/Qlik-Autoceiba" style="display:inline-block;padding:13px 28px;color:#ffffff;font-weight:700;font-size:14px;text-decoration:none">Ver inventario disponible →</a>
+    </td></tr></table>
+  </td></tr>
+
+  <!-- FOOTER -->
+  <tr><td style="background:#0a0a0a;padding:18px 32px;text-align:center">
+    <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.3)">Auto Ceiba · Honda · Cali, Colombia · Qlik Portal Comercial</p>
+  </td></tr>
+
+</table>
+</td></tr></table>
+</body></html>`
+
+};
+
+// ── CONFIG EMAILJS ──
+async function guardarConfigEmailJS(){
+  const pk=$('ejsPublicKey').value.trim();
+  const si=$('ejsServiceId').value.trim();
+  const fe=$('ejsFromEmail').value.trim();
+  if(!pk||!si||!fe){toast('⚠️ Completa todos los campos');return;}
+  EJS_CONFIG={publicKey:pk,serviceId:si,fromEmail:fe};
+  emailjs.init(pk);
+  if(db){
+    try{
+      await db.collection('config').doc('emailjs_config').set({...EJS_CONFIG,updatedAt:today()});
+      $('emailjsStatus').textContent='✅ Configurado';
+      $('emailjsStatus').style.background='#eaf3de';
+      $('emailjsStatus').style.color='#2d6011';
+      toast('✅ EmailJS configurado correctamente');
+    }catch(e){toast('❌ Error guardando: '+e.message);}
+  }
+}
+
+async function cargarConfigEmailJS(){
+  if(!db) return;
+  try{
+    const snap=await db.collection('config').doc('emailjs_config').get();
+    if(snap.exists&&snap.data().publicKey){
+      EJS_CONFIG={...snap.data()};
+      emailjs.init(EJS_CONFIG.publicKey);
+      if($('ejsPublicKey')) $('ejsPublicKey').value=EJS_CONFIG.publicKey;
+      if($('ejsServiceId')) $('ejsServiceId').value=EJS_CONFIG.serviceId;
+      if($('ejsFromEmail')) $('ejsFromEmail').value=EJS_CONFIG.fromEmail;
+      if($('emailjsStatus')){
+        $('emailjsStatus').textContent='✅ Configurado';
+        $('emailjsStatus').style.background='#eaf3de';
+        $('emailjsStatus').style.color='#2d6011';
+      }
+    }
+  }catch(e){}
+}
+
+async function testEmailJS(){
+  if(!EJS_CONFIG.publicKey){toast('⚠️ Configura EmailJS primero');return;}
+  if(!CU){toast('⚠️ Debes estar logueado');return;}
+  try{
+    await enviarEmail(CU.email, '✅ Prueba de notificación — Qlik Auto Ceiba',
+      EMAIL_TEMPLATES.nuevo_inventario({
+        asesor:CU.nombre, cantidad:3,
+        vehiculos:[
+          {producto:'HR-V PRESTIGE',mod:2026,color:'Rojo Supernova',ubicacion:'CEIBA',vin:'52132'},
+          {producto:'CR-V TOURING',mod:2026,color:'Gris Urbano',ubicacion:'CEIBA',vin:'52245'},
+          {producto:'WR-V PRESTIGE',mod:2026,color:'Plata Lunar',ubicacion:'CEIBA',vin:'52299'}
+        ]
+      })
+    );
+    toast('📧 Correo de prueba enviado a '+CU.email);
+  }catch(e){toast('❌ Error: '+e.message);}
+}
+
+// ── CORE EMAIL SENDER ──
+async function enviarEmail(toEmail, subject, htmlContent){
+  if(!EJS_CONFIG.publicKey||!EJS_CONFIG.serviceId){
+    console.warn('EmailJS no configurado — notificación omitida');
+    return;
+  }
+  // EmailJS requires a template — we use a generic "pass-through" template
+  // Template must have: {{to_email}}, {{subject}}, {{html_content}} variables
+  const templateParams={
+    to_email: toEmail,
+    subject: subject,
+    html_content: htmlContent,
+    from_name: 'Qlik · Auto Ceiba Honda',
+    reply_to: EJS_CONFIG.fromEmail
+  };
+  const result=await emailjs.send(EJS_CONFIG.serviceId,'template_qlik_notif',templateParams);
+  logNotif({to:toEmail,subject,status:'enviado',ts:new Date().toLocaleString('es-CO')});
+  return result;
+}
+
+async function enviarEmailATodos(subject, htmlFn){
+  const asesores=USERS.filter(u=>u.activo&&u.email);
+  for(const u of asesores){
+    try{
+      await enviarEmail(u.email, subject, htmlFn(u.nombre));
+    }catch(e){
+      logNotif({to:u.email,subject,status:'error: '+e.message,ts:new Date().toLocaleString('es-CO')});
+    }
+  }
+}
+
+// ── NOTIFICATION TRIGGERS ──
+async function notifAlistamiento(proc, etapaIdx){
+  if(!NOTIF_PREFS.alistamiento) return;
+  if(!EJS_CONFIG.publicKey) return;
+  const asesor=USERS.find(u=>u.id===proc.asesorId);
+  if(!asesor||!asesor.email) return;
+  const veh=INV.find(v=>v.vin===proc.vin);
+  const etapas=proc.etapas||[];
+  const done=etapas.filter(e=>e.done).length;
+  const total=etapas.length||7;
+  const pct=Math.round((done/total)*100);
+  await enviarEmail(
+    asesor.email,
+    `Nueva etapa de alistamiento — VIN ${proc.vin||''}`,
+    EMAIL_TEMPLATES.alistamiento({
+      asesor:asesor.nombre,
+      cliente:proc.cliente,
+      vehiculo:veh?veh.producto:proc.vin,
+      vin:proc.vin||'—',
+      etapaCompletada:etapas[etapaIdx]?.nombre||'Etapa completada',
+      fecha:today(),
+      etapasDone:done,
+      etapasTotal:total,
+      pct
+    })
+  );
+  showNotifBadge('📧 Notificación enviada a '+asesor.nombre);
+}
+
+async function notifUbicacion(vin, sedeAnterior, sedeNueva, quien){
+  if(!NOTIF_PREFS.ubicacion) return;
+  if(!EJS_CONFIG.publicKey) return;
+  const v=INV.find(x=>x.vin===vin);
+  if(!v) return;
+  // Find asesor assigned to this vehicle
+  const asesor=v.sepAsesorId?USERS.find(u=>u.id===v.sepAsesorId):null;
+  // Also check seguimiento
+  const seg=SEGS.find(s=>s.vin===vin);
+  const asesorSeg=seg?USERS.find(u=>u.id===seg.asesorId):null;
+  const targets=[asesor,asesorSeg].filter(Boolean).filter((u,i,a)=>a.findIndex(x=>x&&x.id===u?.id)===i);
+  for(const u of targets){
+    if(!u||!u.email) continue;
+    await enviarEmail(
+      u.email,
+      `📍 Cambio de ubicación — ${v.producto} (VIN: ${vin})`,
+      EMAIL_TEMPLATES.ubicacion({
+        asesor:u.nombre,
+        vehiculo:v.producto,
+        vin,
+        cliente:seg?seg.nombre:'',
+        sedeAnterior,
+        sedeNueva,
+        fecha:today(),
+        quien:quien||CU?.nombre||'Sistema'
+      })
+    );
+  }
+  if(targets.length) showNotifBadge('📧 Notificación de ubicación enviada');
+}
+
+async function notifNuevoInventario(nuevosVehiculos){
+  if(!NOTIF_PREFS.nuevo_inv) return;
+  if(!EJS_CONFIG.publicKey) return;
+  if(!nuevosVehiculos.length) return;
+  if(!NOTIF_PREFS.nuevo_inv) return;
+  if(!EJS_CONFIG.publicKey) return;
+  // Only notify asesores comerciales
+  const asesoresActivos=USERS.filter(u=>u.activo&&u.rol==='asesor'&&u.email);
+  for(const u of asesoresActivos){
+    try{
+      await enviarEmail(
+        u.email,
+        `IMPORTANTE Nuevo inventario disponible`,
+        EMAIL_TEMPLATES.nuevo_inventario({asesor:u.nombre,cantidad:nuevosVehiculos.length,vehiculos:nuevosVehiculos})
+      );
+    }catch(e){logNotif({to:u.email,subject:'Nuevo inventario',status:'error: '+e.message,ts:new Date().toLocaleString('es-CO')});}
+  }
+  showNotifBadge(`📧 Nuevo inventario notificado a ${asesoresActivos.length} asesores`);
+}
+
+async function notifSeparado(vin, clienteNombre){
+  if(!EJS_CONFIG.publicKey) return;
+  const v=INV.find(x=>x.vin===vin);
+  if(!v) return;
+
+  // Calcular fecha límite (+8 días hábiles)
+  const fechaLimite=(()=>{
+    const d=new Date();let count=0;
+    while(count<8){d.setDate(d.getDate()+1);if(d.getDay()>0&&d.getDay()<6)count++;}
+    return d.toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
+  })();
+
+  // EMAIL 1: Al asesor que separó — ¡Felicitaciones!
+  if(NOTIF_PREFS.separado){
+    const asesor=USERS.find(u=>u.id===v.sepAsesorId);
+    if(asesor&&asesor.email){
+      await enviarEmail(
+        asesor.email,
+        `Asignación VIN ${v.vin} para ${clienteNombre||'tu cliente'}`,
+        EMAIL_TEMPLATES.separado_asesor({
+          asesor:asesor.nombre,
+          vin:v.vin,
+          vehiculo:v.producto,
+          color:v.color,
+          ubicacion:v.ubicacion,
+          cliente:clienteNombre||'tu cliente',
+          fechaLimite
+        })
+      );
+    }
+  }
+
+  // EMAIL 2: A todos los demás asesores — Modificación inventario
+  if(NOTIF_PREFS.separado){
+    const otros=USERS.filter(u=>u.activo&&u.rol==='asesor'&&u.id!==v.sepAsesorId&&u.email);
+    for(const u of otros){
+      await enviarEmail(
+        u.email,
+        `Modificación inventario`,
+        EMAIL_TEMPLATES.separado_equipo({
+          asesor:u.nombre,
+          vehiculo:v.producto,
+          vin:v.vin,
+          color:v.color,
+          ubicacion:v.ubicacion
+        })
+      );
+    }
+    if(otros.length) showNotifBadge(`📧 Equipo notificado — ${otros.length+1} correos enviados`);
+  }
+}
+
+function showNotifBadge(msg){
+  const b=$('notifBadge');const t=$('notifBadgeText');
+  if(!b||!t) return;
+  t.textContent=msg;b.classList.add('show');
+  setTimeout(()=>b.classList.remove('show'),4000);
+}
+
+function logNotif(entry){
+  NOTIF_LOG.unshift(entry);
+  const el=$('notifLog');
+  if(!el) return;
+  el.innerHTML=NOTIF_LOG.slice(0,50).map(e=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:12px">
+      <span style="color:${e.status==='enviado'?'#2d6011':'#9b2020'};font-size:16px">${e.status==='enviado'?'✅':'❌'}</span>
+      <div style="flex:1"><div style="font-weight:600">${e.subject}</div><div style="color:#aaa">${e.to}</div></div>
+      <span style="color:#bbb;white-space:nowrap">${e.ts}</span>
+    </div>`).join('');
+}
+
+function limpiarLogNotif(){
+  NOTIF_LOG=[];
+  const el=$('notifLog');
+  if(el) el.innerHTML='<div style="text-align:center;color:#ccc;padding:1.5rem">Sin notificaciones</div>';
 }
 
 // ══════════════════════════════════════════
@@ -4751,9 +5373,13 @@ function limpiarRuta(){
 
 async function cambiarUbicVeh(vin, nuevaSede){
   if(!nuevaSede||!db) return;
+  const v=INV.find(x=>x.vin===vin);
+  const sedeAnterior=v?v.ubicacion:'—';
   await db.collection('inventario').doc(vin).update({ubicacion:nuevaSede});
   toast('✅ Ubicación actualizada: '+nuevaSede);
   setTimeout(()=>renderMapa(),500);
+  // Notify asesor if vehicle is separated
+  try{await notifUbicacion(vin,sedeAnterior,nuevaSede,CU?.nombre);}catch(e){}
 }
 
 async function cambiarSedeDemo(id, nuevaSede, tipo){
@@ -6207,6 +6833,7 @@ document.addEventListener('DOMContentLoaded', function() {
   $('nav-metas').addEventListener('click', ()=>showPage('metas'));
   $('nav-entregados').addEventListener('click', ()=>showPage('entregados'));
   $('nav-desistidos').addEventListener('click', ()=>showPage('desistidos'));
+  $('nav-notificaciones').addEventListener('click', ()=>showPage('notificaciones'));
   $('nav-editor').addEventListener('click', ()=>showPage('editor'));
   $('nav-simulador').addEventListener('click', ()=>showPage('simulador'));
   $('nav-config').addEventListener('click', ()=>showPage('config'));
@@ -6267,14 +6894,16 @@ function importXL(inp){
       const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
-      let added=0;
+      let added=0;const nuevosVins=[];
       for(const r of rows){
         const vin=(r['VIN']||r['vin']||'').toString().trim();
         if(!vin||INV.find(v=>v.vin===vin))continue;
         await db.collection('inventario').doc(vin).set({vin,producto:(r['Producto']||r['PRODUCTO']||'').toString().trim(),mod:parseInt(r['Mod']||r['Año']||2026),color:(r['Color']||'').toString().trim(),colorInt:(r['Color Interior']||'').toString().trim(),chasis:(r['Chasis']||'').toString().trim(),motor:(r['Motor']||'').toString().trim(),ubicacion:(r['Ubicación']||r['Ubicacion']||'CEIBA').toString().trim(),estado:(r['ESTADO']||'DISPONIBLE').toString().trim().toUpperCase(),estadoUNOE:(r['Estado UNOE']||'Disponible').toString().trim(),diasInv:parseInt(r['Días inventario']||0)||0,sepAsesorId:null,sepFecha:null,sepObs:''});
+        nuevosVins.push({vin,producto:leadData?leadData.producto:(r['Producto']||r['PRODUCTO']||'').toString().trim(),color:(r['Color']||'').toString().trim(),ubicacion:(r['Ubicación']||r['Ubicacion']||'CEIBA').toString().trim(),mod:parseInt(r['Mod']||r['Año']||2026)||2026});
         added++;
       }
       toast(`✅ ${added} vehículos importados`);
+      if(added>0){try{await notifNuevoInventario(nuevosVins);}catch(e){}}
     }catch{toast('❌ Error al leer Excel');}
   };
   reader.readAsArrayBuffer(file);inp.value='';
