@@ -445,39 +445,61 @@ body.edit-mode .dash-section-edit{display:flex}
       </div>
       <div class="pg" id="page-demos">
         <div class="pt">Vehículos demo</div>
-        <div class="ps">Gestión y ubicación de demos — actualizado en tiempo real</div>
+        <div class="ps">Gestión, ubicación y pico y placa — actualizado en tiempo real</div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:1rem" id="demoGrid"></div>
+        <div style="margin-bottom:.75rem;display:flex;justify-content:flex-end">
+          <button class="btn btnp btnsm" id="btnNuevoDemo">+ Agregar nuevo demo</button>
+        </div>
 
-        <!-- EDITAR DEMO -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:1.25rem" id="demoGrid"></div>
+
+        <!-- EDITAR / NUEVO DEMO -->
         <div class="card" id="editDemoCard" style="display:none">
           <div class="ct" id="editDemoTitle">✏️ Editar demo</div>
+
           <div class="fr">
-            <div class="ff"><label>Modelo</label><input type="text" id="demoModelo"></div>
-            <div class="ff"><label>Placa / Identificador</label><input type="text" id="demoPlaca"></div>
+            <div class="ff"><label>Modelo del vehículo</label><input type="text" id="demoModelo" placeholder="Ej: HR-V"></div>
+            <div class="ff"><label>Color</label><input type="text" id="demoColor" placeholder="Ej: Rojo Supernova"></div>
           </div>
           <div class="fr">
-            <div class="ff"><label>Color</label><input type="text" id="demoColor"></div>
-            <div class="ff"><label>📍 Sede actual</label>
+            <div class="ff">
+              <label>Placa del vehículo</label>
+              <input type="text" id="demoPlaca" placeholder="Ej: ABC123" style="text-transform:uppercase">
+            </div>
+            <div class="ff">
+              <label>🚫 Día de pico y placa <span style="font-size:10px;color:#aaa">(actualiza cada 6 meses)</span></label>
+              <select id="demoPicoYPlaca">
+                <option value="">Sin pico y placa / No aplica</option>
+                <option value="1">Lunes</option>
+                <option value="2">Martes</option>
+                <option value="3">Miércoles</option>
+                <option value="4">Jueves</option>
+                <option value="5">Viernes</option>
+              </select>
+            </div>
+          </div>
+          <div class="fr">
+            <div class="ff"><label>📍 Sede esta semana</label>
               <select id="demoSedeActual">
                 <option>Ciudad Jardín</option>
                 <option>Avenida 3ra Norte</option>
               </select>
             </div>
+            <div class="ff"><label>📅 Sede próxima semana</label>
+              <select id="demoSedeSig">
+                <option>Ciudad Jardín</option>
+                <option>Avenida 3ra Norte</option>
+              </select>
+            </div>
           </div>
-          <div class="ff"><label>📅 Sede próxima semana</label>
-            <select id="demoSedeSig">
-              <option>Ciudad Jardín</option>
-              <option>Avenida 3ra Norte</option>
-            </select>
+          <div class="ib ibw" style="margin-bottom:.5rem">
+            ⚠️ El pico y placa bloqueará automáticamente las horas 6:00am–7:00pm del día restringido en el calendario de pruebas de ruta.
           </div>
           <div class="mf">
             <button class="btn btns" onclick="cancelarEditDemo()">Cancelar</button>
             <button class="btn btnp" onclick="guardarEditDemo()">💾 Guardar cambios</button>
           </div>
         </div>
-
-        ${isAdm()?`<button class="btn btnp btnsm" onclick="abrirNuevoDemo()" style="margin-top:.5rem">+ Agregar demo</button>`:''}
       </div>
       <div class="pg" id="page-cronograma">
         <div class="pt">Cronograma de pruebas de ruta</div>
@@ -1094,7 +1116,7 @@ body.edit-mode .dash-section-edit{display:flex}
                 <div style="font-size:11px;color:#888;margin-top:2px">✉️ Solo al asesor del vehículo: "VIN en nueva etapa — mide los tiempos para la fecha de entrega"</div>
               </div>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-                <input type="checkbox" id="notif_alistamiento" checked style="accent-color:#CC0001;width:18px;height:18px">
+                <input type="checkbox" id="notif_alistamiento" checked style="accent-color:#CC0001;width:18px;height:18px" onchange="guardarNotifPrefs()">
                 <span style="font-size:12px;color:#888">Activo</span>
               </label>
             </div>
@@ -1105,7 +1127,7 @@ body.edit-mode .dash-section-edit{display:flex}
                 <div style="font-size:11px;color:#888;margin-top:2px">Alerta cuando un vehículo asignado a un asesor cambia de sede</div>
               </div>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-                <input type="checkbox" id="notif_ubicacion" checked style="accent-color:#CC0001;width:18px;height:18px">
+                <input type="checkbox" id="notif_ubicacion" checked style="accent-color:#CC0001;width:18px;height:18px" onchange="guardarNotifPrefs()">
                 <span style="font-size:12px;color:#888">Activo</span>
               </label>
             </div>
@@ -1116,7 +1138,7 @@ body.edit-mode .dash-section-edit{display:flex}
                 <div style="font-size:11px;color:#888;margin-top:2px">✉️ A todos los asesores: "IMPORTANTE Nuevo inventario disponible — revisa e inicia prospección"</div>
               </div>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-                <input type="checkbox" id="notif_nuevo_inv" checked style="accent-color:#CC0001;width:18px;height:18px">
+                <input type="checkbox" id="notif_nuevo_inv" checked style="accent-color:#CC0001;width:18px;height:18px" onchange="guardarNotifPrefs()">
                 <span style="font-size:12px;color:#888">Activo</span>
               </label>
             </div>
@@ -1127,7 +1149,7 @@ body.edit-mode .dash-section-edit{display:flex}
                 <div style="font-size:11px;color:#888;margin-top:2px">✉️ Al asesor: "¡Felicitaciones! VIN asignado, tienes 8 días para facturar" · ✉️ A los demás: "Revisa el inventario, un compañero separó un VIN"</div>
               </div>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-                <input type="checkbox" id="notif_separado" checked style="accent-color:#CC0001;width:18px;height:18px">
+                <input type="checkbox" id="notif_separado" checked style="accent-color:#CC0001;width:18px;height:18px" onchange="guardarNotifPrefs()">
                 <span style="font-size:12px;color:#888">Activo</span>
               </label>
             </div>
@@ -1350,7 +1372,8 @@ body.edit-mode .dash-section-edit{display:flex}
 
 <div class="mo" id="mNE"><div class="mdl">
   <div class="mt">📦 Nuevo proceso de entrega</div>
-  <div class="fr"><div class="ff"><label>Cliente</label><input type="text" id="epCl"></div><div class="ff"><label>Cédula</label><input type="text" id="epCd"></div></div>
+  <div id="epVinInfo" style="display:none;background:#eaf3de;border-radius:8px;padding:10px 14px;margin-bottom:.5rem;font-size:13px;color:#2d6011;border:1px solid #b5d880"></div>
+  <div class="fr"><div class="ff"><label>Cliente</label><input type="text" id="epCl" placeholder="Se llena automáticamente"></div><div class="ff"><label>Cédula</label><input type="text" id="epCd" placeholder="Se llena automáticamente"></div></div>
   <div class="fr"><div class="ff"><label>VIN</label><select id="epVin"></select></div><div class="ff"><label>Sede</label><select id="epSd"><option>Ciudad Jardín</option><option>Avenida 3ra Norte</option></select></div></div>
   <div class="ff"><label>Asesor</label><select id="epAs"></select></div>
   <div class="mf"><button class="btn btns" id="btnCancelNE">Cancelar</button><button class="btn btnp" id="btnSaveProc">Crear proceso</button></div>
@@ -1955,6 +1978,10 @@ async function doLogin(){
       // fillVehicleSelects after INV loads via listener — called there
     }catch(ePreload){console.warn('Preload error:',ePreload);}
 
+    // ── Cargar EmailJS y preferencias de notificaciones (todos los usuarios) ──
+    try{await cargarConfigEmailJS();}catch(eEjs){console.warn('EmailJS:',eEjs);}
+    try{await cargarNotifPrefs();}catch(eNp){console.warn('NotifPrefs:',eNp);}
+
     CU=u;
     $('loginScreen').style.display='none';
     const app=$('appScreen');app.style.display='flex';app.classList.remove('hidden');
@@ -2023,7 +2050,19 @@ function showPage(p){
   }
   if(p==='leads') renderLeads();
   if(p==='seguimiento') renderSeg();
-  if(p==='notificaciones'){/* loads on demand */}
+  if(p==='notificaciones'){
+    // Refresh checkboxes from current NOTIF_PREFS state
+    Object.keys(NOTIF_PREFS).forEach(k=>{
+      const cb=document.getElementById('notif_'+k);
+      if(cb) cb.checked=NOTIF_PREFS[k];
+    });
+    // Refresh emailjs status badge
+    const st=$('emailjsStatus');
+    if(st&&EJS_CONFIG.publicKey){
+      st.textContent='✅ Configurado';
+      st.style.background='#eaf3de';st.style.color='#2d6011';
+    }
+  }
   if(p==='editor'){
     if(Object.keys(DASH_LAYOUT.widgets||{}).length===0) cargarLayoutDash().then(()=>renderEditor());
     else renderEditor();
@@ -2135,21 +2174,86 @@ async function guardarVeh(){
 }
 
 // ── DEMOS ──
+// ── PICO Y PLACA CALI 2026 ──
+// Último dígito de placa → día restringido (getDay(): 0=Dom,1=Lun...5=Vie)
+function getPicoYPlaca(placa){
+  if(!placa) return null;
+  const digito=parseInt(placa.replace(/\D/g,'').slice(-1));
+  if(isNaN(digito)) return null;
+  const mapa={1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,0:5};
+  return mapa[digito]; // día de la semana restringido
+}
+function getDiaSemana(n){
+  return['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][n]||'';
+}
+function isDemoRestringido(demoId, fecha, hora){
+  const d=DEMOS.find(x=>x._id===demoId);
+  if(!d||!fecha||!hora) return false;
+  // Use manually set picoYPlaca (day of week number)
+  const diaRestr=d.picoYPlaca||null;
+  if(!diaRestr) return false;
+  const fechaObj=new Date(fecha+'T12:00:00');
+  const diaSemana=fechaObj.getDay();
+  if(diaSemana===0||diaSemana===6) return false; // fines de semana libres
+  if(diaSemana!==diaRestr) return false;
+  // Horario restringido: 6:00am a 7:00pm
+  const [h,m]=hora.split(':').map(Number);
+  const minutos=h*60+m;
+  return (minutos>=6*60&&minutos<19*60);
+}
+
 function renderDemos(){
-  if(!CU)return;
-  $('demoGrid').innerHTML=DEMOS.map(d=>`<div class="dc"><div class="dch"><span class="dm">Honda ${d.modelo}</span><span class="b bgy">${d.placa}</span></div><div class="db"><div class="dr"><span class="dk">Color</span><span style="font-size:12px;font-weight:600">${d.color}</span></div><div class="dr"><span class="dk">📍 Esta semana</span><span class="b bg" style="font-size:10px">${d.sedeActual}</span></div><div class="dr"><span class="dk">📅 Próx. semana</span><span class="b ba" style="font-size:10px">${d.sedeSig}</span></div>${isAdm()?`<div style="display:flex;gap:6px;margin-top:.6rem"><button class="btn btns btnsm" onclick="togSede('${d._id}','actual')">Cambiar sede</button><button class="btn btns btnsm" onclick="togSede('${d._id}','sig')">Próx. semana</button></div>`:''}</div></div>`).join('');
+  if(!CU) return;
+  $('demoGrid').innerHTML=DEMOS.map(d=>{
+    const diaRestr=getPicoYPlaca(d.placa);
+    const picoInfo=diaRestr?`<div class="dr"><span class="dk">🚫 Pico y placa</span><span class="b br" style="font-size:10px">${getDiaSemana(diaRestr)} · 6:00am–7:00pm</span></div>`:'';
+    return `<div class="dc">
+      <div class="dch">
+        <span class="dm">Honda ${d.modelo}</span>
+        <span class="b bgy">${d.placa||'Sin placa'}</span>
+        ${isAdm()?`<button class="btn btns btnsm" onclick="abrirEditDemo('${d._id}')" style="margin-left:auto;font-size:11px">✏️ Editar</button>`:''}
+      </div>
+      <div class="db">
+        <div class="dr"><span class="dk">🎨 Color</span><span style="font-size:12px;font-weight:600">${d.color||'—'}</span></div>
+        <div class="dr"><span class="dk">📍 Esta semana</span><span class="b bg" style="font-size:10px">${d.sedeActual}</span></div>
+        <div class="dr"><span class="dk">📅 Próx. semana</span><span class="b ba" style="font-size:10px">${d.sedeSig}</span></div>
+        ${picoInfo}
+        ${isAdm()?`<div style="display:flex;gap:6px;margin-top:.6rem">
+          <button class="btn btns btnsm" onclick="togSede('${d._id}','actual')">↔ Sede actual</button>
+          <button class="btn btns btnsm" onclick="togSede('${d._id}','sig')">↔ Próx. sem.</button>
+        </div>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
 let curDemoId=null;
+
+function actualizarPicoPreview(){
+  const placa=($('demoPlaca').value||'').trim().toUpperCase();
+  const prev=$('picoPreview');
+  if(!prev) return;
+  if(!placa){prev.textContent='Ingresa la placa para ver el día restringido';prev.style.color='#aaa';return;}
+  const diaRestr=getPicoYPlaca(placa);
+  if(!diaRestr){
+    prev.innerHTML='<span style="color:#2d6011">✅ Sin pico y placa detectado</span>';
+  } else {
+    const dia=getDiaSemana(diaRestr);
+    prev.innerHTML=`<span style="color:#9b2020;font-weight:700">🚫 ${dia}</span> · 6:00am–7:00pm bloqueados en calendario`;
+  }
+}
 
 function abrirEditDemo(id){
   const d=DEMOS.find(x=>x._id===id);
   if(!d) return;
   curDemoId=id;
   $('demoModelo').value=d.modelo||'';
-  $('demoPlaca').value=d.placa||'';
+  $('demoPlaca').value=(d.placa||'').toUpperCase();
   $('demoColor').value=d.color||'';
   $('demoSedeActual').value=d.sedeActual||'Ciudad Jardín';
   $('demoSedeSig').value=d.sedeSig||'Ciudad Jardín';
+  // Populate manual pico selector
+  const pico=$('demoPicoYPlaca');
+  if(pico) pico.value=d.picoYPlaca?String(d.picoYPlaca):'';
   $('editDemoTitle').textContent='✏️ Editar demo — Honda '+d.modelo;
   $('editDemoCard').style.display='block';
   $('editDemoCard').scrollIntoView({behavior:'smooth',block:'center'});
@@ -2157,10 +2261,11 @@ function abrirEditDemo(id){
 
 function abrirNuevoDemo(){
   curDemoId=null;
-  ['demoModelo','demoPlaca','demoColor'].forEach(id=>$(id).value='');
+  ['demoModelo','demoPlaca','demoColor'].forEach(id=>{if($(id))$(id).value='';});
   $('demoSedeActual').value='Ciudad Jardín';
   $('demoSedeSig').value='Ciudad Jardín';
-  $('editDemoTitle').textContent='➕ Nuevo demo';
+  if($('demoPicoYPlaca')) $('demoPicoYPlaca').value='';
+  $('editDemoTitle').textContent='➕ Agregar nuevo demo';
   $('editDemoCard').style.display='block';
   $('editDemoCard').scrollIntoView({behavior:'smooth',block:'center'});
 }
@@ -2172,21 +2277,26 @@ function cancelarEditDemo(){
 
 async function guardarEditDemo(){
   const modelo=$('demoModelo').value.trim();
-  const placa=$('demoPlaca').value.trim();
+  const placa=($('demoPlaca').value||'').trim().toUpperCase();
   const color=$('demoColor').value.trim();
   const sedeActual=$('demoSedeActual').value;
   const sedeSig=$('demoSedeSig').value;
-  if(!modelo||!placa){toast('⚠️ Modelo e identificador son requeridos');return;}
-  const data={modelo,placa,color,sedeActual,sedeSig};
-  if(curDemoId){
-    await db.collection('demos').doc(curDemoId).update(data);
-    toast('✅ Demo actualizado correctamente');
-  } else {
-    data.id='d'+Date.now();
-    await db.collection('demos').doc(data.id).set(data);
-    toast('✅ Demo agregado correctamente');
-  }
-  cancelarEditDemo();
+  if(!modelo){toast('⚠️ El modelo es requerido');return;}
+  // Read manual pico y placa selection
+  const picoSelVal=$('demoPicoYPlaca')?$('demoPicoYPlaca').value:'';
+  const picoYPlaca=picoSelVal?parseInt(picoSelVal):null;
+  const data={modelo,placa,color,sedeActual,sedeSig,picoYPlaca:picoYPlaca||null};
+  try{
+    if(curDemoId){
+      await db.collection('demos').doc(curDemoId).update(data);
+      toast('✅ Demo actualizado'+(picoYPlaca?` · Pico y placa: ${getDiaSemana(picoYPlaca)}`:''));
+    } else {
+      const newId='d'+Date.now();
+      await db.collection('demos').doc(newId).set({...data,id:newId});
+      toast('✅ Demo agregado'+(picoYPlaca?` · Pico y placa: ${getDiaSemana(picoYPlaca)}`:''));
+    }
+    cancelarEditDemo();
+  }catch(e){toast('❌ Error guardando: '+e.message);}
 }
 
 async function togSede(id,tipo){
@@ -2222,6 +2332,14 @@ function openAgenda(fecha){$('agFc').value=fecha||today();$('agConf').style.disp
 function chkConf(){
   const dId=$('agDm').value,sede=$('agSd').value,fecha=$('agFc').value,hora=$('agHr').value;
   const div=$('agConf');if(!dId||!fecha||!hora){div.style.display='none';return;}
+  // Check pico y placa first
+  if(isDemoRestringido(dId,fecha,hora)){
+    const d=DEMOS.find(x=>x._id===dId);
+    const diaRestr=d?d.picoYPlaca:null;
+    div.className='ib ibd';
+    div.innerHTML=`🚫 <strong>Bloqueado por pico y placa</strong> — ${getDiaSemana(diaRestr||0)}: el demo no puede circular entre 6:00am y 7:00pm.`;
+    div.style.display='flex';return;
+  }
   const conf=PRUEBAS.filter(p=>p.demoId===dId&&p.fecha===fecha);if(!conf.length){div.style.display='none';return;}
   const mh=conf.find(p=>p.hora===hora);if(mh){div.className='ib ibd';div.innerHTML=`⛔ Demo reservado a las ${hora} en ${mh.sede} para ${mh.cliente}.`;div.style.display='flex';return;}
   for(const p of conf){const diff=Math.abs(parseInt(hora)-parseInt(p.hora.split(':')[0]));if(p.sede!==sede&&diff<2){div.className='ib ibw';div.innerHTML=`⚠️ Demo en ${p.sede} a las ${p.hora}. Requiere 1h traslado.`;div.style.display='flex';return;}if(p.sede===sede&&diff<1){div.className='ib ibd';div.innerHTML=`⛔ Demo ocupado en ${p.sede} a las ${p.hora}.`;div.style.display='flex';return;}}
@@ -2230,6 +2348,15 @@ function chkConf(){
 async function confirmarPrueba(){
   const dId=$('agDm').value,sede=$('agSd').value,fecha=$('agFc').value,hora=$('agHr').value,cliente=$('agCl').value.trim();
   if(!fecha||!cliente){toast('⚠️ Completa todos los campos');return;}
+
+  // ── BLOQUEO PICO Y PLACA ──
+  if(isDemoRestringido(dId,fecha,hora)){
+    const d=DEMOS.find(x=>x._id===dId);
+    const diaRestr=getPicoYPlaca(d?.placa||'');
+    toast(`🚫 Bloqueado por pico y placa — ${getDiaSemana(diaRestr||0)} 6:00am–7:00pm no disponible`);
+    return;
+  }
+
   const conf=PRUEBAS.filter(p=>p.demoId===dId&&p.fecha===fecha);
   if(conf.find(p=>p.hora===hora)){toast('⛔ Conflicto de horario');return;}
   for(const p of conf){const diff=Math.abs(parseInt(hora)-parseInt(p.hora.split(':')[0]));if(p.sede!==sede&&diff<2){toast('⛔ Conflicto traslado');return;}if(p.sede===sede&&diff<1){toast('⛔ Conflicto misma sede');return;}}
@@ -2252,7 +2379,24 @@ function renderEnts(){
 
   // Fill selects
   const sv=$('epVin');
-  if(sv) sv.innerHTML=INV.filter(v=>v.estado==='SEPARADO').map(v=>`<option value="${v.vin}">${v.vin} · ${v.producto}</option>`).join('');
+  if(sv){
+    // Show VINs that are facturados/matriculados OR in seguimiento as Facturado
+    const vinsFactMat=new Set(SEGS.filter(s=>s.vin&&(s.estado==='Facturado'||s.estado==='Matriculado'||s.fechaFact)).map(s=>s.vin));
+    const vinsDisp=INV.filter(v=>
+      v.estado==='FACTURADO'||v.estado==='MATRICULADO'||
+      v.oculto===true||vinsFactMat.has(v.vin)
+    );
+    // Also include SEPARADO with fechaFact in seguimiento
+    const vinsSepFact=INV.filter(v=>v.estado==='SEPARADO'&&vinsFactMat.has(v.vin));
+    const allVins=[...new Map([...vinsDisp,...vinsSepFact].map(v=>[v.vin,v])).values()];
+    sv.innerHTML='<option value="">Selecciona un VIN...</option>'+(
+      allVins.length?allVins.map(v=>{
+        const seg=SEGS.find(s=>s.vin===v.vin);
+        const label=`${v.vin} · ${v.producto}${seg?' · '+seg.nombre:''}`;
+        return `<option value="${v.vin}">${label}</option>`;
+      }).join(''):'<option disabled>No hay VINs facturados disponibles</option>'
+    );
+  }
   const sa=$('epAs');
   if(sa) sa.innerHTML=USERS.filter(u=>u.rol==='asesor'&&u.activo).map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
 
@@ -2460,6 +2604,30 @@ async function markEt(pid,idx){
   // Notify asesor
   try{await notifAlistamiento({...p,etapas},idx);}catch(e){}
 }
+function autoFillProcesoFromVin(){
+  const vin=$('epVin').value;
+  if(!vin) return;
+  // Find client from seguimiento
+  const seg=SEGS.find(s=>s.vin===vin);
+  if(seg){
+    if($('epCl')) $('epCl').value=seg.nombre||'';
+    if($('epCd')) $('epCd').value=seg.cedula||'';
+    if($('epAs')) $('epAs').value=seg.asesorId||'';
+    // Set sede from asesor
+    const as=USERS.find(u=>u.id===seg.asesorId);
+    if(as&&$('epSd')) $('epSd').value=as.sede||'Ciudad Jardín';
+    // Show vehicle info
+    const veh=INV.find(v=>v.vin===vin);
+    const info=document.getElementById('epVinInfo');
+    if(info){
+      info.style.display='block';
+      info.innerHTML=`<strong>${veh?veh.producto:'Vehículo'}</strong> · ${veh?veh.color:''}<br>
+        <span style="font-size:11px;color:#888">Cliente: ${seg.nombre} · Asesor: ${as?as.nombre:'—'}</span>`;
+    }
+    toast('✅ Información cargada automáticamente');
+  }
+}
+
 function openNuevaEnt(){om('mNE');}
 async function crearProc(){
   const cli=$('epCl').value.trim(),ced=$('epCd').value.trim(),vin=$('epVin').value,sede=$('epSd').value,aid=$('epAs').value;
@@ -3015,6 +3183,41 @@ const EMAIL_TEMPLATES = {
 };
 
 // ── CONFIG EMAILJS ──
+async function cargarNotifPrefs(){
+  if(!db) return;
+  try{
+    const snap=await db.collection('config').doc('notif_prefs').get();
+    if(snap.exists){
+      const d=snap.data();
+      NOTIF_PREFS={
+        alistamiento: d.alistamiento!==false,
+        ubicacion:    d.ubicacion!==false,
+        nuevo_inv:    d.nuevo_inv!==false,
+        separado:     d.separado!==false
+      };
+      // Update checkboxes if on page
+      Object.keys(NOTIF_PREFS).forEach(k=>{
+        const cb=document.getElementById('notif_'+k);
+        if(cb) cb.checked=NOTIF_PREFS[k];
+      });
+    }
+  }catch(e){}
+}
+
+async function guardarNotifPrefs(){
+  if(!db) return;
+  // Read current checkbox states
+  Object.keys(NOTIF_PREFS).forEach(k=>{
+    const cb=document.getElementById('notif_'+k);
+    if(cb) NOTIF_PREFS[k]=cb.checked;
+  });
+  try{
+    await db.collection('config').doc('notif_prefs').set({
+      ...NOTIF_PREFS, updatedAt:today()
+    });
+  }catch(e){}
+}
+
 async function guardarConfigEmailJS(){
   const pk=$('ejsPublicKey').value.trim();
   const si=$('ejsServiceId').value.trim();
@@ -3028,7 +3231,9 @@ async function guardarConfigEmailJS(){
       $('emailjsStatus').textContent='✅ Configurado';
       $('emailjsStatus').style.background='#eaf3de';
       $('emailjsStatus').style.color='#2d6011';
-      toast('✅ EmailJS configurado correctamente');
+      toast('✅ EmailJS configurado — notificaciones activas para todos los usuarios');
+      // Also save current notif prefs
+      await guardarNotifPrefs();
     }catch(e){toast('❌ Error guardando: '+e.message);}
   }
 }
@@ -6833,6 +7038,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Nav
   $('nav-inv').addEventListener('click', ()=>showPage('inv'));
   $('nav-demos').addEventListener('click', ()=>showPage('demos'));
+  document.addEventListener('click', function(e){
+    if(e.target&&e.target.id==='btnNuevoDemo') abrirNuevoDemo();
+  });
   $('nav-cronograma').addEventListener('click', ()=>showPage('cronograma'));
   $('nav-entregas').addEventListener('click', ()=>showPage('entregas'));
   $('nav-usuarios').addEventListener('click', ()=>showPage('usuarios'));
