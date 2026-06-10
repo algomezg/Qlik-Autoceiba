@@ -2141,10 +2141,8 @@ async function confirmarSep(){
   const vin=curVin;
   await db.collection('inventario').doc(vin).update({estado:'SEPARADO',sepAsesorId:$('sepAs').value,sepFecha:today(),sepObs:$('sepOb').value});
   cm('mSep');toast('✅ Vehículo separado');
-  // Notify asesor (felicitaciones) and otros asesores (inventario)
-  // Find cliente from seguimiento if linked
   const segCliente=(SEGS.find(s=>s.vin===vin)||{}).nombre||'';
-  setTimeout(async()=>{try{await notifSeparado(vin,segCliente);}catch(e){}},500);
+  setTimeout(async()=>{try{await notifSeparado(vin,segCliente);}catch(e){console.warn('notif sep:',e);}},500);
 }
 async function libVeh(vin){
   await db.collection('inventario').doc(vin).update({estado:'DISPONIBLE',sepAsesorId:null,sepFecha:null,sepObs:''});
@@ -2601,8 +2599,7 @@ async function markEt(pid,idx){
   const etapas=[...p.etapas];etapas[idx]={...etapas[idx],done:true,fecha:today()};
   await db.collection('procesos').doc(pid).update({etapas});
   verDet(pid);toast('✅ Etapa completada');
-  // Notify asesor
-  try{await notifAlistamiento({...p,etapas},idx);}catch(e){}
+  try{await notifAlistamiento({...p,etapas},idx);}catch(e){console.warn('notif alist:',e);}
 }
 function autoFillProcesoFromVin(){
   const vin=$('epVin').value;
@@ -3332,7 +3329,25 @@ async function notifAlistamiento(proc, etapaIdx){
       pct
     })
   );
-  showNotifBadge('📧 Notificación enviada a '+asesor.nombre);
+  // Asistente de la misma sede del asesor
+  const asistente=USERS.find(u=>u.rol==='admin_sede'&&u.sede===asesor.sede&&u.activo&&u.email);
+  if(asistente){
+    try{
+      await enviarEmail(
+        asistente.email,
+        `Nueva etapa de alistamiento — VIN ${proc.vin||''}`,
+        EMAIL_TEMPLATES.alistamiento({
+          asesor:asistente.nombre,
+          cliente:proc.cliente,
+          vehiculo:veh?veh.producto:proc.vin,
+          vin:proc.vin||'—',
+          etapaCompletada:etapas[etapaIdx]?.nombre||'Etapa completada',
+          fecha:today(),etapasDone:done,etapasTotal:total,pct
+        })
+      );
+    }catch(e){}
+  }
+  showNotifBadge('📧 Notificación enviada a '+asesor.nombre+(asistente?' y '+asistente.nombre:''));
 }
 
 async function notifUbicacion(vin, sedeAnterior, sedeNueva, quien){
@@ -3372,8 +3387,9 @@ async function notifNuevoInventario(nuevosVehiculos){
   if(!nuevosVehiculos.length) return;
   if(!NOTIF_PREFS.nuevo_inv) return;
   if(!EJS_CONFIG.publicKey) return;
-  // Only notify asesores comerciales
-  const asesoresActivos=USERS.filter(u=>u.activo&&u.rol==='asesor'&&u.email);
+  // Notify asesores + asistentes + gerente
+  const asesoresActivos=USERS.filter(u=>u.activo&&u.email&&
+    (u.rol==='asesor'||u.rol==='admin_sede'||u.rol==='gerente'));
   for(const u of asesoresActivos){
     try{
       await enviarEmail(
@@ -3398,23 +3414,25 @@ async function notifSeparado(vin, clienteNombre){
     return d.toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
   })();
 
-  // EMAIL 1: Al asesor que separó — ¡Felicitaciones!
+  // EMAIL 1: Al asesor que separó — ¡Felicitaciones! + copia al gerente
   if(NOTIF_PREFS.separado){
     const asesor=USERS.find(u=>u.id===v.sepAsesorId);
     if(asesor&&asesor.email){
-      await enviarEmail(
-        asesor.email,
-        `Asignación VIN ${v.vin} para ${clienteNombre||'tu cliente'}`,
-        EMAIL_TEMPLATES.separado_asesor({
-          asesor:asesor.nombre,
-          vin:v.vin,
-          vehiculo:v.producto,
-          color:v.color,
-          ubicacion:v.ubicacion,
-          cliente:clienteNombre||'tu cliente',
-          fechaLimite
-        })
-      );
+      const emailData={
+        asesor:asesor.nombre,vin:v.vin,vehiculo:v.producto,
+        color:v.color,ubicacion:v.ubicacion,
+        cliente:clienteNombre||'tu cliente',fechaLimite
+      };
+      await enviarEmail(asesor.email,`Asignación VIN ${v.vin} para ${clienteNombre||'tu cliente'}`,
+        EMAIL_TEMPLATES.separado_asesor(emailData));
+      // Copia al gerente
+      const gerente=USERS.find(u=>u.rol==='gerente'&&u.activo&&u.email);
+      if(gerente&&gerente.id!==asesor.id){
+        try{
+          await enviarEmail(gerente.email,`[Copia] Asignación VIN ${v.vin} — ${asesor.nombre}`,
+            EMAIL_TEMPLATES.separado_asesor({...emailData,asesor:'Gerencia (copia) — Asesor: '+asesor.nombre}));
+        }catch(e){}
+      }
     }
   }
 
