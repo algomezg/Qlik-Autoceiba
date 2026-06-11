@@ -3404,6 +3404,7 @@ async function notifNuevoInventario(nuevosVehiculos){
 
 async function notifSeparado(vin, clienteNombre){
   if(!EJS_CONFIG.publicKey) return;
+  if(!NOTIF_PREFS.separado) return;
   const v=INV.find(x=>x.vin===vin);
   if(!v) return;
 
@@ -3414,46 +3415,49 @@ async function notifSeparado(vin, clienteNombre){
     return d.toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
   })();
 
-  // EMAIL 1: Al asesor que separó — ¡Felicitaciones! + copia al gerente
-  if(NOTIF_PREFS.separado){
-    const asesor=USERS.find(u=>u.id===v.sepAsesorId);
-    if(asesor&&asesor.email){
-      const emailData={
-        asesor:asesor.nombre,vin:v.vin,vehiculo:v.producto,
-        color:v.color,ubicacion:v.ubicacion,
-        cliente:clienteNombre||'tu cliente',fechaLimite
-      };
-      await enviarEmail(asesor.email,`Asignación VIN ${v.vin} para ${clienteNombre||'tu cliente'}`,
-        EMAIL_TEMPLATES.separado_asesor(emailData));
-      // Copia al gerente
-      const gerente=USERS.find(u=>u.rol==='gerente'&&u.activo&&u.email);
-      if(gerente&&gerente.id!==asesor.id){
-        try{
-          await enviarEmail(gerente.email,`[Copia] Asignación VIN ${v.vin} — ${asesor.nombre}`,
-            EMAIL_TEMPLATES.separado_asesor({...emailData,asesor:'Gerencia (copia) — Asesor: '+asesor.nombre}));
-        }catch(e){}
-      }
-    }
+  const emailDataAsesor={
+    asesor:'',vin:v.vin,vehiculo:v.producto,
+    color:v.color||'',ubicacion:v.ubicacion||'',
+    cliente:clienteNombre||'tu cliente',fechaLimite
+  };
+
+  let enviados=0;
+
+  // ── EMAIL 1: Al asesor que separó — ¡Felicitaciones! ──
+  const asesor=USERS.find(u=>u.id===v.sepAsesorId);
+  if(asesor&&asesor.email){
+    try{
+      await enviarEmail(asesor.email,
+        `Asignación VIN ${v.vin} para ${clienteNombre||'tu cliente'}`,
+        EMAIL_TEMPLATES.separado_asesor({...emailDataAsesor,asesor:asesor.nombre}));
+      enviados++;
+    }catch(e){console.warn('notif sep asesor:',e);}
   }
 
-  // EMAIL 2: A todos los demás asesores — Modificación inventario
-  if(NOTIF_PREFS.separado){
-    const otros=USERS.filter(u=>u.activo&&u.rol==='asesor'&&u.id!==v.sepAsesorId&&u.email);
-    for(const u of otros){
-      await enviarEmail(
-        u.email,
-        `Modificación inventario`,
-        EMAIL_TEMPLATES.separado_equipo({
-          asesor:u.nombre,
-          vehiculo:v.producto,
-          vin:v.vin,
-          color:v.color,
-          ubicacion:v.ubicacion
-        })
-      );
-    }
-    if(otros.length) showNotifBadge(`📧 Equipo notificado — ${otros.length+1} correos enviados`);
+  // ── EMAIL 1b: Copia al gerente — misma felicitación ──
+  const gerentes=USERS.filter(u=>u.activo&&u.rol==='gerente'&&u.email&&u.id!==(asesor?asesor.id:''));
+  for(const g of gerentes){
+    try{
+      await enviarEmail(g.email,
+        `Asignación VIN ${v.vin} para ${clienteNombre||'cliente'} — ${asesor?asesor.nombre:''}`,
+        EMAIL_TEMPLATES.separado_asesor({...emailDataAsesor,asesor:g.nombre}));
+      enviados++;
+    }catch(e){}
   }
+
+  // ── EMAIL 2: A todos los demás asesores + admins + gerente — Modificación inventario ──
+  const yaNotificados=new Set([asesor?asesor.id:'',...gerentes.map(g=>g.id)]);
+  const equipoResto=USERS.filter(u=>u.activo&&u.email&&!yaNotificados.has(u.id)&&(u.rol==='asesor'||u.rol==='admin_sede'||u.rol==='gerente'));
+  for(const u of equipoResto){
+    try{
+      await enviarEmail(u.email,
+        'Modificación inventario',
+        EMAIL_TEMPLATES.separado_equipo({asesor:u.nombre,vehiculo:v.producto,vin:v.vin,color:v.color||'',ubicacion:v.ubicacion||''}));
+      enviados++;
+    }catch(e){}
+  }
+
+  if(enviados) showNotifBadge(`📧 Separación notificada a ${enviados} personas`);
 }
 
 function showNotifBadge(msg){
@@ -7036,6 +7040,11 @@ async function guardarSeg(){
   // Get VIN from form OR from existing record if editing
   const vinToSync = vin || (editId ? (SEGS.find(s=>s._id===editId)||{}).vin : null);
   if(vinToSync) await syncVinWithInventario(vinToSync, estado, asesorId);
+
+  // 1b. Notify on Separado from seguimiento
+  if(estado==='Separado'&&vinToSync){
+    setTimeout(async()=>{try{await notifSeparado(vinToSync,nombre);}catch(e){}},500);
+  }
 
   // 2. Auto-create proceso de entrega if Facturado
   if((estado==='Facturado'||estado==='Matriculado')&&vin){
