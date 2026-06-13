@@ -1145,6 +1145,28 @@ body.edit-mode .dash-section-edit{display:flex}
 
             <div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;background:#fafafa;border-radius:9px;border:1px solid #ebebeb">
               <div>
+                <div style="font-size:13px;font-weight:600">📄 Vehículo facturado</div>
+                <div style="font-size:11px;color:#888;margin-top:2px">✉️ Al asesor + asistente de sede + gerente: "Se registró una nueva factura"</div>
+              </div>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="checkbox" id="notif_facturado" checked style="accent-color:#CC0001;width:18px;height:18px" onchange="guardarNotifPrefs()">
+                <span style="font-size:12px;color:#888">Activo</span>
+              </label>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;background:#fafafa;border-radius:9px;border:1px solid #ebebeb">
+              <div>
+                <div style="font-size:13px;font-weight:600">🔓 VIN liberado</div>
+                <div style="font-size:11px;color:#888;margin-top:2px">✉️ A todos: "Un VIN que estaba separado acaba de quedar disponible"</div>
+              </div>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="checkbox" id="notif_liberado" checked style="accent-color:#CC0001;width:18px;height:18px" onchange="guardarNotifPrefs()">
+                <span style="font-size:12px;color:#888">Activo</span>
+              </label>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;background:#fafafa;border-radius:9px;border:1px solid #ebebeb">
+              <div>
                 <div style="font-size:13px;font-weight:600">🔒 Vehículo separado</div>
                 <div style="font-size:11px;color:#888;margin-top:2px">✉️ Al asesor: "¡Felicitaciones! VIN asignado, tienes 8 días para facturar" · ✉️ A los demás: "Revisa el inventario, un compañero separó un VIN"</div>
               </div>
@@ -1350,7 +1372,7 @@ body.edit-mode .dash-section-edit{display:flex}
 
 <div class="mo" id="mAddV"><div class="mdl">
   <div class="mt">🚗 Agregar vehículo</div>
-  <div class="fr"><div class="ff"><label>Producto</label><input type="text" id="vP"></div><div class="ff"><label>Año</label><input type="number" id="vA" placeholder="2026"></div></div>
+  <div class="fr"><div class="ff"><label>Producto</label><select id="vP"><option value="">Selecciona modelo...</option></select></div><div class="ff"><label>Año</label><input type="number" id="vA" placeholder="2026"></div></div>
   <div class="fr"><div class="ff"><label>Color ext.</label><input type="text" id="vC"></div><div class="ff"><label>Color int.</label><input type="text" id="vCI"></div></div>
   <div class="fr"><div class="ff"><label>Chasis</label><input type="text" id="vCH"></div><div class="ff"><label>VIN</label><input type="text" id="vV"></div></div>
   <div class="fr">
@@ -2147,8 +2169,19 @@ async function confirmarSep(){
 async function libVeh(vin){
   await db.collection('inventario').doc(vin).update({estado:'DISPONIBLE',sepAsesorId:null,sepFecha:null,sepObs:''});
   toast('✅ Vehículo liberado');
+  // Notify everyone
+  setTimeout(async()=>{try{await notifVinLiberado(vin);}catch(e){}},300);
 }
-function openAddVeh(){['vP','vA','vC','vCI','vCH','vV'].forEach(i=>$(i).value='');om('mAddV');}
+function openAddVeh(){
+  ['vA','vC','vCI','vCH','vV'].forEach(i=>{if($(i))$(i).value='';});
+  // Populate product dropdown from config
+  const sel=$('vP');
+  if(sel){
+    const modelos=buildUnifiedVehicleList();
+    sel.innerHTML='<option value="">Selecciona modelo...</option>'+modelos.map(m=>`<option value="${m}">${m}</option>`).join('');
+  }
+  om('mAddV');
+}
 function toggleVerFacturados(){
   if(!isGer()) return;
   const cb=$('toggleFacturados');
@@ -2167,8 +2200,11 @@ Esta acción no se puede deshacer.`)) return;
 async function guardarVeh(){
   const prod=$('vP').value.trim(),vin=$('vV').value.trim();
   if(!prod||!vin){toast('⚠️ Producto y VIN requeridos');return;}
-  await db.collection('inventario').doc(vin).set({vin,producto:prod,mod:parseInt($('vA').value)||2026,color:$('vC').value.trim(),colorInt:$('vCI').value.trim(),chasis:$('vCH').value.trim(),motor:'',ubicacion:$('vU').value,estado:'DISPONIBLE',estadoUNOE:$('vUN').value,diasInv:0,sepAsesorId:null,sepFecha:null,sepObs:''});
+  const vehData={vin,producto:prod,mod:parseInt($('vA').value)||2026,color:$('vC').value.trim(),colorInt:$('vCI').value.trim(),chasis:$('vCH').value.trim(),motor:'',ubicacion:$('vU').value||'CEIBA',estado:'DISPONIBLE',estadoUNOE:$('vUN')?$('vUN').value:'Disponible',diasInv:0,oculto:false,sepAsesorId:null,sepFecha:null,sepObs:'',importadoEn:today()};
+  await db.collection('inventario').doc(vin).set(vehData);
   cm('mAddV');toast('✅ Vehículo agregado');
+  // Notify everyone of new inventory
+  try{await notifNuevoInventario([{vin,producto:prod,color:vehData.color,ubicacion:vehData.ubicacion,mod:vehData.mod}]);}catch(e){}
 }
 
 // ── DEMOS ──
@@ -2921,7 +2957,7 @@ function onWidgetDropReorder(e,i){
 // ══════════════════════════════════════════
 let EJS_CONFIG = { publicKey:'', serviceId:'', fromEmail:'' };
 let NOTIF_LOG = [];
-let NOTIF_PREFS = { alistamiento:true, ubicacion:true, nuevo_inv:true, separado:true };
+let NOTIF_PREFS = { alistamiento:true, ubicacion:true, nuevo_inv:true, separado:true, liberado:true, facturado:true };
 
 // ── EmailJS HTML TEMPLATES ──
 const EMAIL_TEMPLATES = {
@@ -3117,6 +3153,46 @@ const EMAIL_TEMPLATES = {
     <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.3)">Auto Ceiba · Honda · Cali, Colombia · Qlik Portal Comercial</p>
   </td></tr>
 
+</table>
+</td></tr></table>
+</body></html>`,
+
+  // ── 5. VIN LIBERADO — todos ──
+  vin_liberado: (data) => `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VIN liberado</title></head>
+<body style="margin:0;padding:0;background:#f2f2ee;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2ee;padding:24px 0">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px">
+  <tr><td style="background:#0a0a0a;padding:24px 32px;text-align:center">
+    <p style="margin:0;font-size:26px;font-weight:900;color:#ffffff;letter-spacing:-1px">Q<span style="color:#CC0001">l</span>ik &middot; Auto Ceiba</p>
+    <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:3px;text-transform:uppercase">Portal Comercial Honda</p>
+  </td></tr>
+  <tr><td style="background:#2d6011;padding:20px 32px">
+    <p style="margin:0;font-size:18px;font-weight:700;color:#ffffff">🔓 VIN liberado — nuevo vehículo disponible</p>
+    <p style="margin:4px 0 0;font-size:13px;color:rgba(255,255,255,0.85)">Un vehículo que estaba separado acaba de quedar disponible</p>
+  </td></tr>
+  <tr><td style="padding:28px 32px">
+    <p style="margin:0 0 16px;font-size:15px;color:#333">Hola <strong>` + '${data.asesor}' + `</strong>,</p>
+    <p style="margin:0 0 20px;font-size:14px;color:#555;line-height:1.7">
+      Un VIN que estaba separado ha sido liberado y ahora está disponible para tus clientes.
+      ¡Aprovecha esta oportunidad para ofrecerlo a tus prospectos calientes!
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eaf3de;border-radius:10px;border-left:4px solid #2d6011;margin-bottom:20px">
+    <tr><td style="padding:16px 20px">
+      <p style="margin:0;font-size:13px;font-weight:700;color:#2d6011;text-transform:uppercase;letter-spacing:.5px">VIN disponible nuevamente</p>
+      <p style="margin:6px 0 3px;font-size:16px;font-weight:700;color:#333">` + '${data.vehiculo}' + `</p>
+      <p style="margin:0;font-size:12px;color:#888;font-family:Courier New,monospace">VIN: ` + '${data.vin}' + `</p>
+      <p style="margin:3px 0 0;font-size:12px;color:#888">` + '${data.color}' + ` &middot; ` + '${data.ubicacion}' + `</p>
+    </td></tr></table>
+    <table cellpadding="0" cellspacing="0"><tr><td style="background:#CC0001;border-radius:9px">
+      <a href="https://algomezg.github.io/Qlik-Autoceiba" style="display:inline-block;padding:13px 28px;color:#ffffff;font-weight:700;font-size:14px;text-decoration:none">Ver inventario disponible &rarr;</a>
+    </td></tr></table>
+  </td></tr>
+  <tr><td style="background:#0a0a0a;padding:18px 32px;text-align:center">
+    <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.3)">Auto Ceiba &middot; Honda &middot; Cali, Colombia &middot; Qlik Portal Comercial</p>
+  </td></tr>
 </table>
 </td></tr></table>
 </body></html>`,
@@ -3458,6 +3534,92 @@ async function notifSeparado(vin, clienteNombre){
   }
 
   if(enviados) showNotifBadge(`📧 Separación notificada a ${enviados} personas`);
+}
+
+async function notifFacturado(vin, clienteNombre, asesorId){
+  if(!NOTIF_PREFS.facturado) return;
+  if(!EJS_CONFIG.publicKey) return;
+  const asesor=USERS.find(u=>u.id===asesorId);
+  if(!asesor) return;
+  const v=vin?INV.find(x=>x.vin===vin):null;
+  const vehiculo=v?v.producto:'Vehículo';
+  const asunto=`📄 Nueva factura — ${vehiculo} · ${clienteNombre||'Cliente'}`;
+
+  const emailHtml=(nombre)=>`<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nueva factura</title></head>
+<body style="margin:0;padding:0;background:#f2f2ee;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2ee;padding:24px 0">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px">
+  <tr><td style="background:#0a0a0a;padding:24px 32px;text-align:center">
+    <p style="margin:0;font-size:26px;font-weight:900;color:#ffffff;letter-spacing:-1px">Q<span style="color:#CC0001">l</span>ik &middot; Auto Ceiba</p>
+    <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:3px;text-transform:uppercase">Portal Comercial Honda</p>
+  </td></tr>
+  <tr><td style="background:#CC0001;padding:24px 32px;text-align:center">
+    <p style="margin:0;font-size:28px">🎉</p>
+    <p style="margin:6px 0 0;font-size:20px;font-weight:700;color:#ffffff">¡Vehículo facturado!</p>
+    <p style="margin:6px 0 0;font-size:13px;color:rgba(255,255,255,0.85)">Se registró una nueva factura en el sistema</p>
+  </td></tr>
+  <tr><td style="padding:28px 32px">
+    <p style="margin:0 0 16px;font-size:15px;color:#333">Hola <strong>${nombre}</strong>,</p>
+    <p style="margin:0 0 20px;font-size:14px;color:#555;line-height:1.7">
+      Se ha registrado la facturación del siguiente vehículo. ¡Felicitaciones al equipo comercial!
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f8f8;border-radius:10px;border-left:4px solid #CC0001;margin-bottom:20px">
+    <tr><td style="padding:16px 20px">
+      <p style="margin:0;font-size:16px;font-weight:700;color:#1a1a1a">${vehiculo}</p>
+      ${vin?'<p style="margin:4px 0 0;font-size:12px;color:#888;font-family:Courier New,monospace">VIN: '+vin+'</p>':''}
+      <p style="margin:4px 0 0;font-size:12px;color:#888">Cliente: <strong>${clienteNombre||'—'}</strong></p>
+      <p style="margin:4px 0 0;font-size:12px;color:#888">Asesor: <strong>${asesor.nombre}</strong></p>
+    </td></tr></table>
+    <table cellpadding="0" cellspacing="0"><tr><td style="background:#CC0001;border-radius:9px">
+      <a href="https://algomezg.github.io/Qlik-Autoceiba" style="display:inline-block;padding:13px 28px;color:#ffffff;font-weight:700;font-size:14px;text-decoration:none">Ver seguimiento &rarr;</a>
+    </td></tr></table>
+  </td></tr>
+  <tr><td style="background:#0a0a0a;padding:18px 32px;text-align:center">
+    <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.3)">Auto Ceiba &middot; Honda &middot; Cali, Colombia &middot; Qlik Portal Comercial</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+
+  let enviados=0;
+  // 1. Al asesor que facturó
+  if(asesor.email){
+    try{await enviarEmail(asesor.email,asunto,emailHtml(asesor.nombre));enviados++;}catch(e){}
+  }
+  // 2. A la asistente comercial de su sede
+  const admSede=USERS.filter(u=>u.activo&&u.rol==='admin_sede'&&u.sede===asesor.sede&&u.email);
+  for(const adm of admSede){
+    try{await enviarEmail(adm.email,asunto,emailHtml(adm.nombre));enviados++;}catch(e){}
+  }
+  // 3. Al gerente comercial
+  const gerentes=USERS.filter(u=>u.activo&&u.rol==='gerente'&&u.email);
+  for(const g of gerentes){
+    try{await enviarEmail(g.email,asunto,emailHtml(g.nombre));enviados++;}catch(e){}
+  }
+  if(enviados) showNotifBadge('📧 Factura notificada a '+enviados+' personas');
+}
+
+async function notifVinLiberado(vin){
+  if(!NOTIF_PREFS.liberado) return;
+  if(!EJS_CONFIG.publicKey) return;
+  const v=INV.find(x=>x.vin===vin);
+  if(!v) return;
+  // Notify ALL: asesores + admins + gerente
+  const todos=USERS.filter(u=>u.activo&&u.email&&(u.rol==='asesor'||u.rol==='admin_sede'||u.rol==='gerente'));
+  let enviados=0;
+  for(const u of todos){
+    try{
+      await enviarEmail(u.email,
+        'VIN liberado — nuevo vehículo disponible',
+        EMAIL_TEMPLATES.vin_liberado({asesor:u.nombre,vehiculo:v.producto||'',vin:v.vin,color:v.color||'',ubicacion:v.ubicacion||''})
+      );
+      enviados++;
+    }catch(e){}
+  }
+  if(enviados) showNotifBadge('📧 VIN liberado notificado a '+enviados+' personas');
 }
 
 function showNotifBadge(msg){
@@ -4804,6 +4966,13 @@ function renderDashboard(){
   const diasHabilesTransc=Math.max(1,diasHabilesTot-diasHabilesRest);
   const semanasRest=Math.round(semanasRestantes(hoy)*10)/10;
 
+  // Separados con fechaFact este mes = próximos a facturar
+  const sepConFechaFact=allFiltered.filter(s=>s.estado==='Separado'&&enMes(s.fechaSep)).length;
+  // Calientes con proxContacto este mes
+  const calConFecha=allFiltered.filter(s=>s.estado==='Caliente'&&s.temperatura==='Esta semana').length;
+  // Pipeline total near close = gaugeTotal + separados near + calientes near
+  const pipelineNearClose=gaugeTotal+sepConFechaFact;
+
   // Use gaugeTotal (fact+mat) for all forecast calculations
   const ritmoXdia=gaugeTotal/diasHabilesTransc;
   const ritmoXsemana=gaugeTotal/Math.max(1,Math.ceil(diasHabilesTransc/5));
@@ -4814,6 +4983,7 @@ function renderDashboard(){
 
   $('forecastGrid').innerHTML=`
     <div class="fc-card"><div class="fc-num" style="color:#CC0001">${gaugeTotal}</div><div class="fc-label">Fact + Mat del mes</div><div class="fc-detail">${mesLabel}</div></div>
+    <div class="fc-card"><div class="fc-num" style="color:#1457a0">${sepConFechaFact}</div><div class="fc-label">Separados del mes</div><div class="fc-detail">Próximos a facturar</div></div>
     <div class="fc-card"><div class="fc-num" style="color:#CC0001">${proyeccionFin}</div><div class="fc-label">Proyección fin de mes</div><div class="fc-detail">Al ritmo actual</div></div>
     <div class="fc-card"><div class="fc-num" style="color:#1457a0">${necesarioXdia}</div><div class="fc-label">Uds/día hábil necesarias</div><div class="fc-detail">Para alcanzar meta</div></div>
     <div class="fc-card"><div class="fc-num" style="color:#7a4a0a">${necesarioXsemana}</div><div class="fc-label">Uds/semana necesarias</div><div class="fc-detail">Para alcanzar meta</div></div>
@@ -4928,13 +5098,19 @@ function renderDashboard(){
     const aAll=allFiltered.filter(s=>s.asesorId===u.id);
     const aCal=aAll.filter(s=>s.estado==='Caliente').length; // ACUMULADO
     const aPrueba=aAll.filter(s=>enMes(s.fechaPrueba)).length; // del mes
-    const aSep=aAll.filter(s=>enMes(s.fechaSep)).length; // del mes
-    const aFact=aAll.filter(s=>enMes(s.fechaFact)).length; // del mes
-    const aMat=aAll.filter(s=>enMes(s.fechaMat)).length; // del mes
-    const aProsp=aAll.filter(s=>enMes(s.createdAt)).length; // del mes
+    const aSep=aAll.filter(s=>s.estado==='Separado'&&enMes(s.fechaSep)).length; // separados del mes
+    const aFact=aAll.filter(s=>enMes(s.fechaFact)).length; // facturados del mes
+    const aMat=aAll.filter(s=>enMes(s.fechaMat)).length; // matriculados del mes
+    const aProsp=aAll.filter(s=>enMes(s.createdAt)).length;
     const aConv=aProsp>0?Math.round((aFact/aProsp)*100):0;
-    return{u,aProsp,aSep,aFact,aMat,aCal,aPrueba,aConv};
-  }).sort((a,b)=>b.aFact-a.aFact);
+    // Tiempo promedio de cierre (createdAt → fechaFact)
+    const cierres=aAll.filter(s=>s.createdAt&&s.fechaFact).map(s=>{
+      const d1=new Date(s.createdAt),d2=new Date(s.fechaFact);
+      return Math.max(0,Math.round((d2-d1)/(1000*60*60*24)));
+    });
+    const aTiempoCierre=cierres.length?Math.round(cierres.reduce((a,b)=>a+b,0)/cierres.length):0;
+    return{u,aProsp,aSep,aFact,aMat,aCal,aPrueba,aConv,aTiempoCierre};
+  }).sort((a,b)=>(b.aFact+b.aMat)-(a.aFact+a.aMat));
 
   const maxFact=rankData.length?Math.max(...rankData.map(r=>r.aFact),1):1;
   $('rankingBody').innerHTML=rankData.map((r,i)=>{
@@ -4961,12 +5137,10 @@ function renderDashboard(){
   dashCharts['asesor']=new Chart(aCtx,{
     type:'bar',
     data:{
-      labels:rankData.map(r=>r.u.nombre.split(' ')[0]+' '+r.u.nombre.split(' ')[1]),
+      labels:rankData.map(r=>r.u.nombre.split(' ').slice(0,2).join(' ')),
       datasets:[
-        {label:'Facturados mes',data:rankData.map(r=>r.aFact),backgroundColor:'#CC0001',borderRadius:5},
-        {label:'Separados mes',data:rankData.map(r=>r.aSep),backgroundColor:'#fac775',borderRadius:5},
-        {label:'Matriculados mes',data:rankData.map(r=>r.aMat),backgroundColor:'#2d6011',borderRadius:5},
-        {label:'🔥 Calientes (acum.)',data:rankData.map(r=>r.aCal),backgroundColor:'rgba(184,76,0,0.3)',borderRadius:5}
+        {label:'📄 Facturados '+mesLabel,data:rankData.map(r=>r.aFact),backgroundColor:'#CC0001',borderRadius:5},
+        {label:'✅ Matriculados '+mesLabel,data:rankData.map(r=>r.aMat),backgroundColor:'#2d6011',borderRadius:5}
       ]
     },
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}
@@ -4980,8 +5154,7 @@ function renderDashboard(){
     data:{
       labels:rankData.map(r=>r.u.nombre.split(' ').slice(0,2).join(' ')),
       datasets:[
-        {label:'🔒 Separados '+mesLabel,data:rankData.map(r=>r.aSep),backgroundColor:'#fac775',borderRadius:5},
-        {label:'🔥 Calientes (acum.)',data:rankData.map(r=>r.aCal),backgroundColor:'rgba(255,107,53,0.7)',borderRadius:5}
+        {label:'🔒 Separados '+mesLabel,data:rankData.map(r=>r.aSep),backgroundColor:'#fac775',borderRadius:5}
       ]
     },
     options:{responsive:true,maintainAspectRatio:false,
@@ -5230,157 +5403,85 @@ function renderHistorialAnual(allSegs){
 
 function renderCosechas(data){
   if(!$('cosechasChart')) return;
-
-  // Build cohorts: for each creation month, how many matriculated in N, N+1, N+2... months
+  // Cosechas: for each creation month, average days to factura
   const hoy=new Date();
-  const curYear=hoy.getFullYear();
-  const curMonth=hoy.getMonth(); // 0-indexed
-
-  // Get last 6 months as cohort labels
   const cohortMonths=[];
   for(let i=5;i>=0;i--){
-    const d=new Date(curYear,curMonth-i,1);
-    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    cohortMonths.push({key,label:MESES[d.getMonth()].substring(0,3)+' '+String(d.getFullYear()).substring(2)});
+    const d=new Date(hoy.getFullYear(),hoy.getMonth()-i,1);
+    cohortMonths.push({key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:MESES[d.getMonth()].substring(0,3)});
   }
 
-  // For each cohort month, count how many days to matricula
-  // And count matriculations that came from each creation month
-  const cosechasData=cohortMonths.map(cm=>{
-    const createdInMonth=data.filter(s=>(s.createdAt||'').startsWith(cm.key));
-    const counts={total:createdInMonth.length,matriculados:0,n0:0,n1:0,n2:0,n3:0,n4plus:0};
-    createdInMonth.forEach(s=>{
-      if(!s.fechaMat) return;
-      counts.matriculados++;
-      const cDate=new Date(s.createdAt);
-      const mDate=new Date(s.fechaMat);
-      const diffMonths=Math.round((mDate-cDate)/(1000*60*60*24*30));
-      if(diffMonths<=0)counts.n0++;
-      else if(diffMonths<=1)counts.n1++;
-      else if(diffMonths<=2)counts.n2++;
-      else if(diffMonths<=3)counts.n3++;
-      else counts.n4plus++;
-    });
-    return{...cm,...counts};
+  const avgDias=cohortMonths.map(cm=>{
+    const recs=data.filter(s=>s.createdAt&&s.createdAt.startsWith(cm.key)&&s.fechaFact);
+    if(!recs.length) return 0;
+    const totalDias=recs.reduce((acc,s)=>{
+      const d1=new Date(s.createdAt),d2=new Date(s.fechaFact);
+      return acc+Math.max(0,Math.round((d2-d1)/(1000*60*60*24)));
+    },0);
+    return Math.round(totalDias/recs.length);
   });
+  const cantFact=cohortMonths.map(cm=>data.filter(s=>s.createdAt&&s.createdAt.startsWith(cm.key)&&s.fechaFact).length);
 
   destroyChart('cosechas');
-  const cosCtx=$('cosechasChart').getContext('2d');
-  dashCharts['cosechas']=new Chart(cosCtx,{
+  const ctx=$('cosechasChart').getContext('2d');
+  dashCharts['cosechas']=new Chart(ctx,{
     type:'bar',
     data:{
-      labels:cohortMonths.map(m=>m.label),
+      labels:cohortMonths.map(c=>c.label),
       datasets:[
-        {label:'Mismo mes',data:cosechasData.map(c=>c.n0),backgroundColor:'#2d6011',stack:'s'},
-        {label:'1 mes',data:cosechasData.map(c=>c.n1),backgroundColor:'#7abf3c',stack:'s'},
-        {label:'2 meses',data:cosechasData.map(c=>c.n2),backgroundColor:'#fac775',stack:'s'},
-        {label:'3 meses',data:cosechasData.map(c=>c.n3),backgroundColor:'#f97316',stack:'s'},
-        {label:'+4 meses',data:cosechasData.map(c=>c.n4plus),backgroundColor:'#9b2020',stack:'s'},
-        {label:'Sin matricular',data:cosechasData.map(c=>c.total-c.matriculados),backgroundColor:'#f0f0f0',stack:'s'}
+        {label:'Días prom. cierre',data:avgDias,backgroundColor:'#CC0001',borderRadius:5,yAxisID:'y'},
+        {label:'Vehículos facturados',data:cantFact,type:'line',borderColor:'#2d6011',borderWidth:2,pointRadius:4,pointBackgroundColor:'#2d6011',fill:false,yAxisID:'y2'}
       ]
     },
     options:{
       responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{position:'top',labels:{font:{size:10},boxWidth:12}},
-        tooltip:{callbacks:{
-          afterBody:ctx=>{
-            const idx=ctx[0].dataIndex;
-            const c=cosechasData[idx];
-            const pct=c.total>0?Math.round((c.matriculados/c.total)*100):0;
-            return [`Total creados: ${c.total}`,`Matriculados: ${c.matriculados} (${pct}%)`];
-          }
-        }}
-      },
+      plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},
       scales:{
-        x:{stacked:true,grid:{display:false},ticks:{font:{size:11}}},
-        y:{stacked:true,beginAtZero:true,grid:{color:'#f5f5f5'},ticks:{font:{size:11}}}
+        y:{beginAtZero:true,title:{display:true,text:'Días promedio',font:{size:10}},grid:{color:'#f5f5f5'}},
+        y2:{beginAtZero:true,position:'right',title:{display:true,text:'Facturados',font:{size:10}},grid:{display:false}},
+        x:{grid:{display:false}}
       }
     }
   });
 
-  // ── TIEMPO PROMEDIO DE CIERRE POR ASESOR ──
-  const asesoresList=USERS.filter(u=>u.rol==='asesor'&&u.activo);
-  const tiempoData=asesoresList.map(u=>{
-    const sCerrados=data.filter(s=>s.asesorId===u.id&&s.createdAt&&s.fechaMat);
-    if(!sCerrados.length) return{nombre:u.nombre.split(' ')[0],dias:0,count:0};
-    const totalDias=sCerrados.reduce((acc,s)=>{
-      const d1=new Date(s.createdAt);const d2=new Date(s.fechaMat);
-      return acc+Math.max(0,Math.round((d2-d1)/(1000*60*60*24)));
-    },0);
-    return{nombre:u.nombre.split(' ').slice(0,2).join(' '),dias:Math.round(totalDias/sCerrados.length),count:sCerrados.length};
-  }).filter(t=>t.dias>0);
-
-  destroyChart('tiempoCierre');
-  if($('tiempoCierreChart')&&tiempoData.length){
+  // ── TIEMPO DE CIERRE POR ASESOR ──
+  if($('tiempoCierreChart')){
+    destroyChart('tiempoCierre');
     const tcCtx=$('tiempoCierreChart').getContext('2d');
+    const tcLabels=rankData.map(r=>r.u.nombre.split(' ').slice(0,2).join(' '));
+    const tcData=rankData.map(r=>r.aTiempoCierre);
     dashCharts['tiempoCierre']=new Chart(tcCtx,{
       type:'bar',
       data:{
-        labels:tiempoData.map(t=>t.nombre),
-        datasets:[{
-          label:'Días promedio de cierre',
-          data:tiempoData.map(t=>t.dias),
-          backgroundColor:tiempoData.map(t=>t.dias<=30?'#2d6011':t.dias<=60?'#fac775':'#9b2020'),
-          borderRadius:6
-        }]
+        labels:tcLabels,
+        datasets:[{label:'Días promedio',data:tcData,backgroundColor:tcData.map(d=>d<=20?'#2d6011':d<=40?'#7a4a0a':'#CC0001'),borderRadius:5}]
       },
       options:{
         responsive:true,maintainAspectRatio:false,
-        plugins:{
-          legend:{display:false},
-          tooltip:{callbacks:{label:ctx=>{
-            const t=tiempoData[ctx.dataIndex];
-            return [` ${ctx.raw} días promedio`,` (${t.count} cierres)`];
-          }}}
-        },
-        scales:{
-          y:{beginAtZero:true,grid:{color:'#f5f5f5'},title:{display:true,text:'Días',font:{size:11}}},
-          x:{grid:{display:false}}
-        }
+        plugins:{legend:{display:false}},
+        scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'},title:{display:true,text:'Días',font:{size:10}}},x:{grid:{display:false}}}
       }
     });
-  } else if($('tiempoCierreChart')){
-    $('tiempoCierreChart').getContext('2d').clearRect(0,0,999,999);
-    const p=document.createElement('p');
-    p.style.cssText='text-align:center;color:#ccc;padding:2rem;font-size:13px';
-    p.textContent='Sin datos de cierre aún';
-    $('tiempoCierreChart').parentNode.appendChild(p);
   }
 
-  // ── MIX FACTURAS MES VIGENTE ──
-  const mesCur=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
-  const facMes=data.filter(s=>s.fechaMat&&s.fechaMat.startsWith(mesCur));
-  const mixEl=$('mixFacturasGrid');
-  if(mixEl){
-    if(!facMes.length){
-      mixEl.innerHTML='<p style="color:#ccc;font-size:13px;text-align:center;padding:1rem">Sin matrículas en el mes vigente</p>';
-    } else {
-      // Group by creation month (cohort origin)
-      const byOrigin={};
-      facMes.forEach(s=>{
-        const origin=(s.createdAt||mesCur).substring(0,7);
-        if(!byOrigin[origin]) byOrigin[origin]={count:0,label:''};
-        byOrigin[origin].count++;
-        const d=new Date(origin+'-01');
-        byOrigin[origin].label=MESES[d.getMonth()].substring(0,3)+' '+String(d.getFullYear()).substring(2);
-      });
-      const total=facMes.length;
-      const sorted=Object.entries(byOrigin).sort((a,b)=>b[1].count-a[1].count);
-      const colors=['#CC0001','#1457a0','#2d6011','#7a4a0a','#3a2e8f','#0d6048'];
-      mixEl.innerHTML=`
-        <div style="font-size:12px;color:#888;margin-bottom:.75rem">Total matriculados mes vigente: <strong style="color:#CC0001">${total}</strong></div>
-        ${sorted.map((([k,v],i)=>`
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-            <span style="font-size:11px;color:#888;min-width:55px">${v.label}</span>
-            <div style="flex:1;background:#f0f0f0;border-radius:10px;height:18px;overflow:hidden">
-              <div style="width:${Math.round((v.count/total)*100)}%;height:100%;background:${colors[i%colors.length]};border-radius:10px;display:flex;align-items:center;padding-left:6px">
-                <span style="font-size:10px;color:#fff;font-weight:700;white-space:nowrap">${v.count}</span>
-              </div>
-            </div>
-            <span style="font-size:11px;font-weight:700;color:#333;min-width:35px">${Math.round((v.count/total)*100)}%</span>
-          </div>`)).join('')}`;
-    }
+  // ── MIX DE FACTURAS ──
+  if($('mixFacturasGrid')){
+    const factMes=data.filter(s=>enMes(s.fechaFact));
+    const mixPorModelo={};
+    factMes.forEach(s=>{if(s.vehiculo)mixPorModelo[s.vehiculo]=(mixPorModelo[s.vehiculo]||0)+1;});
+    const sorted=Object.entries(mixPorModelo).sort((a,b)=>b[1]-a[1]);
+    const total=sorted.reduce((a,[,c])=>a+c,0);
+    $('mixFacturasGrid').innerHTML=sorted.length?sorted.map(([m,c])=>{
+      const pct=total>0?Math.round((c/total)*100):0;
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f5f5f5">
+        <span style="font-size:12px;font-weight:600;flex:1;color:#333">${m}</span>
+        <div style="width:100px;background:#f0f0f0;border-radius:6px;height:10px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:#CC0001;border-radius:6px"></div>
+        </div>
+        <span style="font-size:12px;font-weight:700;color:#CC0001;min-width:30px;text-align:right">${c}</span>
+        <span style="font-size:10px;color:#aaa;min-width:28px">${pct}%</span>
+      </div>`;
+    }).join(''):'<div style="text-align:center;color:#ccc;padding:1rem;font-size:12px">Sin facturas en el mes</div>';
   }
 }
 
@@ -7039,11 +7140,29 @@ async function guardarSeg(){
   // 1. Sync VIN status with inventario
   // Get VIN from form OR from existing record if editing
   const vinToSync = vin || (editId ? (SEGS.find(s=>s._id===editId)||{}).vin : null);
+  // Detect if estado CHANGED (not just re-saved)
+  const existingRec=editId?SEGS.find(s=>s._id===editId):null;
+  const estadoAnterior=existingRec?existingRec.estado:'';
+  const estadoCambio=estado!==estadoAnterior;
+
   if(vinToSync) await syncVinWithInventario(vinToSync, estado, asesorId);
 
-  // 1b. Notify on Separado from seguimiento
-  if(estado==='Separado'&&vinToSync){
+  // 1b. Notify on Separado ONLY when estado changes TO Separado (not on every edit)
+  if(estadoCambio&&estado==='Separado'&&vinToSync){
     setTimeout(async()=>{try{await notifSeparado(vinToSync,nombre);}catch(e){}},500);
+  }
+
+  // 1c. Notify on Facturado — when estado changes TO Facturado
+  if(estadoCambio&&estado==='Facturado'){
+    setTimeout(async()=>{try{await notifFacturado(vinToSync||'',nombre,asesorId);}catch(e){}},500);
+  }
+
+  // 1d. Liberate VIN + notify when estado changes FROM Separado to Caliente/Desistido
+  if(estadoCambio&&estadoAnterior==='Separado'&&(estado==='Caliente'||estado==='Desistido')&&vinToSync){
+    try{
+      await db.collection('inventario').doc(vinToSync).update({estado:'DISPONIBLE',sepAsesorId:null,sepFecha:null,sepObs:'',oculto:false});
+    }catch(e){}
+    setTimeout(async()=>{try{await notifVinLiberado(vinToSync);}catch(e){}},500);
   }
 
   // 2. Auto-create proceso de entrega if Facturado
