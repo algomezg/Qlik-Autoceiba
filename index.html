@@ -2188,6 +2188,17 @@ function toggleVerFacturados(){
   if(cb){cb.checked=!cb.checked;renderInv();}
 }
 
+function editarVeh(vin){
+  const v=INV.find(x=>x.vin===vin);if(!v) return;
+  const sel=$('vP');
+  if(sel){const modelos=buildUnifiedVehicleList();sel.innerHTML='<option value="">Selecciona...</option>'+modelos.map(m=>`<option value="${m}">${m}</option>`).join('');sel.value=v.producto||'';if(!sel.value&&v.producto){const o=document.createElement('option');o.value=v.producto;o.textContent=v.producto;sel.appendChild(o);sel.value=v.producto;}}
+  if($('vA'))$('vA').value=v.mod||2026;if($('vC'))$('vC').value=v.color||'';if($('vCI'))$('vCI').value=v.colorInt||'';if($('vCH'))$('vCH').value=v.chasis||'';
+  if($('vV')){$('vV').value=v.vin;$('vV').readOnly=true;}
+  $('mAddV').dataset.editVin=vin;
+  const mt=$('mAddV').querySelector('.mt');if(mt)mt.textContent='✏️ Editar — VIN '+vin;
+  om('mAddV');
+}
+
 async function eliminarVeh(vin, producto){
   if(!isGer()){toast('⚠️ Solo el gerente puede eliminar vehículos');return;}
   if(!confirm(`¿Eliminar el vehículo ${producto} (VIN: ${vin}) del inventario?
@@ -2198,13 +2209,20 @@ Esta acción no se puede deshacer.`)) return;
 }
 
 async function guardarVeh(){
+  const editVin=($('mAddV').dataset||{}).editVin||'';
   const prod=$('vP').value.trim(),vin=$('vV').value.trim();
   if(!prod||!vin){toast('⚠️ Producto y VIN requeridos');return;}
-  const vehData={vin,producto:prod,mod:parseInt($('vA').value)||2026,color:$('vC').value.trim(),colorInt:$('vCI').value.trim(),chasis:$('vCH').value.trim(),motor:'',ubicacion:$('vU').value||'CEIBA',estado:'DISPONIBLE',estadoUNOE:$('vUN')?$('vUN').value:'Disponible',diasInv:0,oculto:false,sepAsesorId:null,sepFecha:null,sepObs:'',importadoEn:today()};
-  await db.collection('inventario').doc(vin).set(vehData);
-  cm('mAddV');toast('✅ Vehículo agregado');
-  // Notify everyone of new inventory
-  try{await notifNuevoInventario([{vin,producto:prod,color:vehData.color,ubicacion:vehData.ubicacion,mod:vehData.mod}]);}catch(e){}
+  if(editVin){
+    await db.collection('inventario').doc(editVin).update({producto:prod,mod:parseInt($('vA').value)||2026,color:$('vC').value.trim(),colorInt:$('vCI').value.trim(),chasis:$('vCH').value.trim()});
+    cm('mAddV');$('mAddV').dataset.editVin='';if($('vV'))$('vV').readOnly=false;
+    const mt=$('mAddV').querySelector('.mt');if(mt)mt.textContent='Agregar vehículo';
+    toast('✅ Vehículo actualizado');
+  } else {
+    const vehData={vin,producto:prod,mod:parseInt($('vA').value)||2026,color:$('vC').value.trim(),colorInt:$('vCI').value.trim(),chasis:$('vCH').value.trim(),motor:'',ubicacion:$('vU')?$('vU').value:'CEIBA',estado:'DISPONIBLE',oculto:false,sepAsesorId:null,sepFecha:null,sepObs:'',importadoEn:today()};
+    await db.collection('inventario').doc(vin).set(vehData);
+    cm('mAddV');toast('✅ Vehículo agregado');
+    try{await notifNuevoInventario([{vin,producto:prod,color:vehData.color,ubicacion:vehData.ubicacion,mod:vehData.mod}]);}catch(e){}
+  }
 }
 
 // ── DEMOS ──
@@ -5032,8 +5050,10 @@ function renderDashboard(){
   const eFacturados  = allFiltered.filter(s=>enMes(s.fechaFact)).length;
   const eMatriculados= allFiltered.filter(s=>enMes(s.fechaMat)).length;
 
-  const funnelLabels=['📋 Cotizados','🚗 Prueba de ruta','✅ Crédito aprobado','🔒 Separaciones','📄 Facturados','🏆 Matriculados'];
-  const funnelData=[eCotizados,ePrueba,eCredito,eSeparados,eFacturados,eMatriculados];
+  const funnelRaw=[eCotizados,ePrueba,eCredito,eSeparados,eFacturados,eMatriculados];
+  const funnelPcts=funnelRaw.map((v,i)=>i===0?100:(funnelRaw[i-1]>0?Math.round((v/funnelRaw[i-1])*100):0));
+  const funnelLabels=['📋 Cotizados','🚗 Prueba de ruta','✅ Crédito aprobado','🔒 Separaciones','📄 Facturados','🏆 Matriculados'].map((n,i)=>n+' · '+funnelRaw[i]+' ('+funnelPcts[i]+'%)');
+  const funnelData=funnelRaw;
   const funnelColors=['#4a90d9','#FF9500','#34C759','#fac775','#CC0001','#2d6011'];
 
   destroyChart('funnel');
@@ -5403,85 +5423,64 @@ function renderHistorialAnual(allSegs){
 
 function renderCosechas(data){
   if(!$('cosechasChart')) return;
-  // Cosechas: for each creation month, average days to factura
   const hoy=new Date();
   const cohortMonths=[];
   for(let i=5;i>=0;i--){
     const d=new Date(hoy.getFullYear(),hoy.getMonth()-i,1);
     cohortMonths.push({key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:MESES[d.getMonth()].substring(0,3)});
   }
-
+  // Avg days createdAt → fechaFact per cohort
   const avgDias=cohortMonths.map(cm=>{
     const recs=data.filter(s=>s.createdAt&&s.createdAt.startsWith(cm.key)&&s.fechaFact);
     if(!recs.length) return 0;
-    const totalDias=recs.reduce((acc,s)=>{
-      const d1=new Date(s.createdAt),d2=new Date(s.fechaFact);
-      return acc+Math.max(0,Math.round((d2-d1)/(1000*60*60*24)));
-    },0);
-    return Math.round(totalDias/recs.length);
+    return Math.round(recs.reduce((a,s)=>a+Math.max(0,Math.round((new Date(s.fechaFact)-new Date(s.createdAt))/(86400000))),0)/recs.length);
   });
   const cantFact=cohortMonths.map(cm=>data.filter(s=>s.createdAt&&s.createdAt.startsWith(cm.key)&&s.fechaFact).length);
 
   destroyChart('cosechas');
-  const ctx=$('cosechasChart').getContext('2d');
-  dashCharts['cosechas']=new Chart(ctx,{
+  dashCharts['cosechas']=new Chart($('cosechasChart').getContext('2d'),{
     type:'bar',
-    data:{
-      labels:cohortMonths.map(c=>c.label),
-      datasets:[
-        {label:'Días prom. cierre',data:avgDias,backgroundColor:'#CC0001',borderRadius:5,yAxisID:'y'},
-        {label:'Vehículos facturados',data:cantFact,type:'line',borderColor:'#2d6011',borderWidth:2,pointRadius:4,pointBackgroundColor:'#2d6011',fill:false,yAxisID:'y2'}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},
-      scales:{
-        y:{beginAtZero:true,title:{display:true,text:'Días promedio',font:{size:10}},grid:{color:'#f5f5f5'}},
-        y2:{beginAtZero:true,position:'right',title:{display:true,text:'Facturados',font:{size:10}},grid:{display:false}},
-        x:{grid:{display:false}}
-      }
-    }
+    data:{labels:cohortMonths.map(c=>c.label),datasets:[
+      {label:'Días prom. cierre',data:avgDias,backgroundColor:'#CC0001',borderRadius:5,yAxisID:'y'},
+      {label:'Facturados',data:cantFact,type:'line',borderColor:'#2d6011',borderWidth:2,pointRadius:4,pointBackgroundColor:'#2d6011',fill:false,yAxisID:'y2'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},
+      scales:{y:{beginAtZero:true,title:{display:true,text:'Días',font:{size:10}},grid:{color:'#f5f5f5'}},
+        y2:{beginAtZero:true,position:'right',title:{display:true,text:'Cant.',font:{size:10}},grid:{display:false}},
+        x:{grid:{display:false}}}}
   });
 
-  // ── TIEMPO DE CIERRE POR ASESOR ──
-  if($('tiempoCierreChart')){
+  // Tiempo cierre por asesor
+  if($('tiempoCierreChart')&&typeof rankData!=='undefined'){
     destroyChart('tiempoCierre');
-    const tcCtx=$('tiempoCierreChart').getContext('2d');
-    const tcLabels=rankData.map(r=>r.u.nombre.split(' ').slice(0,2).join(' '));
-    const tcData=rankData.map(r=>r.aTiempoCierre);
-    dashCharts['tiempoCierre']=new Chart(tcCtx,{
+    dashCharts['tiempoCierre']=new Chart($('tiempoCierreChart').getContext('2d'),{
       type:'bar',
-      data:{
-        labels:tcLabels,
-        datasets:[{label:'Días promedio',data:tcData,backgroundColor:tcData.map(d=>d<=20?'#2d6011':d<=40?'#7a4a0a':'#CC0001'),borderRadius:5}]
-      },
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false}},
-        scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'},title:{display:true,text:'Días',font:{size:10}}},x:{grid:{display:false}}}
-      }
+      data:{labels:rankData.map(r=>r.u.nombre.split(' ').slice(0,2).join(' ')),
+        datasets:[{label:'Días prom.',data:rankData.map(r=>r.aTiempoCierre||0),
+          backgroundColor:rankData.map(r=>(r.aTiempoCierre||0)<=20?'#2d6011':(r.aTiempoCierre||0)<=40?'#7a4a0a':'#CC0001'),borderRadius:5}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}
     });
   }
 
-  // ── MIX DE FACTURAS ──
+  // Mix facturas del mes
   if($('mixFacturasGrid')){
-    const factMes=data.filter(s=>enMes(s.fechaFact));
-    const mixPorModelo={};
-    factMes.forEach(s=>{if(s.vehiculo)mixPorModelo[s.vehiculo]=(mixPorModelo[s.vehiculo]||0)+1;});
-    const sorted=Object.entries(mixPorModelo).sort((a,b)=>b[1]-a[1]);
-    const total=sorted.reduce((a,[,c])=>a+c,0);
+    const fMes2=getDashMes();
+    const enM2=(f)=>f&&f.startsWith(fMes2);
+    const factMes=data.filter(s=>enM2(s.fechaFact));
+    const mixModelo={};
+    factMes.forEach(s=>{if(s.vehiculo)mixModelo[s.vehiculo]=(mixModelo[s.vehiculo]||0)+1;});
+    const sorted=Object.entries(mixModelo).sort((a,b)=>b[1]-a[1]);
+    const tot=sorted.reduce((a,[,c])=>a+c,0);
     $('mixFacturasGrid').innerHTML=sorted.length?sorted.map(([m,c])=>{
-      const pct=total>0?Math.round((c/total)*100):0;
+      const p=tot>0?Math.round((c/tot)*100):0;
       return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f5f5f5">
-        <span style="font-size:12px;font-weight:600;flex:1;color:#333">${m}</span>
-        <div style="width:100px;background:#f0f0f0;border-radius:6px;height:10px;overflow:hidden">
-          <div style="width:${pct}%;height:100%;background:#CC0001;border-radius:6px"></div>
-        </div>
-        <span style="font-size:12px;font-weight:700;color:#CC0001;min-width:30px;text-align:right">${c}</span>
-        <span style="font-size:10px;color:#aaa;min-width:28px">${pct}%</span>
+        <span style="font-size:12px;font-weight:600;flex:1">${m}</span>
+        <div style="width:80px;background:#f0f0f0;border-radius:6px;height:10px;overflow:hidden"><div style="width:${p}%;height:100%;background:#CC0001;border-radius:6px"></div></div>
+        <span style="font-size:12px;font-weight:700;color:#CC0001;min-width:20px;text-align:right">${c}</span>
+        <span style="font-size:10px;color:#aaa">${p}%</span>
       </div>`;
-    }).join(''):'<div style="text-align:center;color:#ccc;padding:1rem;font-size:12px">Sin facturas en el mes</div>';
+    }).join(''):'<div style="text-align:center;color:#ccc;padding:1rem;font-size:12px">Sin facturas</div>';
   }
 }
 
