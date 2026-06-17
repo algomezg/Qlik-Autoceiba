@@ -841,81 +841,65 @@ body.edit-mode .dash-section-edit{display:flex}
       </div>
 
       <div class="pg" id="page-leads">
-        <div class="pt">📋 Leads comerciales</div>
-        <div class="ps">Pipeline de prospectos — seguimiento completo desde lead hasta facturación</div>
+        <div class="pt">Leads comerciales</div>
+        <div class="ps">Base de datos de prospectos — cargue masivo desde Excel o registro individual</div>
 
         <!-- STATS -->
         <div class="sg" id="leadsGrid"></div>
 
         <!-- ACCIONES Y FILTROS -->
         <div class="card">
-          <div class="ct">📋 Pipeline de leads
-            <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn btnp btnsm" onclick="openNewLead()">+ Nuevo lead</button>
-              <label class="btn btns btnsm" style="cursor:pointer">📥 Importar Excel<input type="file" accept=".xlsx,.xls,.csv" onchange="importLeadsXL(this)" hidden></label>
-              <button class="btn btns btnsm" onclick="exportLeadsXL()">📤 Exportar</button>
-              <button class="btn btns btnsm" onclick="descargarPlantillaLeads()">📄 Plantilla</button>
-              <button class="btn btns btnsm" onclick="showPage('leads-dash')">📊 Dashboard Leads</button>
+          <div class="ct">📋 Gestión de leads
+            <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn btns btnsm" onclick="document.getElementById('leadsXlFile').click()">📥 Cargar Excel masivo</button>
+              <input type="file" id="leadsXlFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="importLeadsXL(this)">
+              <button class="btn btns btnsm" onclick="exportLeadsXL()">📤 Exportar Excel</button>
+              <button class="btn btnp btnsm" id="btnNewLead">+ Nuevo lead</button>
             </div>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
-            <input type="text" id="leadsSearch" placeholder="Buscar nombre, cédula, celular..." oninput="renderLeads()"
-              style="flex:1;min-width:180px;padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none">
-            <select id="leadsFiltAsesor" onchange="renderLeads()" style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none">
-              <option value="">Todos los asesores</option>
-            </select>
-            <select id="leadsFiltEstado" onchange="renderLeads()" style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none">
+
+          <!-- PLANTILLA INFO -->
+          <div class="ib ibi" style="margin-bottom:1rem">
+            ℹ️ <div>Para carga masiva, el Excel debe tener las columnas: <strong>Nombre, Celular, Cédula, Correo, Vehículo, Color, Tipo, Forma de Pago, Entidad, Fuente, Asesor (correo), Fecha Primer Contacto, Observaciones</strong>
+            <br><button class="btn btns btnsm" style="margin-top:4px" onclick="descargarPlantilla()">📄 Descargar plantilla</button></div>
+          </div>
+
+          <div class="sb2">
+            <input type="text" id="leadsSearch" placeholder="Buscar por nombre, cédula, celular...">
+            <select id="leadsFiltAsesor"><option value="">Todos los asesores</option></select>
+            <select id="leadsFiltEstado">
               <option value="">Todos los estados</option>
-              <option>Por gestionar</option><option>Contactado</option><option>Cotizado</option>
-              <option>Separado</option><option>Facturado</option><option>Matriculado</option><option>Perdido</option>
+              <option value="Nuevo">🆕 Nuevo</option>
+              <option value="Contactado">📞 Contactado</option>
+              <option value="Interesado">⭐ Interesado</option>
+              <option value="Cita agendada">📅 Cita agendada</option>
+              <option value="En negociación">🤝 En negociación</option>
+              <option value="Convertido">✅ Convertido</option>
+              <option value="Desistido">❌ Desistido</option>
             </select>
-            <select id="leadsFiltFuente" onchange="renderLeads()" style="padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none">
+            <select id="leadsFiltFuente">
               <option value="">Todas las fuentes</option>
+              <option>Referido</option>
+              <option>Redes sociales</option>
+              <option>Sala de ventas</option>
+              <option>Llamada entrante</option>
+              <option>Página web</option>
+              <option>Evento / Feria</option>
+              <option>Base de datos</option>
+              <option>WhatsApp</option>
+              <option>Email marketing</option>
             </select>
+            <select id="leadsFiltVeh"><option value="">Todos los vehículos</option></select>
           </div>
 
           <div class="tw"><table>
             <thead><tr>
-              <th>Asesor</th><th>Cliente</th><th>Celular</th><th>Vehículo</th><th>Estado</th>
-              <th>Cita</th><th>Test Drive</th><th>Cotizado</th><th>VIN</th><th>Fuente</th><th>Acciones</th>
+              <th>Asesor</th><th>Nombre</th><th>Celular</th><th>Cédula</th>
+              <th>Vehículo</th><th>Fuente</th><th>1er Contacto</th>
+              <th>Estado</th><th>Últ. gestión</th><th>Acciones</th>
             </tr></thead>
-            <tbody id="leadsTbody"></tbody>
+            <tbody id="leadsTb"></tbody>
           </table></div>
-        </div>
-      </div>
-
-      <!-- LEADS DASHBOARD -->
-      <div class="pg" id="page-leads-dash">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">
-          <div class="pt" style="margin:0">📊 Dashboard de Leads</div>
-          <button class="btn btns btnsm" onclick="showPage('leads')">← Volver a Leads</button>
-        </div>
-        <div class="sg" id="leadsDashStats"></div>
-        <div class="chart-grid">
-          <div class="chart-card full">
-            <div class="chart-title">🔽 Embudo de conversión de Leads</div>
-            <div class="chart-wrap" style="height:280px"><canvas id="leadsFunnelChart"></canvas></div>
-          </div>
-        </div>
-        <div class="chart-grid">
-          <div class="chart-card">
-            <div class="chart-title">❌ Motivos de pérdida</div>
-            <div class="chart-wrap-sm"><canvas id="leadsMotivoChart"></canvas></div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-title">🥧 Estado del pipeline</div>
-            <div class="chart-wrap-sm"><canvas id="leadsPipelineChart"></canvas></div>
-          </div>
-        </div>
-        <div class="chart-grid">
-          <div class="chart-card">
-            <div class="chart-title">📊 Leads por asesor</div>
-            <div class="chart-wrap"><canvas id="leadsAsesorChart"></canvas></div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-title">🚗 Leads por modelo de interés</div>
-            <div class="chart-wrap"><canvas id="leadsModeloChart"></canvas></div>
-          </div>
         </div>
       </div>
 
@@ -1446,101 +1430,114 @@ body.edit-mode .dash-section-edit{display:flex}
 </div></div>
 
 <!-- MODAL NUEVO / EDITAR LEAD -->
-<div class="mo" id="mNewLead"><div class="mdl" style="width:700px;max-height:90vh;overflow-y:auto">
+<div class="mo" id="mNewLead"><div class="mdl" style="width:620px">
   <div class="mt" id="mLeadTitle">📋 Nuevo lead</div>
   <input type="hidden" id="leadEditId">
 
   <div class="fr">
+    <div class="ff"><label>Asesor comercial</label><select id="leadAsesor"></select></div>
+    <div class="ff"><label>Estado actual</label>
+      <select id="leadEstado" onchange="toggleLeadFields()">
+        <option value="Nuevo">🆕 Nuevo</option>
+        <option value="Contactado">📞 Contactado</option>
+        <option value="Interesado">⭐ Interesado</option>
+        <option value="Cita agendada">📅 Cita agendada</option>
+        <option value="En negociación">🤝 En negociación</option>
+        <option value="Convertido">✅ Convertido</option>
+        <option value="Desistido">❌ Desistido</option>
+      </select>
+    </div>
+  </div>
+  <div class="fr">
     <div class="ff"><label>Nombre completo</label><input type="text" id="leadNombre" placeholder="Nombre del prospecto"></div>
-    <div class="ff"><label>Cédula</label><input type="text" id="leadCedula" placeholder="Cédula"></div>
+    <div class="ff"><label>Número de cédula</label><input type="text" id="leadCedula" placeholder="Cédula"></div>
   </div>
   <div class="fr">
     <div class="ff"><label>Celular</label><input type="text" id="leadCelular" placeholder="Celular"></div>
-    <div class="ff"><label>Correo</label><input type="email" id="leadCorreo" placeholder="correo@email.com"></div>
+    <div class="ff"><label>Correo electrónico</label><input type="email" id="leadCorreo" placeholder="correo@email.com"></div>
   </div>
   <div class="fr">
-    <div class="ff"><label>Asesor asignado</label><select id="leadAsesor"></select></div>
-    <div class="ff"><label>Vehículo de interés</label><select id="leadVehiculo"></select></div>
+    <div class="ff"><label>Fuente de prospección</label>
+      <select id="leadFuente">
+        <option value="">Selecciona fuente</option>
+        <option>Referido</option>
+        <option>Redes sociales</option>
+        <option>Sala de ventas</option>
+        <option>Llamada entrante</option>
+        <option>Página web</option>
+        <option>Evento / Feria</option>
+        <option>Base de datos</option>
+        <option>WhatsApp</option>
+        <option>Email marketing</option>
+      </select>
+    </div>
+    <div class="ff"><label>📅 Fecha primer contacto</label><input type="date" id="leadFechaPrimer"></div>
   </div>
   <div class="fr">
-    <div class="ff"><label>Fuente del lead</label><select id="leadFuente">
-      <option>Showroom</option><option>Referido</option><option>Digital</option>
-      <option>Feria</option><option>Recompra</option><option>Llamada entrante</option><option>Otro</option>
-    </select></div>
-    <div class="ff"><label>Estado</label><select id="leadEstado" onchange="toggleLeadFields()">
-      <option>Por gestionar</option><option>Contactado</option><option>Cotizado</option>
-      <option>Separado</option><option>Facturado</option><option>Matriculado</option><option>Perdido</option>
-    </select></div>
+    <div class="ff"><label>Vehículo de interés</label>
+      <select id="leadVehiculo">
+        <option value="">Selecciona vehículo</option>
+        <!-- Populated dynamically by fillVehicleSelects() -->
+      </select>
+    </div>
+    <div class="ff"><label>Color de interés</label><input type="text" id="leadColor" placeholder="Color deseado"></div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Tipo de cliente</label>
+      <select id="leadTipo">
+        <option value="Vehículo nuevo">Vehículo nuevo</option>
+        <option value="Empleado">Empleado</option>
+      </select>
+    </div>
+    <div class="ff"><label>Forma de pago</label>
+      <select id="leadPago">
+        <option value="">Selecciona forma de pago</option>
+        <option>Crédito + Contado</option><option>Crédito 100%</option>
+        <option>Retoma + Crédito</option><option>Retoma + Contado</option>
+        <option>Contado</option><option>Renting</option><option>Leasing</option>
+      </select>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Entidad financiera</label>
+      <select id="leadEntidad">
+        <option value="">Selecciona entidad</option>
+        <option>Finandina</option><option>Sufi</option>
+        <option>Banco de Occidente</option><option>Banco Santander</option>
+        <option>Finanzauto</option><option>Vehigrupo</option>
+        <option>Finesa</option><option>Renting Total</option>
+      </select>
+    </div>
+    <div class="ff"><label>📅 Fecha próximo contacto</label><input type="date" id="leadProxContacto"></div>
   </div>
 
-  <!-- ETAPAS CON CASILLAS Y FECHAS -->
-  <div style="background:#f8f8f8;border-radius:9px;padding:.75rem 1rem;margin:.75rem 0">
-    <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-bottom:.5rem">Etapas del proceso</div>
-    <div class="fr">
-      <div class="ff" style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="leadChkContacto" style="accent-color:#CC0001;width:16px;height:16px">
-        <label style="font-size:12px;margin:0">Contactado</label>
-        <input type="date" id="leadFechaContacto" style="font-size:11px;padding:4px 8px;border:1px solid #ddd;border-radius:5px;margin-left:auto">
-      </div>
-      <div class="ff" style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="leadChkCita" style="accent-color:#CC0001;width:16px;height:16px">
-        <label style="font-size:12px;margin:0">Cita programada</label>
-        <input type="date" id="leadFechaCita" style="font-size:11px;padding:4px 8px;border:1px solid #ddd;border-radius:5px;margin-left:auto">
-      </div>
-    </div>
-    <div class="fr">
-      <div class="ff" style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="leadChkCitaCumplida" style="accent-color:#2d6011;width:16px;height:16px">
-        <label style="font-size:12px;margin:0">Cita cumplida</label>
-      </div>
-      <div class="ff" style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="leadChkTestDrive" style="accent-color:#CC0001;width:16px;height:16px">
-        <label style="font-size:12px;margin:0">Test Drive</label>
-        <input type="date" id="leadFechaTestDrive" style="font-size:11px;padding:4px 8px;border:1px solid #ddd;border-radius:5px;margin-left:auto">
-      </div>
-    </div>
-    <div class="fr">
-      <div class="ff" style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="leadChkCotizado" style="accent-color:#CC0001;width:16px;height:16px">
-        <label style="font-size:12px;margin:0">Cotizado</label>
-        <input type="date" id="leadFechaCotizado" style="font-size:11px;padding:4px 8px;border:1px solid #ddd;border-radius:5px;margin-left:auto">
-      </div>
-      <div class="ff" style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="leadChkSeparado" style="accent-color:#CC0001;width:16px;height:16px">
-        <label style="font-size:12px;margin:0">Separado</label>
-        <input type="date" id="leadFechaSeparado" style="font-size:11px;padding:4px 8px;border:1px solid #ddd;border-radius:5px;margin-left:auto">
-      </div>
-    </div>
-    <div class="fr">
-      <div class="ff" style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="leadChkFacturado" style="accent-color:#CC0001;width:16px;height:16px">
-        <label style="font-size:12px;margin:0">Facturado</label>
-        <input type="date" id="leadFechaFacturado" style="font-size:11px;padding:4px 8px;border:1px solid #ddd;border-radius:5px;margin-left:auto">
-      </div>
-      <div class="ff" style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="leadChkMatriculado" style="accent-color:#2d6011;width:16px;height:16px">
-        <label style="font-size:12px;margin:0">Matriculado</label>
-        <input type="date" id="leadFechaMatriculado" style="font-size:11px;padding:4px 8px;border:1px solid #ddd;border-radius:5px;margin-left:auto">
-      </div>
-    </div>
-  </div>
-
-  <div class="fr">
-    <div class="ff"><label>VIN asignado</label><select id="leadVin"><option value="">Sin VIN</option></select></div>
-    <div class="ff" id="leadMotivoPerdidaWrap" style="display:none"><label>Motivo de pérdida</label>
-      <select id="leadMotivoPerdida">
-        <option>No volvió a contestar</option><option>Capacidad de pago</option>
-        <option>Crédito no aprobado</option><option>Retoma baja</option>
-        <option>Compró otra marca</option><option>Compró en otro concesionario Honda</option>
+  <!-- Desistido fields -->
+  <div id="leadDesistidoField" style="display:none">
+    <div class="ff"><label>Motivo de desistimiento</label>
+      <select id="leadMotivo">
+        <option value="">Selecciona motivo</option>
+        <option>No contesta</option>
+        <option>No interesado</option>
+        <option>Perfil no viable</option>
+        <option>Compró otra marca</option>
+        <option>Crédito negado</option>
       </select>
     </div>
   </div>
 
-  <div class="ff"><label>Observaciones</label><textarea id="leadObs" rows="2" style="width:100%;padding:8px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;outline:none;resize:vertical" placeholder="Notas adicionales..."></textarea></div>
+  <!-- Convertido field -->
+  <div id="leadConvertidoField" style="display:none">
+    <div class="ib ibs">✅ Este lead será marcado como convertido. Puedes agregarlo al módulo de Seguimiento para continuar su proceso.</div>
+  </div>
+
+  <div class="ff"><label>Observaciones / Notas de gestión</label>
+    <textarea id="leadObs" placeholder="Resultado del contacto, próximos pasos, observaciones..."></textarea>
+  </div>
 
   <div class="mf">
     <button class="btn btns" id="btnCancelLead">Cancelar</button>
-    <button class="btn btnp" id="btnSaveLead">💾 Guardar lead</button>
+    <button class="btn btns" id="btnLeadToSeg" style="display:none" onclick="convertirLeadASeg()">➡️ Pasar a Seguimiento</button>
+    <button class="btn btnp" id="btnSaveLead">Guardar lead</button>
   </div>
 </div></div>
 
@@ -2043,8 +2040,8 @@ function setupNav(){
 function showPage(p){
   document.querySelectorAll('.pg').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
-  const pg=$('page-'+p);if(pg) pg.classList.add('active');
-  const nv=$('nav-'+p);if(nv) nv.classList.add('active');
+  $('page-'+p).classList.add('active');
+  $('nav-'+p).classList.add('active');
   if(p==='inv'){fillPF();renderInv();}
   if(p==='demos') renderDemos();
   if(p==='cronograma') renderCal();
@@ -2074,7 +2071,6 @@ function showPage(p){
     }
   }
   if(p==='leads') renderLeads();
-  if(p==='leads-dash') renderLeadsDash();
   if(p==='seguimiento') renderSeg();
   if(p==='notificaciones'){
     Object.keys(NOTIF_PREFS).forEach(k=>{
@@ -4931,10 +4927,6 @@ function renderDashboard(){
   const gaugeVins=new Set();
   allFiltered.filter(s=>enMes(s.fechaFact)).forEach(s=>gaugeVins.add(s._id));
   allFiltered.filter(s=>enMes(s.fechaMat)).forEach(s=>gaugeVins.add(s._id));
-  // Also count leads facturados/matriculados toward gauge
-  const fMesGauge=getDashMes();
-  LEADS.filter(l=>(l.facturado||l.estado==='Facturado')&&(l.fechaFacturado||'').startsWith(fMesGauge)).forEach(l=>gaugeVins.add('lead_'+l._id));
-  LEADS.filter(l=>(l.matriculado||l.estado==='Matriculado')&&(l.fechaMatriculado||'').startsWith(fMesGauge)).forEach(l=>gaugeVins.add('lead_'+l._id));
   const gaugeTotal=gaugeVins.size;
   const pct=Math.min(metaUnidades>0?Math.round((gaugeTotal/metaUnidades)*100):0,100);
   $('gaugeNum').textContent=pct+'%';
@@ -5867,323 +5859,87 @@ function toggleLeadFields(){
   $('btnLeadToSeg').style.display=estado==='Convertido'?'inline-flex':'none';
 }
 
-function toggleLeadFields(){
-  const e=$('leadEstado').value;
-  const mw=$('leadMotivoPerdidaWrap');
-  if(mw) mw.style.display=e==='Perdido'?'block':'none';
-}
-
-function fillLeadSelects(){
-  const sa=$('leadAsesor');
-  if(sa){
-    const asesores=CU.rol==='asesor'?USERS.filter(u=>u.id===CU.id):USERS.filter(u=>u.rol==='asesor'&&u.activo);
-    sa.innerHTML=asesores.map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
-  }
-  const sv=$('leadVehiculo');
-  if(sv){
-    const modelos=buildUnifiedVehicleList();
-    sv.innerHTML='<option value="">Sin definir</option>'+modelos.map(m=>`<option value="${m}">${m}</option>`).join('');
-  }
-  const svin=$('leadVin');
-  if(svin){
-    const disponibles=INV.filter(v=>!v.oculto&&v.estado!=='FACTURADO'&&v.estado!=='MATRICULADO');
-    svin.innerHTML='<option value="">Sin VIN</option>'+disponibles.map(v=>`<option value="${v.vin}">${v.vin} · ${v.producto} · ${v.color}</option>`).join('');
-  }
-}
-
-function openNewLead(){
-  $('leadEditId').value='';
-  ['leadNombre','leadCedula','leadCelular','leadCorreo','leadObs'].forEach(id=>{if($(id))$(id).value='';});
-  ['leadChkContacto','leadChkCita','leadChkCitaCumplida','leadChkTestDrive','leadChkCotizado','leadChkSeparado','leadChkFacturado','leadChkMatriculado'].forEach(id=>{if($(id))$(id).checked=false;});
-  ['leadFechaContacto','leadFechaCita','leadFechaTestDrive','leadFechaCotizado','leadFechaSeparado','leadFechaFacturado','leadFechaMatriculado'].forEach(id=>{if($(id))$(id).value='';});
-  if($('leadEstado')) $('leadEstado').value='Por gestionar';
-  if($('leadVin')) $('leadVin').value='';
-  toggleLeadFields();
-  fillLeadSelects();
-  $('mLeadTitle').textContent='📋 Nuevo lead';
-  om('mNewLead');
-}
-
-function editLead(id){
-  const l=LEADS.find(x=>x._id===id);if(!l) return;
-  $('leadEditId').value=id;
-  $('leadNombre').value=l.nombre||'';
-  $('leadCedula').value=l.cedula||'';
-  $('leadCelular').value=l.celular||'';
-  if($('leadCorreo')) $('leadCorreo').value=l.correo||'';
-  if($('leadObs')) $('leadObs').value=l.obs||'';
-  if($('leadEstado')) $('leadEstado').value=l.estado||'Por gestionar';
-  if($('leadMotivoPerdida')) $('leadMotivoPerdida').value=l.motivoPerdida||'';
-  fillLeadSelects();
-  setTimeout(()=>{
-    if($('leadAsesor')) $('leadAsesor').value=l.asesorId||'';
-    if($('leadVehiculo')) $('leadVehiculo').value=l.vehiculo||'';
-    if($('leadFuente')) $('leadFuente').value=l.fuente||'Showroom';
-    // VIN — add current VIN even if oculto
-    const svin=$('leadVin');
-    if(svin&&l.vin){
-      if(![...svin.options].some(o=>o.value===l.vin)){
-        const v=INV.find(x=>x.vin===l.vin);
-        const opt=document.createElement('option');opt.value=l.vin;opt.textContent=l.vin+' · '+(v?v.producto:'');
-        svin.appendChild(opt);
-      }
-      svin.value=l.vin;
-    }
-    // Checkboxes
-    if($('leadChkContacto')) $('leadChkContacto').checked=!!l.contactado;
-    if($('leadChkCita')) $('leadChkCita').checked=!!l.citaProgramada;
-    if($('leadChkCitaCumplida')) $('leadChkCitaCumplida').checked=!!l.citaCumplida;
-    if($('leadChkTestDrive')) $('leadChkTestDrive').checked=!!l.testDrive;
-    if($('leadChkCotizado')) $('leadChkCotizado').checked=!!l.cotizado;
-    if($('leadChkSeparado')) $('leadChkSeparado').checked=!!l.separado;
-    if($('leadChkFacturado')) $('leadChkFacturado').checked=!!l.facturado;
-    if($('leadChkMatriculado')) $('leadChkMatriculado').checked=!!l.matriculado;
-    // Dates
-    if($('leadFechaContacto')) $('leadFechaContacto').value=l.fechaContacto||'';
-    if($('leadFechaCita')) $('leadFechaCita').value=l.fechaCita||'';
-    if($('leadFechaTestDrive')) $('leadFechaTestDrive').value=l.fechaTestDrive||'';
-    if($('leadFechaCotizado')) $('leadFechaCotizado').value=l.fechaCotizado||'';
-    if($('leadFechaSeparado')) $('leadFechaSeparado').value=l.fechaSeparado||'';
-    if($('leadFechaFacturado')) $('leadFechaFacturado').value=l.fechaFacturado||'';
-    if($('leadFechaMatriculado')) $('leadFechaMatriculado').value=l.fechaMatriculado||'';
-    toggleLeadFields();
-  },80);
-  $('mLeadTitle').textContent='✏️ Editar lead — '+l.nombre;
-  om('mNewLead');
-}
-
-async function guardarLead(){
-  const nombre=$('leadNombre').value.trim();
-  if(!nombre){toast('⚠️ Nombre requerido');return;}
-  const editId=$('leadEditId').value;
-  const data={
-    nombre,
-    cedula:$('leadCedula').value.trim(),
-    celular:$('leadCelular').value.trim(),
-    correo:$('leadCorreo')?$('leadCorreo').value.trim():'',
-    asesorId:$('leadAsesor').value,
-    vehiculo:$('leadVehiculo')?$('leadVehiculo').value:'',
-    fuente:$('leadFuente')?$('leadFuente').value:'',
-    estado:$('leadEstado').value||'Por gestionar',
-    motivoPerdida:$('leadEstado').value==='Perdido'?($('leadMotivoPerdida')?$('leadMotivoPerdida').value:''):'',
-    vin:$('leadVin')?$('leadVin').value:'',
-    obs:$('leadObs')?$('leadObs').value.trim():'',
-    // Checkboxes
-    contactado:$('leadChkContacto')?$('leadChkContacto').checked:false,
-    citaProgramada:$('leadChkCita')?$('leadChkCita').checked:false,
-    citaCumplida:$('leadChkCitaCumplida')?$('leadChkCitaCumplida').checked:false,
-    testDrive:$('leadChkTestDrive')?$('leadChkTestDrive').checked:false,
-    cotizado:$('leadChkCotizado')?$('leadChkCotizado').checked:false,
-    separado:$('leadChkSeparado')?$('leadChkSeparado').checked:false,
-    facturado:$('leadChkFacturado')?$('leadChkFacturado').checked:false,
-    matriculado:$('leadChkMatriculado')?$('leadChkMatriculado').checked:false,
-    // Dates
-    fechaContacto:$('leadFechaContacto')?$('leadFechaContacto').value||null:null,
-    fechaCita:$('leadFechaCita')?$('leadFechaCita').value||null:null,
-    fechaTestDrive:$('leadFechaTestDrive')?$('leadFechaTestDrive').value||null:null,
-    fechaCotizado:$('leadFechaCotizado')?$('leadFechaCotizado').value||null:null,
-    fechaSeparado:$('leadFechaSeparado')?$('leadFechaSeparado').value||null:null,
-    fechaFacturado:$('leadFechaFacturado')?$('leadFechaFacturado').value||null:null,
-    fechaMatriculado:$('leadFechaMatriculado')?$('leadFechaMatriculado').value||null:null,
-    updatedAt:today()
-  };
-
-  // Sync VIN with inventory
-  if(data.vin&&(data.estado==='Separado'||data.separado)){
-    try{await syncVinWithInventario(data.vin,'Separado',data.asesorId);}catch(e){}
-  }
-  if(data.vin&&(data.estado==='Facturado'||data.facturado)){
-    try{await syncVinWithInventario(data.vin,'Facturado',data.asesorId);}catch(e){}
-  }
-
-  if(editId){
-    await db.collection('leads').doc(editId).update(data);
-    toast('✅ Lead actualizado');
-  } else {
-    data.createdAt=today();
-    await db.collection('leads').add(data);
-    toast('✅ Lead creado');
-  }
-  cm('mNewLead');
-}
-
 function renderLeads(){
   if(!CU) return;
+
   // Fill filters
   const selA=$('leadsFiltAsesor');
   if(selA){
     const prev=selA.value;
     const asesores=CU.rol==='asesor'?USERS.filter(u=>u.id===CU.id):USERS.filter(u=>u.rol==='asesor'&&u.activo);
-    selA.innerHTML='<option value="">Todos</option>'+asesores.map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+    selA.innerHTML='<option value="">Todos los asesores</option>'+asesores.map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
     selA.value=prev;
   }
-  const selF=$('leadsFiltFuente');
-  if(selF){
-    const prev=selF.value;
-    const fuentes=[...new Set(LEADS.map(l=>l.fuente).filter(Boolean))];
-    selF.innerHTML='<option value="">Todas las fuentes</option>'+fuentes.map(f=>`<option value="${f}">${f}</option>`).join('');
-    selF.value=prev;
+  const selV=$('leadsFiltVeh');
+  if(selV){
+    const prev=selV.value;
+    selV.innerHTML='<option value="">Todos los vehículos</option>'+VEHICULOS_SEG.map(v=>`<option value="${v}">${v}</option>`).join('');
+    selV.value=prev;
   }
 
-  const q=($('leadsSearch')?$('leadsSearch').value:'').toLowerCase();
-  const fA=$('leadsFiltAsesor')?$('leadsFiltAsesor').value:'';
-  const fE=$('leadsFiltEstado')?$('leadsFiltEstado').value:'';
-  const fF=$('leadsFiltFuente')?$('leadsFiltFuente').value:'';
+  const q=($('leadsSearch').value||'').toLowerCase();
+  const fA=$('leadsFiltAsesor').value;
+  const fE=$('leadsFiltEstado').value;
+  const fF=$('leadsFiltFuente').value;
+  const fV=$('leadsFiltVeh').value;
 
   let data=[...LEADS];
   if(CU.rol==='asesor') data=data.filter(l=>l.asesorId===CU.id);
-  if(q) data=data.filter(l=>[l.nombre,l.cedula,l.celular].join(' ').toLowerCase().includes(q));
+  if(q) data=data.filter(l=>[l.nombre,l.cedula,l.celular,l.correo].join(' ').toLowerCase().includes(q));
   if(fA) data=data.filter(l=>l.asesorId===fA);
   if(fE) data=data.filter(l=>l.estado===fE);
   if(fF) data=data.filter(l=>l.fuente===fF);
+  if(fV) data=data.filter(l=>l.vehiculo===fV);
 
   // Stats
-  const tot=data.length;
-  const porGest=data.filter(l=>l.estado==='Por gestionar').length;
-  const contact=data.filter(l=>l.contactado||l.estado==='Contactado').length;
-  const cotiz=data.filter(l=>l.cotizado||l.estado==='Cotizado').length;
-  const sep=data.filter(l=>l.separado||l.estado==='Separado').length;
-  const fact=data.filter(l=>l.facturado||l.estado==='Facturado').length;
-  const mat=data.filter(l=>l.matriculado||l.estado==='Matriculado').length;
-  const perdidos=data.filter(l=>l.estado==='Perdido').length;
-  const sg=$('leadsGrid');
-  if(sg) sg.innerHTML=`
+  const tot=LEADS.length;
+  const nuevos=LEADS.filter(l=>l.estado==='Nuevo').length;
+  const contactados=LEADS.filter(l=>l.estado==='Contactado').length;
+  const interesados=LEADS.filter(l=>l.estado==='Interesado'||l.estado==='Cita agendada'||l.estado==='En negociación').length;
+  const convertidos=LEADS.filter(l=>l.estado==='Convertido').length;
+  const desistidos=LEADS.filter(l=>l.estado==='Desistido').length;
+  const convRate=tot>0?Math.round((convertidos/tot)*100):0;
+  const proxVencidos=LEADS.filter(l=>l.proxContacto&&l.proxContacto<today()&&l.estado!=='Convertido'&&l.estado!=='Desistido').length;
+
+  $('leadsGrid').innerHTML=`
     <div class="sc"><div class="sn">${tot}</div><div class="sl">Total leads</div></div>
-    <div class="sc"><div class="sn" style="color:#888">${porGest}</div><div class="sl">Por gestionar</div></div>
-    <div class="sc"><div class="sn" style="color:#1457a0">${contact}</div><div class="sl">Contactados</div></div>
-    <div class="sc"><div class="sn" style="color:#3a2e8f">${cotiz}</div><div class="sl">Cotizados</div></div>
-    <div class="sc"><div class="sn" style="color:#fac775">${sep}</div><div class="sl">Separados</div></div>
-    <div class="sc"><div class="sn" style="color:#CC0001">${fact}</div><div class="sl">Facturados</div></div>
-    <div class="sc"><div class="sn" style="color:#2d6011">${mat}</div><div class="sl">Matriculados</div></div>
-    <div class="sc"><div class="sn" style="color:#9b2020">${perdidos}</div><div class="sl">Perdidos</div></div>`;
+    <div class="sc"><div class="sn" style="color:#1457a0">${nuevos}</div><div class="sl">🆕 Nuevos</div></div>
+    <div class="sc"><div class="sn" style="color:#7a4a0a">${contactados}</div><div class="sl">📞 Contactados</div></div>
+    <div class="sc"><div class="sn" style="color:#3a2e8f">${interesados}</div><div class="sl">⭐ Interesados</div></div>
+    <div class="sc"><div class="sn" style="color:#2d6011">${convertidos}</div><div class="sl">✅ Convertidos</div></div>
+    <div class="sc"><div class="sn" style="color:#777">${desistidos}</div><div class="sl">❌ Desistidos</div></div>
+    <div class="sc"><div class="sn" style="color:#CC0001">${convRate}%</div><div class="sl">Tasa conversión</div></div>
+    <div class="sc"><div class="sn" style="color:#9b2020">${proxVencidos}</div><div class="sl">⚠️ Contacto vencido</div></div>`;
 
-  // Sort: Por gestionar first, then Contactado, Cotizado, Separado, rest, Perdido last
-  const ord={'Por gestionar':0,'Contactado':1,'Cotizado':2,'Separado':3,'Facturado':4,'Matriculado':5,'Perdido':9};
-  data.sort((a,b)=>(ord[a.estado]||6)-(ord[b.estado]||6));
-
-  const tb=$('leadsTbody');if(!tb) return;
-  if(!data.length){tb.innerHTML='<tr><td colspan="11" style="text-align:center;color:#ccc;padding:2rem">Sin leads</td></tr>';return;}
-  const estadoColors={'Por gestionar':'bgy','Contactado':'ba','Cotizado':'bp','Separado':'ba','Facturado':'br','Matriculado':'bg','Perdido':'bgy'};
+  const tb=$('leadsTb');
+  if(!data.length){
+    tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#ccc;padding:2rem">No hay leads registrados. Carga un Excel masivo o agrega uno manualmente.</td></tr>';
+    return;
+  }
 
   tb.innerHTML=data.map(l=>{
     const as=USERS.find(u=>u.id===l.asesorId);
+    const vencido=l.proxContacto&&l.proxContacto<today()&&l.estado!=='Convertido'&&l.estado!=='Desistido';
+    const desistInfo=l.estado==='Desistido'&&l.motivo?`<br><span style="font-size:10px;color:#9b2020">${l.motivo}</span>`:'';
     return `<tr>
-      <td style="font-size:11px">${as?as.nombre.split(' ').slice(0,2).join(' '):'—'}</td>
-      <td><strong style="font-size:12px">${l.nombre}</strong></td>
-      <td class="mono" style="font-size:11px">${l.celular||'—'}</td>
-      <td style="font-size:11px">${l.vehiculo||'—'}</td>
-      <td><span class="b ${estadoColors[l.estado]||'bgy'}" style="font-size:10px">${l.estado||'—'}</span></td>
-      <td style="font-size:11px;text-align:center">${l.citaProgramada?'✅':'—'}${l.fechaCita?' '+l.fechaCita.substring(5):''}</td>
-      <td style="font-size:11px;text-align:center">${l.testDrive?'✅':'—'}${l.fechaTestDrive?' '+l.fechaTestDrive.substring(5):''}</td>
-      <td style="font-size:11px;text-align:center">${l.cotizado?'✅':'—'}</td>
-      <td style="font-size:10px;color:#1457a0;font-family:monospace">${l.vin||'—'}</td>
-      <td style="font-size:10px">${l.fuente||'—'}</td>
-      <td><button class="btn btns btnsm" onclick="editLead('${l._id}')">✏️</button></td>
+      <td style="font-size:12px">${as?as.nombre.split(' ').slice(0,2).join(' '):'—'}</td>
+      <td>
+        <strong style="font-size:12px">${l.nombre||'—'}</strong>
+        ${l.correo?`<br><span style="font-size:10px;color:#aaa">${l.correo}</span>`:''}
+      </td>
+      <td class="mono">${l.celular||'—'}</td>
+      <td class="mono">${l.cedula||'—'}</td>
+      <td style="font-size:11px;font-weight:600">${l.vehiculo||'—'}</td>
+      <td><span class="b bgy" style="font-size:10px">${l.fuente||'—'}</span></td>
+      <td style="font-size:11px">${l.fechaPrimer||'—'}</td>
+      <td>${getLeadEstadoBadge(l.estado)}${desistInfo}</td>
+      <td style="font-size:11px;color:${vencido?'#9b2020':'#888'};font-weight:${vencido?'700':'400'}">${l.proxContacto||(l.updatedAt||'—')}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btns btnsm" onclick="verDetLead('${l._id}')">Ver</button>
+        <button class="btn btnp btnsm" onclick="editLead('${l._id}')" style="margin-top:3px">Editar</button>
+      </td>
     </tr>`;
   }).join('');
-}
-
-// ── LEADS DASHBOARD ──
-let leadsDashCharts={};
-function destroyLeadChart(id){if(leadsDashCharts[id]){leadsDashCharts[id].destroy();delete leadsDashCharts[id];}}
-
-function renderLeadsDash(){
-  if(!CU) return;
-  let data=[...LEADS];
-  if(CU.rol==='asesor') data=data.filter(l=>l.asesorId===CU.id);
-
-  const tot=data.length;
-  const contactados=data.filter(l=>l.contactado||l.fechaContacto||l.estado==='Contactado').length;
-  const conCita=data.filter(l=>l.citaProgramada||l.fechaCita).length;
-  const citasCumplidas=data.filter(l=>l.citaCumplida).length;
-  const testDrives=data.filter(l=>l.testDrive||l.fechaTestDrive).length;
-  const cotizados=data.filter(l=>l.cotizado||l.fechaCotizado||l.estado==='Cotizado').length;
-  const separados=data.filter(l=>l.separado||l.fechaSeparado||l.estado==='Separado').length;
-  const facturados=data.filter(l=>l.facturado||l.fechaFacturado||l.estado==='Facturado').length;
-  const matriculados=data.filter(l=>l.matriculado||l.fechaMatriculado||l.estado==='Matriculado').length;
-  const perdidos=data.filter(l=>l.estado==='Perdido').length;
-
-  // Stats
-  const sg=$('leadsDashStats');
-  if(sg) sg.innerHTML=`
-    <div class="sc"><div class="sn">${tot}</div><div class="sl">Total leads</div></div>
-    <div class="sc"><div class="sn" style="color:#1457a0">${contactados}</div><div class="sl">Contactados</div></div>
-    <div class="sc"><div class="sn" style="color:#3a2e8f">${cotizados}</div><div class="sl">Cotizados</div></div>
-    <div class="sc"><div class="sn" style="color:#CC0001">${facturados}</div><div class="sl">Facturados</div></div>
-    <div class="sc"><div class="sn" style="color:#2d6011">${matriculados}</div><div class="sl">Matriculados</div></div>
-    <div class="sc"><div class="sn" style="color:#9b2020">${perdidos}</div><div class="sl">Perdidos</div></div>
-    <div class="sc"><div class="sn" style="color:#7a4a0a">${tot>0?Math.round((facturados/tot)*100):0}%</div><div class="sl">Conversión</div></div>`;
-
-  // Funnel
-  const funnelStages=[tot,contactados,conCita,testDrives,cotizados,separados,facturados,matriculados];
-  const funnelNames=['📋 Lead generado','📞 Contactado','📅 Cita programada','🚗 Test Drive','💰 Cotizado','🔒 Separado','📄 Facturado','✅ Matriculado'];
-  const funnelCols=['#888','#1457a0','#3a2e8f','#FF9500','#7a4a0a','#fac775','#CC0001','#2d6011'];
-  const fPcts=funnelStages.map((v,i)=>i===0?100:(funnelStages[i-1]>0?Math.round((v/funnelStages[i-1])*100):0));
-  const fLabels=funnelNames.map((n,i)=>n+' · '+funnelStages[i]+' ('+fPcts[i]+'%)');
-
-  destroyLeadChart('leadsFunnel');
-  if($('leadsFunnelChart')){
-    leadsDashCharts['leadsFunnel']=new Chart($('leadsFunnelChart').getContext('2d'),{
-      type:'bar',
-      data:{labels:fLabels,datasets:[{label:'Leads',data:funnelStages,backgroundColor:funnelCols,borderRadius:5}]},
-      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#f5f5f5'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}
-    });
-  }
-
-  // Motivos pérdida
-  const motivos={};
-  data.filter(l=>l.estado==='Perdido').forEach(l=>{const m=l.motivoPerdida||'Sin motivo';motivos[m]=(motivos[m]||0)+1;});
-  const mSorted=Object.entries(motivos).sort((a,b)=>b[1]-a[1]);
-  destroyLeadChart('leadsMotivo');
-  if($('leadsMotivoChart')){
-    leadsDashCharts['leadsMotivo']=new Chart($('leadsMotivoChart').getContext('2d'),{
-      type:'doughnut',
-      data:{labels:mSorted.map(m=>m[0]),datasets:[{data:mSorted.map(m=>m[1]),backgroundColor:['#CC0001','#FF6B35','#fac775','#7a4a0a','#888','#ddd'],borderWidth:2,borderColor:'#fff'}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10}}}}
-    });
-  }
-
-  // Pipeline
-  const pipeStates={'Por gestionar':0,'Contactado':0,'Cotizado':0,'Separado':0,'Facturado':0,'Matriculado':0,'Perdido':0};
-  data.forEach(l=>{if(pipeStates[l.estado]!==undefined)pipeStates[l.estado]++;});
-  destroyLeadChart('leadsPipeline');
-  if($('leadsPipelineChart')){
-    leadsDashCharts['leadsPipeline']=new Chart($('leadsPipelineChart').getContext('2d'),{
-      type:'doughnut',
-      data:{labels:Object.keys(pipeStates),datasets:[{data:Object.values(pipeStates),backgroundColor:['#888','#1457a0','#3a2e8f','#fac775','#CC0001','#2d6011','#ddd'],borderWidth:2,borderColor:'#fff'}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10}}}}
-    });
-  }
-
-  // Leads por asesor
-  const asesores=USERS.filter(u=>u.rol==='asesor'&&u.activo);
-  const aLabels=asesores.map(u=>u.nombre.split(' ').slice(0,2).join(' '));
-  const aFact=asesores.map(u=>data.filter(l=>l.asesorId===u.id&&(l.facturado||l.estado==='Facturado')).length);
-  const aTot=asesores.map(u=>data.filter(l=>l.asesorId===u.id).length);
-  destroyLeadChart('leadsAsesor');
-  if($('leadsAsesorChart')){
-    leadsDashCharts['leadsAsesor']=new Chart($('leadsAsesorChart').getContext('2d'),{
-      type:'bar',
-      data:{labels:aLabels,datasets:[
-        {label:'Total leads',data:aTot,backgroundColor:'rgba(20,87,160,0.3)',borderRadius:5},
-        {label:'Facturados',data:aFact,backgroundColor:'#CC0001',borderRadius:5}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}
-    });
-  }
-
-  // Leads por modelo
-  const modelos={};
-  data.forEach(l=>{if(l.vehiculo)modelos[l.vehiculo]=(modelos[l.vehiculo]||0)+1;});
-  const msSorted=Object.entries(modelos).sort((a,b)=>b[1]-a[1]);
-  destroyLeadChart('leadsModelo');
-  if($('leadsModeloChart')){
-    leadsDashCharts['leadsModelo']=new Chart($('leadsModeloChart').getContext('2d'),{
-      type:'bar',
-      data:{labels:msSorted.map(m=>m[0]),datasets:[{label:'Leads',data:msSorted.map(m=>m[1]),backgroundColor:'#CC0001',borderRadius:5}]},
-      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#f5f5f5'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
-    });
-  }
 }
 
 function openNewLead(){
@@ -6342,19 +6098,7 @@ async function convertirLeadASeg(){
 }
 
 // ── IMPORT EXCEL MASIVO ──
-async function descargarPlantillaLeads(){
-  const headers=['Nombre','Cédula','Celular','Correo','Vehículo de interés','Fuente','Asesor (correo)','Observaciones'];
-  const ejemplo=['Juan Pérez','1234567890','3001234567','juan@email.com','HR-V PRESTIGE','Digital','aframirez@autoceiba.com.co','Lead de campaña digital'];
-  const ws=XLSX.utils.aoa_to_sheet([headers,ejemplo]);
-  // Set column widths
-  ws['!cols']=headers.map(()=>({wch:22}));
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Plantilla Leads');
-  XLSX.writeFile(wb,'Plantilla_Leads_AutoCeiba.xlsx');
-  toast('📄 Plantilla descargada');
-}
-
-function importLeadsXL(inp){
+async function importLeadsXL(inp){
   const file=inp.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=async e=>{
@@ -6362,50 +6106,63 @@ function importLeadsXL(inp){
       const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      let added=0,skipped=0,errors=[];
 
-      const col=(r,...keys)=>{for(const k of keys){if(r[k]!==undefined&&r[k]!=='')return String(r[k]).trim();}return '';};
-
-      let added=0,skipped=0;
       for(const r of rows){
-        const nombre=col(r,'Nombre','nombre','NOMBRE','Cliente','cliente');
+        const nombre=(r['Nombre']||r['nombre']||r['NOMBRE']||'').toString().trim();
         if(!nombre){skipped++;continue;}
 
-        const asesorEmail=col(r,'Asesor','asesor','Asesor (correo)','Correo Asesor','Email Asesor').toLowerCase();
-        const asesor=asesorEmail?USERS.find(u=>u.email.toLowerCase()===asesorEmail&&u.rol==='asesor'):null;
+        // Find asesor by email
+        const asesorEmail=(r['Asesor']||r['asesor']||r['Correo Asesor']||'').toString().trim().toLowerCase();
+        const asesor=USERS.find(u=>u.email.toLowerCase()===asesorEmail&&u.rol==='asesor');
+
+        // Format date
+        const fechaRaw=(r['Fecha Primer Contacto']||r['Fecha']||r['fecha']||'').toString().trim();
+        let fechaPrimer=today();
+        if(fechaRaw){
+          // Try to parse various formats
+          const d=new Date(fechaRaw);
+          if(!isNaN(d)) fechaPrimer=d.toISOString().split('T')[0];
+        }
 
         const leadData={
-          nombre,
-          cedula:col(r,'Cédula','Cedula','cedula','CC','Documento'),
-          celular:col(r,'Celular','celular','Teléfono','Telefono','Tel','Cel'),
-          correo:col(r,'Correo','correo','Email','email'),
-          vehiculo:col(r,'Vehículo de interés','Vehiculo','vehiculo','Modelo','modelo','Vehículo'),
-          fuente:col(r,'Fuente','fuente','Origen','origen')||'Base de datos',
-          obs:col(r,'Observaciones','observaciones','Notas','notas'),
           asesorId:asesor?asesor.id:(CU.rol==='asesor'?CU.id:''),
-          estado:'Por gestionar',
-          // Initialize all checkboxes as false
-          contactado:false,citaProgramada:false,citaCumplida:false,
-          testDrive:false,cotizado:false,separado:false,
-          facturado:false,matriculado:false,
-          // Initialize all dates as null
-          fechaContacto:null,fechaCita:null,fechaTestDrive:null,
-          fechaCotizado:null,fechaSeparado:null,fechaFacturado:null,
-          fechaMatriculado:null,
-          vin:'',motivoPerdida:'',
+          nombre,
+          cedula:(r['Cédula']||r['Cedula']||r['cedula']||'').toString().trim(),
+          celular:(r['Celular']||r['celular']||r['Teléfono']||r['Telefono']||'').toString().trim(),
+          correo:(r['Correo']||r['correo']||r['Email']||r['email']||'').toString().trim(),
+          vehiculo:(r['Vehículo']||r['Vehiculo']||r['vehiculo']||r['Modelo']||'').toString().trim(),
+          color:(r['Color']||r['color']||'').toString().trim(),
+          tipo:(r['Tipo']||r['tipo']||'Vehículo nuevo').toString().trim(),
+          pago:(r['Forma de Pago']||r['Pago']||r['pago']||'').toString().trim(),
+          entidad:(r['Entidad']||r['entidad']||'').toString().trim(),
+          fuente:(r['Fuente']||r['fuente']||'Base de datos').toString().trim(),
+          fechaPrimer,
+          proxContacto:null,
+          estado:'Nuevo',
+          motivo:'',
+          obs:(r['Observaciones']||r['observaciones']||'').toString().trim(),
           createdAt:today(),updatedAt:today()
         };
 
         await db.collection('leads').add(leadData);
         added++;
       }
-      toast(`✅ ${added} lead${added!==1?'s':''} importado${added!==1?'s':''} correctamente${skipped?' · '+skipped+' omitido'+((skipped!==1)?'s':''):''}`);
+
+      $('importResultBody').innerHTML=`
+        <div class="ib ibs" style="margin-bottom:.75rem">✅ Carga completada</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
+          <div class="sc"><div class="sn" style="color:#2d6011">${added}</div><div class="sl">Leads importados</div></div>
+          <div class="sc"><div class="sn" style="color:#888">${skipped}</div><div class="sl">Registros omitidos</div></div>
+        </div>
+        <p style="font-size:12px;color:#888;margin-top:1rem">Los registros sin nombre fueron omitidos. Los asesores se asignan por correo electrónico.</p>`;
+      om('mImportResult');
     }catch(err){
-      console.error('Import leads error:',err);
-      toast('❌ Error al leer Excel: '+err.message);
+      toast('❌ Error al leer el archivo: '+err.message);
     }
-    inp.value='';
   };
   reader.readAsArrayBuffer(file);
+  inp.value='';
 }
 
 // ── EXPORT EXCEL ──
@@ -6414,26 +6171,31 @@ function exportLeadsXL(){
   const rows=LEADS.map(l=>{
     const as=USERS.find(u=>u.id===l.asesorId);
     return{
-      'Nombre':l.nombre||'','Cédula':l.cedula||'','Celular':l.celular||'',
-      'Correo':l.correo||'','Asesor':as?as.nombre:'','Vehículo':l.vehiculo||'',
-      'Fuente':l.fuente||'','Estado':l.estado||'',
-      'Contactado':l.contactado?'Sí':'No','F. Contacto':l.fechaContacto||'',
-      'Cita':l.citaProgramada?'Sí':'No','F. Cita':l.fechaCita||'',
-      'Cita cumplida':l.citaCumplida?'Sí':'No',
-      'Test Drive':l.testDrive?'Sí':'No','F. Test Drive':l.fechaTestDrive||'',
-      'Cotizado':l.cotizado?'Sí':'No','F. Cotizado':l.fechaCotizado||'',
-      'Separado':l.separado?'Sí':'No','F. Separado':l.fechaSeparado||'',
-      'Facturado':l.facturado?'Sí':'No','F. Facturado':l.fechaFacturado||'',
-      'Matriculado':l.matriculado?'Sí':'No','F. Matriculado':l.fechaMatriculado||'',
-      'VIN':l.vin||'','Motivo pérdida':l.motivoPerdida||'',
-      'Observaciones':l.obs||'','Creado':l.createdAt||''
+      'Nombre':l.nombre||'',
+      'Cédula':l.cedula||'',
+      'Celular':l.celular||'',
+      'Correo':l.correo||'',
+      'Vehículo':l.vehiculo||'',
+      'Color':l.color||'',
+      'Tipo':l.tipo||'',
+      'Forma de Pago':l.pago||'',
+      'Entidad':l.entidad||'',
+      'Fuente':l.fuente||'',
+      'Fecha Primer Contacto':l.fechaPrimer||'',
+      'Próximo Contacto':l.proxContacto||'',
+      'Estado':l.estado||'',
+      'Motivo Desistimiento':l.motivo||'',
+      'Asesor':as?as.nombre:'—',
+      'Correo Asesor':as?as.email:'—',
+      'Observaciones':l.obs||'',
+      'Fecha Registro':l.createdAt||''
     };
   });
   const ws=XLSX.utils.json_to_sheet(rows);
   const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Leads');
+  XLSX.utils.book_append_sheet(wb,'Leads',ws);
   XLSX.writeFile(wb,'Leads_AutoCeiba_'+today()+'.xlsx');
-  toast('✅ Excel exportado');
+  toast('✅ Excel exportado correctamente');
 }
 
 // ── DESCARGAR PLANTILLA ──
