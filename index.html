@@ -2043,8 +2043,8 @@ function setupNav(){
 function showPage(p){
   document.querySelectorAll('.pg').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
-  $('page-'+p).classList.add('active');
-  $('nav-'+p).classList.add('active');
+  const pg=$('page-'+p);if(pg) pg.classList.add('active');
+  const nv=$('nav-'+p);if(nv) nv.classList.add('active');
   if(p==='inv'){fillPF();renderInv();}
   if(p==='demos') renderDemos();
   if(p==='cronograma') renderCal();
