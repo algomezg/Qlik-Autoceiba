@@ -1414,6 +1414,36 @@ body.edit-mode .dash-section-edit{display:flex}
   <div class="mf"><button class="btn btns" id="btnCancelPE">Cancelar</button><button class="btn btnp" id="btnConfEnt">Programar</button></div>
 </div></div>
 
+<div class="mo" id="mEditU"><div class="mdl">
+  <div class="mt">✏️ Editar usuario</div>
+  <input type="hidden" id="editUId">
+  <div class="fr">
+    <div class="ff"><label>Nombre completo</label><input type="text" id="editUNombre"></div>
+    <div class="ff"><label>Correo electrónico</label><input type="email" id="editUEmail"></div>
+  </div>
+  <div class="fr">
+    <div class="ff"><label>Rol</label>
+      <select id="editURol">
+        <option value="gerente">Gerente</option>
+        <option value="admin_sede">Asistente Comercial</option>
+        <option value="asesor">Asesor Comercial</option>
+      </select>
+    </div>
+    <div class="ff"><label>Vitrina / Sede</label>
+      <select id="editUSede">
+        <option value="">Sin sede</option>
+        <option>Ciudad Jardín</option>
+        <option>Avenida 3ra Norte</option>
+      </select>
+    </div>
+  </div>
+  <div class="ff"><label>Nueva contraseña <span style="font-size:10px;color:#aaa">(vacío = no cambiar)</span></label><input type="password" id="editUPass" placeholder="••••••••"></div>
+  <div class="mf">
+    <button class="btn btns" onclick="cm('mEditU')">Cancelar</button>
+    <button class="btn btnp" onclick="guardarEditUsr()">💾 Guardar</button>
+  </div>
+</div></div>
+
 <div class="mo" id="mAddU"><div class="mdl">
   <div class="mt">👤 Nuevo usuario</div>
   <div class="fr"><div class="ff"><label>Nombre</label><input type="text" id="uN"></div><div class="ff"><label>Correo</label><input type="email" id="uE"></div></div>
@@ -2153,7 +2183,7 @@ function renderInv(){
     const segLink=SEGS.find(s=>s.vin===v.vin);
     const segBadge=segLink?`<br><span style="font-size:9px;color:#1457a0">🔥 ${segLink.nombre}</span>`:'';
     const delBtn=isGer()?`<button class="btn btnsm" style="background:#fff0f0;color:#9b2020;border:1px solid #f0c0c0;margin-top:3px" onclick="eliminarVeh('${v.vin}','${v.producto}')">🗑️</button>`:'';
-    if(isAdm()){acc=v.estado==='DISPONIBLE'?`<div style="display:flex;flex-direction:column;gap:3px"><button class="btn btnd btnsm" onclick="openSep('${v.vin}')">Separar</button>${delBtn}</div>`:`<div class="si">${as?as.nombre:'—'}<br>${v.sepFecha||''}</div>${segBadge}<div style="display:flex;flex-direction:column;gap:3px;margin-top:3px"><button class="btn btnok btnsm" onclick="libVeh('${v.vin}')">Liberar</button>${delBtn}</div>`;}
+    if(isAdm()){acc=v.estado==='DISPONIBLE'?`<div style="display:flex;flex-direction:column;gap:3px"><button class="btn btnd btnsm" onclick="openSep('${v.vin}')">Separar</button>${isGer()?`<button class="btn btns btnsm" onclick="editarVeh('${v.vin}')" style="font-size:10px">✏️</button>`:''}${delBtn}</div>`:`<div class="si">${as?as.nombre:'—'}<br>${v.sepFecha||''}</div>${segBadge}<div style="display:flex;flex-direction:column;gap:3px;margin-top:3px"><button class="btn btnok btnsm" onclick="libVeh('${v.vin}')">Liberar</button>${delBtn}</div>`;}
     else{acc=(v.estado==='SEPARADO'&&v.sepAsesorId===CU.id)?`<span class="b ba">Tuyo·${dias}d</span>${segBadge}`:'<span style="color:#ddd">—</span>';}
     return `<tr><td><strong style="font-size:12px">${v.producto}</strong></td><td>${v.mod}</td><td style="font-size:12px">${v.color}</td><td class="mono">${v.chasis}</td><td class="mono">${v.vin}</td><td><span class="b bb" style="font-size:10px">${v.ubicacion}</span></td><td style="text-align:center;font-weight:700;font-size:12px;color:${dc}">${v.diasInv}d</td><td>${unoeB}</td><td>${estB}</td><td>${acc}</td></tr>`;
   }).join('');
@@ -3854,8 +3884,9 @@ function renderUsrs(){
       <td>${u.sede||'Todas'}</td>
       <td><span class="b ${u.activo?'bg':'br'}">${u.activo?'Activo':'Inactivo'}</span></td>
       <td style="white-space:nowrap;display:flex;flex-direction:column;gap:4px">
+        <button class="btn btnsm btnp" onclick="openEditUsr('${u.id}')">✏️ Editar</button>
         ${!esTu?`<button class="btn btnsm ${u.activo?'btnd':'btnok'}" onclick="togUsr('${u.id}')">${u.activo?'Desactivar':'Activar'}</button>`:''}
-        <button class="btn btnsm btns" onclick="resetPwd('${u.id}')">🔑 Cambiar clave</button>
+        <button class="btn btnsm btns" onclick="resetPwd('${u.id}')">🔑</button>
         ${esTu?'<span class="b bg" style="font-size:10px">Tú</span>':''}
       </td>
     </tr>`;
@@ -5936,10 +5967,17 @@ function renderLeads(){
       <td style="font-size:11px;color:${vencido?'#9b2020':'#888'};font-weight:${vencido?'700':'400'}">${l.proxContacto||(l.updatedAt||'—')}</td>
       <td style="white-space:nowrap">
         <button class="btn btns btnsm" onclick="verDetLead('${l._id}')">Ver</button>
-        <button class="btn btnp btnsm" onclick="editLead('${l._id}')" style="margin-top:3px">Editar</button>
+        <button class="btn btnp btnsm" onclick="editLead('${l._id}')">✏️</button>
+        ${isGer()?`<button class="btn btnd btnsm" onclick="eliminarLead('${l._id}')">🗑️</button>`:''}
       </td>
     </tr>`;
   }).join('');
+}
+
+async function eliminarLead(id){
+  const l=LEADS.find(x=>x._id===id);
+  if(!confirm('¿Eliminar el lead "'+(l?l.nombre:'')+'"?')) return;
+  try{await db.collection('leads').doc(id).delete();toast('🗑️ Lead eliminado');}catch(e){toast('❌ Error: '+e.message);}
 }
 
 function openNewLead(){
