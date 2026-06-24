@@ -4846,11 +4846,11 @@ function getDashMes(){
 
 function filtrarSegs(){
   // Returns ALL segs filtered by asesor/veh/vitrina (no month filter here)
-  // Month filtering happens in renderDashboard for specific KPIs
+  // EXCLUDES vehículos de empleado (tipo === 'Empleado')
   const fAs=$('dashFiltAsesor2')?$('dashFiltAsesor2').value:'';
   const fVeh=$('dashFiltVeh2')?$('dashFiltVeh2').value:'';
   const fVit=$('dashFiltVitrina')?$('dashFiltVitrina').value:'';
-  let data=[...SEGS];
+  let data=SEGS.filter(s=>s.tipo!=='Empleado'); // ← excluir empleados
   if(CU&&CU.rol==='asesor') data=data.filter(s=>s.asesorId===CU.id);
   if(fAs) data=data.filter(s=>s.asesorId===fAs);
   if(fVeh) data=data.filter(s=>s.vehiculo===fVeh);
@@ -5380,7 +5380,7 @@ function renderDashboard(){
   if(EDIT_MODE) setTimeout(injectEditOverlays,500);
 
   // ── COSECHAS ──
-  renderCosechas(allFiltered);
+  renderCosechas(allFiltered.filter(s=>s.tipo!=='Empleado'));
 }
 
 function renderHistorialAnual(allSegs){
@@ -5394,7 +5394,7 @@ function renderHistorialAnual(allSegs){
   const matPorMes=new Array(12).fill(0);
   const metaPorMes=new Array(12).fill(0);
 
-  allSegs.forEach(s=>{
+  allSegs.filter(s=>s.tipo!=='Empleado').forEach(s=>{
     // Facturados
     const fFact=s.fechaFact||'';
     if(fFact.startsWith(anio+'-')){
