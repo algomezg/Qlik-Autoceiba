@@ -398,6 +398,7 @@ body.edit-mode .dash-section-edit{display:flex}
       <div class="ni" id="nav-seguimiento"><span>🔥</span>Seguimiento</div>
       <div class="ns">Cierres</div>
       <div class="ni" id="nav-entregados"><span>🚗</span>Entregados</div>
+      <div class="ni" id="nav-reporte-seg"><span>📥</span>Reporte Seguimiento</div>
       <div class="ni" id="nav-desistidos"><span>❌</span>Desistidos</div>
       <div class="ns">Administración</div>
       <div class="ni hidden" id="nav-config"><span>⚙️</span>Configuración</div>
@@ -943,6 +944,74 @@ body.edit-mode .dash-section-edit{display:flex}
       </div>
 
       <!-- ══ ENTREGADOS ══ -->
+      <div class="pg" id="page-reporte-seg">
+        <div class="pt">📥 Reporte de seguimiento</div>
+        <div class="ps">Descarga completa de clientes en seguimiento con todos sus datos</div>
+
+        <div class="card">
+          <div class="ct">⚙️ Filtros del reporte</div>
+          <div class="fr">
+            <div class="ff"><label>Estado</label>
+              <select id="repSegEstado">
+                <option value="">Todos los estados</option>
+                <option>Caliente</option><option>Separado</option>
+                <option>Facturado</option><option>Matriculado</option>
+                <option>Entregado</option><option>Desistido</option>
+              </select>
+            </div>
+            <div class="ff"><label>Asesor</label>
+              <select id="repSegAsesor">
+                <option value="">Todos los asesores</option>
+              </select>
+            </div>
+            <div class="ff"><label>Tipo de cliente</label>
+              <select id="repSegTipo">
+                <option value="">Todos</option>
+                <option>Vehículo nuevo</option>
+                <option>Empleado</option>
+              </select>
+            </div>
+          </div>
+          <div class="fr">
+            <div class="ff"><label>Desde (fecha creación)</label><input type="date" id="repSegDesde"></div>
+            <div class="ff"><label>Hasta (fecha creación)</label><input type="date" id="repSegHasta"></div>
+            <div class="ff"><label>Período facturación</label>
+              <select id="repSegMes">
+                <option value="">Todo el período</option>
+                <option value="2026-01">Enero 2026</option><option value="2026-02">Febrero 2026</option>
+                <option value="2026-03">Marzo 2026</option><option value="2026-04">Abril 2026</option>
+                <option value="2026-05">Mayo 2026</option><option value="2026-06">Junio 2026</option>
+                <option value="2026-07">Julio 2026</option><option value="2026-08">Agosto 2026</option>
+                <option value="2026-09">Septiembre 2026</option><option value="2026-10">Octubre 2026</option>
+                <option value="2026-11">Noviembre 2026</option><option value="2026-12">Diciembre 2026</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:.5rem">
+            <button class="btn btnp" onclick="renderReporteSeg()">🔍 Aplicar filtros</button>
+            <button class="btn btns" onclick="exportReporteSeg()">📥 Descargar Excel</button>
+          </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="sg" id="repSegStats" style="margin-bottom:.5rem"></div>
+
+        <!-- PREVIEW TABLE -->
+        <div class="card">
+          <div class="ct">📋 Vista previa <span id="repSegCount" style="font-size:12px;color:#aaa;font-weight:400"></span></div>
+          <div class="tw"><table>
+            <thead><tr>
+              <th>Asesor</th><th>Nombre</th><th>Cédula</th><th>Celular</th>
+              <th>Estado</th><th>Vehículo</th><th>VIN</th><th>Color</th>
+              <th>Tipo</th><th>Pago</th><th>Precio</th>
+              <th>F. Separación</th><th>F. Factura</th><th>F. Matrícula</th><th>F. Entrega</th>
+              <th>Temperatura</th><th>Próx. Contacto</th>
+            </tr></thead>
+            <tbody id="repSegTbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
       <div class="pg" id="page-entregados">
         <div class="pt">Vehículos entregados</div>
         <div class="ps">Clientes que recibieron su vehículo — historial completo</div>
@@ -2090,6 +2159,7 @@ function showPage(p){
     if(selMes) selMes.value=mesActual;
     cargarMetas();
   }
+  if(p==='reporte-seg'){renderReporteSeg();}
   if(p==='entregados'){renderEntregados();}
   if(p==='desistidos'){renderDesistidos();}
   if(p==='config'){
@@ -6270,6 +6340,166 @@ function descargarPlantilla(){
 // ══════════════════════════════════════════
 // ENTREGADOS MODULE
 // ══════════════════════════════════════════
+function renderReporteSeg(){
+  if(!CU) return;
+
+  // Populate asesor selector
+  const sa=$('repSegAsesor');
+  if(sa){
+    const prev=sa.value;
+    const asesores=CU.rol==='asesor'?USERS.filter(u=>u.id===CU.id):USERS.filter(u=>u.rol==='asesor'&&u.activo);
+    sa.innerHTML='<option value="">Todos</option>'+asesores.map(u=>`<option value="${u.id}">${u.nombre}</option>`).join('');
+    sa.value=prev;
+  }
+
+  const fEstado=$('repSegEstado')?$('repSegEstado').value:'';
+  const fAsesor=$('repSegAsesor')?$('repSegAsesor').value:'';
+  const fTipo=$('repSegTipo')?$('repSegTipo').value:'';
+  const fDesde=$('repSegDesde')?$('repSegDesde').value:'';
+  const fHasta=$('repSegHasta')?$('repSegHasta').value:'';
+  const fMes=$('repSegMes')?$('repSegMes').value:'';
+
+  let data=[...SEGS];
+  if(CU.rol==='asesor') data=data.filter(s=>s.asesorId===CU.id);
+  if(fEstado) data=data.filter(s=>s.estado===fEstado);
+  if(fAsesor) data=data.filter(s=>s.asesorId===fAsesor);
+  if(fTipo) data=data.filter(s=>s.tipo===fTipo);
+  if(fDesde) data=data.filter(s=>(s.createdAt||'')>=fDesde);
+  if(fHasta) data=data.filter(s=>(s.createdAt||'')<=fHasta+'Z');
+  if(fMes) data=data.filter(s=>(s.fechaFact||s.fechaSep||s.createdAt||'').startsWith(fMes));
+
+  data.sort((a,b)=>{
+    const ord={Caliente:0,Separado:1,Facturado:2,Matriculado:3,Entregado:4,Desistido:5};
+    return (ord[a.estado]||9)-(ord[b.estado]||9);
+  });
+
+  // Stats
+  const sg=$('repSegStats');
+  if(sg) sg.innerHTML=`
+    <div class="sc"><div class="sn">${data.length}</div><div class="sl">Total registros</div></div>
+    <div class="sc"><div class="sn" style="color:#b84c00">${data.filter(s=>s.estado==='Caliente').length}</div><div class="sl">Calientes</div></div>
+    <div class="sc"><div class="sn" style="color:#1457a0">${data.filter(s=>s.estado==='Separado').length}</div><div class="sl">Separados</div></div>
+    <div class="sc"><div class="sn" style="color:#CC0001">${data.filter(s=>s.estado==='Facturado').length}</div><div class="sl">Facturados</div></div>
+    <div class="sc"><div class="sn" style="color:#2d6011">${data.filter(s=>s.estado==='Matriculado').length}</div><div class="sl">Matriculados</div></div>
+    <div class="sc"><div class="sn" style="color:#888">${data.filter(s=>s.estado==='Desistido').length}</div><div class="sl">Desistidos</div></div>
+    <div class="sc"><div class="sn" style="color:#CC0001">${fmtMillones(data.filter(s=>s.precio).reduce((a,s)=>a+(s.precio||0),0))}</div><div class="sl">Facturación total</div></div>`;
+
+  const cnt=$('repSegCount');
+  if(cnt) cnt.textContent=`— ${data.length} registro${data.length!==1?'s':''}`;
+
+  const tb=$('repSegTbody');
+  if(!tb) return;
+  if(!data.length){
+    tb.innerHTML='<tr><td colspan="17" style="text-align:center;color:#ccc;padding:2rem">Sin registros con los filtros seleccionados</td></tr>';
+    return;
+  }
+
+  tb.innerHTML=data.slice(0,100).map(s=>{
+    const as=USERS.find(u=>u.id===s.asesorId);
+    const veh=s.vin?INV.find(v=>v.vin===s.vin):null;
+    return `<tr>
+      <td style="font-size:11px">${as?as.nombre.split(' ').slice(0,2).join(' '):'—'}</td>
+      <td style="font-size:12px;font-weight:600">${s.nombre}</td>
+      <td class="mono" style="font-size:11px">${s.cedula||'—'}</td>
+      <td class="mono" style="font-size:11px">${s.celular||'—'}</td>
+      <td>${getEstadoBadge(s.estado)}</td>
+      <td style="font-size:11px">${s.vehiculo||'—'}</td>
+      <td class="mono" style="font-size:10px;color:#1457a0">${s.vin||'—'}</td>
+      <td style="font-size:11px">${s.color||'—'}</td>
+      <td style="font-size:11px">${s.tipo||'—'}</td>
+      <td style="font-size:11px">${s.pago||'—'}</td>
+      <td style="font-size:11px;font-weight:700;color:#CC0001">${fmtCOP(s.precio)}</td>
+      <td style="font-size:11px">${s.fechaSep||'—'}</td>
+      <td style="font-size:11px">${s.fechaFact||'—'}</td>
+      <td style="font-size:11px">${s.fechaMat||'—'}</td>
+      <td style="font-size:11px">${s.fechaEntrega||'—'}</td>
+      <td style="font-size:11px">${s.temperatura||'—'}</td>
+      <td style="font-size:11px">${s.proxContacto||'—'}</td>
+    </tr>`;
+  }).join('');
+  if(data.length>100){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td colspan="17" style="text-align:center;font-size:12px;color:#aaa;padding:.75rem">Vista previa limitada a 100 registros. Descarga el Excel para ver todos.</td>`;
+    tb.appendChild(tr);
+  }
+
+  // Store filtered data for export
+  tb.dataset.exportData=JSON.stringify(data.map(s=>s._id));
+}
+
+function exportReporteSeg(){
+  if(!CU) return;
+  // Re-apply same filters
+  const fEstado=$('repSegEstado')?$('repSegEstado').value:'';
+  const fAsesor=$('repSegAsesor')?$('repSegAsesor').value:'';
+  const fTipo=$('repSegTipo')?$('repSegTipo').value:'';
+  const fDesde=$('repSegDesde')?$('repSegDesde').value:'';
+  const fHasta=$('repSegHasta')?$('repSegHasta').value:'';
+  const fMes=$('repSegMes')?$('repSegMes').value:'';
+
+  let data=[...SEGS];
+  if(CU.rol==='asesor') data=data.filter(s=>s.asesorId===CU.id);
+  if(fEstado) data=data.filter(s=>s.estado===fEstado);
+  if(fAsesor) data=data.filter(s=>s.asesorId===fAsesor);
+  if(fTipo) data=data.filter(s=>s.tipo===fTipo);
+  if(fDesde) data=data.filter(s=>(s.createdAt||'')>=fDesde);
+  if(fHasta) data=data.filter(s=>(s.createdAt||'')<=fHasta+'Z');
+  if(fMes) data=data.filter(s=>(s.fechaFact||s.fechaSep||s.createdAt||'').startsWith(fMes));
+
+  if(!data.length){toast('⚠️ Sin registros para exportar');return;}
+
+  const rows=data.map(s=>{
+    const as=USERS.find(u=>u.id===s.asesorId);
+    const veh=s.vin?INV.find(v=>v.vin===s.vin):null;
+    return{
+      'Asesor':as?as.nombre:'—',
+      'Sede':as?as.sede||'—':'—',
+      'Nombre cliente':s.nombre||'',
+      'Cédula':s.cedula||'',
+      'Celular':s.celular||'',
+      'Estado':s.estado||'',
+      'Temperatura':s.temperatura||'',
+      'Tipo cliente':s.tipo||'',
+      'Vehículo':s.vehiculo||'',
+      'VIN':s.vin||'',
+      'Color':s.color||'',
+      'Forma de pago':s.pago||'',
+      'Entidad':s.entidad||'',
+      'Precio':s.precio||'',
+      'Abonos':s.abonos||'',
+      'Saldo pendiente':(s.precio||0)-(s.abonos||0)||'',
+      'F. Separación':s.fechaSep||'',
+      'F. Factura':s.fechaFact||'',
+      'F. Matrícula':s.fechaMat||'',
+      'F. Entrega':s.fechaEntrega||'',
+      'Próx. contacto':s.proxContacto||'',
+      'Prueba de ruta':s.pruebaRuta?'Sí':'No',
+      'F. Prueba':s.fechaPrueba||'',
+      'Cotizado':s.cotizado?'Sí':'No',
+      'Crédito aprobado':s.creditoAprobado?'Sí':'No',
+      'Motivo desistimiento':s.motivo||'',
+      'Observaciones':s.obs||'',
+      'F. Creación':s.createdAt||'',
+      'F. Actualización':s.updatedAt||'',
+      // Inventory data from VIN
+      'Producto VIN':veh?veh.producto:'',
+      'Modelo VIN':veh?veh.mod:'',
+      'Color VIN':veh?veh.color:'',
+      'Chasis':veh?veh.chasis:'',
+      'Ubicación':veh?veh.ubicacion:'',
+    };
+  });
+
+  const ws=XLSX.utils.json_to_sheet(rows);
+  // Auto column widths
+  const cols=Object.keys(rows[0]||{}).map(k=>({wch:Math.max(k.length,14)}));
+  ws['!cols']=cols;
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Seguimiento');
+  XLSX.writeFile(wb,'Reporte_Seguimiento_AutoCeiba_'+today()+'.xlsx');
+  toast('✅ Excel descargado — '+data.length+' registros');
+}
+
 function renderEntregados(){
   if(!CU) return;
 
@@ -7313,6 +7543,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Dashboard, Metas & Config
   $('nav-dashboard').addEventListener('click', ()=>showPage('dashboard'));
   $('nav-metas').addEventListener('click', ()=>showPage('metas'));
+  $('nav-reporte-seg').addEventListener('click', ()=>showPage('reporte-seg'));
   $('nav-entregados').addEventListener('click', ()=>showPage('entregados'));
   $('nav-desistidos').addEventListener('click', ()=>showPage('desistidos'));
   $('nav-notificaciones').addEventListener('click', ()=>showPage('notificaciones'));
