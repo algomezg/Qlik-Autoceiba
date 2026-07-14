@@ -945,8 +945,17 @@ body.edit-mode .dash-section-edit{display:flex}
 
       <!-- ══ ENTREGADOS ══ -->
       <div class="pg" id="page-reporte-seg">
-        <div class="pt">📥 Reporte de seguimiento</div>
-        <div class="ps">Descarga completa de clientes en seguimiento con todos sus datos</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.5rem">
+          <div>
+            <div class="pt">📥 Reporte de seguimiento</div>
+            <div class="ps">Descarga completa de clientes en seguimiento con todos sus datos</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0">
+            <button class="btn btnp" onclick="exportReporteSeg()" style="padding:10px 20px;font-size:13px">
+              📥 Descargar Excel
+            </button>
+          </div>
+        </div>
 
         <div class="card">
           <div class="ct">⚙️ Filtros del reporte</div>
@@ -6428,8 +6437,9 @@ function renderReporteSeg(){
 }
 
 function exportReporteSeg(){
-  if(!CU) return;
-  // Re-apply same filters
+  if(!CU){toast('⚠️ Debes iniciar sesión');return;}
+  if(!SEGS||!SEGS.length){toast('⚠️ No hay datos en seguimiento');return;}
+  // Apply filters if set, otherwise export all
   const fEstado=$('repSegEstado')?$('repSegEstado').value:'';
   const fAsesor=$('repSegAsesor')?$('repSegAsesor').value:'';
   const fTipo=$('repSegTipo')?$('repSegTipo').value:'';
@@ -6446,9 +6456,11 @@ function exportReporteSeg(){
   if(fHasta) data=data.filter(s=>(s.createdAt||'')<=fHasta+'Z');
   if(fMes) data=data.filter(s=>(s.fechaFact||s.fechaSep||s.createdAt||'').startsWith(fMes));
 
-  if(!data.length){toast('⚠️ Sin registros para exportar');return;}
+  if(!data.length){toast('⚠️ Sin registros con los filtros seleccionados');return;}
+  toast('⏳ Generando Excel...');
 
   const rows=data.map(s=>{
+    try{
     const as=USERS.find(u=>u.id===s.asesorId);
     const veh=s.vin?INV.find(v=>v.vin===s.vin):null;
     return{
@@ -6488,6 +6500,7 @@ function exportReporteSeg(){
       'Chasis':veh?veh.chasis:'',
       'Ubicación':veh?veh.ubicacion:'',
     };
+    }catch(eRow){return{'Nombre':s.nombre||'Error al procesar fila','Error':String(eRow)};}
   });
 
   const ws=XLSX.utils.json_to_sheet(rows);
