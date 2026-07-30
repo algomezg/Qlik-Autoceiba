@@ -951,8 +951,10 @@ body.edit-mode .dash-section-edit{display:flex}
             <div class="ps">Descarga completa de clientes en seguimiento con todos sus datos</div>
           </div>
           <div style="display:flex;gap:8px;flex-shrink:0">
-            <button class="btn btnp" onclick="exportReporteSeg()" style="padding:10px 20px;font-size:13px">
-              📥 Descargar Excel
+            <button onclick="exportReporteSeg()"
+              style="padding:12px 24px;background:#CC0001;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(204,0,1,.3)"
+              onmouseover="this.style.background='#a30001'" onmouseout="this.style.background='#CC0001'">
+              📥 Descargar Excel completo
             </button>
           </div>
         </div>
@@ -6437,80 +6439,85 @@ function renderReporteSeg(){
 }
 
 function exportReporteSeg(){
-  if(!CU){toast('⚠️ Debes iniciar sesión');return;}
-  if(!SEGS||!SEGS.length){toast('⚠️ No hay datos en seguimiento');return;}
-  // Apply filters if set, otherwise export all
-  const fEstado=$('repSegEstado')?$('repSegEstado').value:'';
-  const fAsesor=$('repSegAsesor')?$('repSegAsesor').value:'';
-  const fTipo=$('repSegTipo')?$('repSegTipo').value:'';
-  const fDesde=$('repSegDesde')?$('repSegDesde').value:'';
-  const fHasta=$('repSegHasta')?$('repSegHasta').value:'';
-  const fMes=$('repSegMes')?$('repSegMes').value:'';
+  try{
+    if(!SEGS||!SEGS.length){
+      toast('⚠️ No hay datos de seguimiento cargados. Abre Seguimiento primero.');
+      return;
+    }
 
-  let data=[...SEGS];
-  if(CU.rol==='asesor') data=data.filter(s=>s.asesorId===CU.id);
-  if(fEstado) data=data.filter(s=>s.estado===fEstado);
-  if(fAsesor) data=data.filter(s=>s.asesorId===fAsesor);
-  if(fTipo) data=data.filter(s=>s.tipo===fTipo);
-  if(fDesde) data=data.filter(s=>(s.createdAt||'')>=fDesde);
-  if(fHasta) data=data.filter(s=>(s.createdAt||'')<=fHasta+'Z');
-  if(fMes) data=data.filter(s=>(s.fechaFact||s.fechaSep||s.createdAt||'').startsWith(fMes));
+    let data=[...SEGS];
 
-  if(!data.length){toast('⚠️ Sin registros con los filtros seleccionados');return;}
-  toast('⏳ Generando Excel...');
+    // Apply filters only if the filter elements exist and have values
+    const fEstado=document.getElementById('repSegEstado');
+    const fAsesor=document.getElementById('repSegAsesor');
+    const fTipo=document.getElementById('repSegTipo');
+    const fDesde=document.getElementById('repSegDesde');
+    const fHasta=document.getElementById('repSegHasta');
+    const fMes=document.getElementById('repSegMes');
 
-  const rows=data.map(s=>{
-    try{
-    const as=USERS.find(u=>u.id===s.asesorId);
-    const veh=s.vin?INV.find(v=>v.vin===s.vin):null;
-    return{
-      'Asesor':as?as.nombre:'—',
-      'Sede':as?as.sede||'—':'—',
-      'Nombre cliente':s.nombre||'',
-      'Cédula':s.cedula||'',
-      'Celular':s.celular||'',
-      'Estado':s.estado||'',
-      'Temperatura':s.temperatura||'',
-      'Tipo cliente':s.tipo||'',
-      'Vehículo':s.vehiculo||'',
-      'VIN':s.vin||'',
-      'Color':s.color||'',
-      'Forma de pago':s.pago||'',
-      'Entidad':s.entidad||'',
-      'Precio':s.precio||'',
-      'Abonos':s.abonos||'',
-      'Saldo pendiente':(s.precio||0)-(s.abonos||0)||'',
-      'F. Separación':s.fechaSep||'',
-      'F. Factura':s.fechaFact||'',
-      'F. Matrícula':s.fechaMat||'',
-      'F. Entrega':s.fechaEntrega||'',
-      'Próx. contacto':s.proxContacto||'',
-      'Prueba de ruta':s.pruebaRuta?'Sí':'No',
-      'F. Prueba':s.fechaPrueba||'',
-      'Cotizado':s.cotizado?'Sí':'No',
-      'Crédito aprobado':s.creditoAprobado?'Sí':'No',
-      'Motivo desistimiento':s.motivo||'',
-      'Observaciones':s.obs||'',
-      'F. Creación':s.createdAt||'',
-      'F. Actualización':s.updatedAt||'',
-      // Inventory data from VIN
-      'Producto VIN':veh?veh.producto:'',
-      'Modelo VIN':veh?veh.mod:'',
-      'Color VIN':veh?veh.color:'',
-      'Chasis':veh?veh.chasis:'',
-      'Ubicación':veh?veh.ubicacion:'',
-    };
-    }catch(eRow){return{'Nombre':s.nombre||'Error al procesar fila','Error':String(eRow)};}
-  });
+    if(CU&&CU.rol==='asesor') data=data.filter(s=>s.asesorId===CU.id);
+    if(fEstado&&fEstado.value) data=data.filter(s=>s.estado===fEstado.value);
+    if(fAsesor&&fAsesor.value) data=data.filter(s=>s.asesorId===fAsesor.value);
+    if(fTipo&&fTipo.value) data=data.filter(s=>s.tipo===fTipo.value);
+    if(fDesde&&fDesde.value) data=data.filter(s=>(s.createdAt||'')>=fDesde.value);
+    if(fHasta&&fHasta.value) data=data.filter(s=>(s.createdAt||'')<=fHasta.value+'Z');
+    if(fMes&&fMes.value) data=data.filter(s=>(s.fechaFact||s.fechaSep||s.createdAt||'').startsWith(fMes.value));
 
-  const ws=XLSX.utils.json_to_sheet(rows);
-  // Auto column widths
-  const cols=Object.keys(rows[0]||{}).map(k=>({wch:Math.max(k.length,14)}));
-  ws['!cols']=cols;
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Seguimiento');
-  XLSX.writeFile(wb,'Reporte_Seguimiento_AutoCeiba_'+today()+'.xlsx');
-  toast('✅ Excel descargado — '+data.length+' registros');
+    if(!data.length){
+      toast('⚠️ No hay registros con los filtros aplicados');
+      return;
+    }
+
+    const rows=data.map(s=>{
+      const as=USERS?USERS.find(u=>u.id===s.asesorId):null;
+      const veh=(INV&&s.vin)?INV.find(v=>v.vin===s.vin):null;
+      return{
+        'Asesor':          (as&&as.nombre)||'',
+        'Sede':            (as&&as.sede)||'',
+        'Nombre':          s.nombre||'',
+        'Cédula':          s.cedula||'',
+        'Celular':         s.celular||'',
+        'Estado':          s.estado||'',
+        'Temperatura':     s.temperatura||'',
+        'Tipo':            s.tipo||'',
+        'Vehículo':        s.vehiculo||'',
+        'VIN':             s.vin||'',
+        'Color':           s.color||'',
+        'Forma de pago':   s.pago||'',
+        'Entidad':         s.entidad||'',
+        'Precio':          s.precio||0,
+        'Abonos':          s.abonos||0,
+        'Saldo':           (s.precio||0)-(s.abonos||0),
+        'F. Separación':   s.fechaSep||'',
+        'F. Factura':      s.fechaFact||'',
+        'F. Matrícula':    s.fechaMat||'',
+        'F. Entrega':      s.fechaEntrega||'',
+        'F. Prueba ruta':  s.fechaPrueba||'',
+        'Prueba ruta':     s.pruebaRuta?'Sí':'No',
+        'Cotizado':        s.cotizado?'Sí':'No',
+        'Crédito aprobado':s.creditoAprobado?'Sí':'No',
+        'Próx. contacto':  s.proxContacto||'',
+        'Motivo':          s.motivo||'',
+        'Observaciones':   s.obs||'',
+        'F. Creación':     s.createdAt||'',
+        'Prod. VIN':       (veh&&veh.producto)||'',
+        'Chasis':          (veh&&veh.chasis)||'',
+        'Ubicación':       (veh&&veh.ubicacion)||'',
+      };
+    });
+
+    const ws=XLSX.utils.json_to_sheet(rows);
+    ws['!cols']=Object.keys(rows[0]).map(k=>({wch:Math.max(k.length+2,16)}));
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Seguimiento');
+    const fname='Seguimiento_AutoCeiba_'+today()+'.xlsx';
+    XLSX.writeFile(wb,fname);
+    toast('✅ Descargado: '+fname+' ('+data.length+' registros)');
+
+  }catch(err){
+    console.error('Export error:',err);
+    toast('❌ Error al exportar: '+err.message);
+  }
 }
 
 function renderEntregados(){
@@ -7385,6 +7392,16 @@ async function guardarSeg(){
     updatedAt:today()
   };
 
+  // ── DUPLICATE VIN CHECK ──
+  if(vin){
+    const vinDup=SEGS.find(s=>s.vin===vin&&s._id!==($('segEditId').value||'__none__'));
+    if(vinDup){
+      const asVin=USERS.find(u=>u.id===vinDup.asesorId);
+      toast(`⛔ El VIN ${vin} ya está asignado a ${vinDup.nombre}${asVin?' ('+asVin.nombre.split(' ')[0]+')':''}. Libéralo primero.`);
+      return;
+    }
+  }
+
   const editId=$('segEditId').value;
   let savedId=editId;
 
@@ -7394,13 +7411,19 @@ async function guardarSeg(){
     const existing=SEGS.find(s=>s._id===editId)||{};
     const safeData={};
     // Fields that should NEVER be cleared when editing
-    const neverClear=['vin','vehiculo','color','cedula','celular','nombre','createdAt',
+    // vin and vehiculo are ALWAYS updated from the form — never preserved
+    // Other fields are protected to avoid accidental clearing
+    const neverClear=['color','cedula','celular','nombre','createdAt',
       'fechaSep','fechaFact','fechaMat','precio','abonos','cotizado','pruebaRuta',
       'creditoAprobado','fechaCotizado','fechaPrueba','fechaCredito'];
     Object.entries(data).forEach(([k,v])=>{
-      const isEmpty=(v===null||v===''||v===undefined||v===false&&!['cotizado','pruebaRuta','creditoAprobado'].includes(k));
+      // vin and vehiculo: always save whatever is in the form (can be null/empty)
+      if(k==='vin'||k==='vehiculo'){
+        safeData[k]=v;
+        return;
+      }
+      const isEmpty=(v===null||v===''||v===undefined||(v===false&&!['cotizado','pruebaRuta','creditoAprobado'].includes(k)));
       const existingHasValue=existing[k]!=null&&existing[k]!=='';
-      // Never clear protected fields OR any field with existing value that's being cleared
       if(isEmpty&&existingHasValue&&neverClear.includes(k)){
         safeData[k]=existing[k];
       } else {
@@ -7419,12 +7442,24 @@ async function guardarSeg(){
   // ── SINCRONIZACIÓN AUTOMÁTICA ──
   // 1. Sync VIN status with inventario
   // Get VIN from form OR from existing record if editing
-  const vinToSync = vin || (editId ? (SEGS.find(s=>s._id===editId)||{}).vin : null);
-  // Detect if estado CHANGED (not just re-saved)
   const existingRec=editId?SEGS.find(s=>s._id===editId):null;
   const estadoAnterior=existingRec?existingRec.estado:'';
   const estadoCambio=estado!==estadoAnterior;
+  const vinAnterior=existingRec?existingRec.vin:null;
+  const vinCambio=vin!==vinAnterior;
 
+  // If VIN changed, release the old VIN back to DISPONIBLE
+  if(editId&&vinCambio&&vinAnterior&&vinAnterior!==vin){
+    try{
+      await db.collection('inventario').doc(vinAnterior).update({
+        estado:'DISPONIBLE',sepAsesorId:null,sepFecha:null,sepObs:'',oculto:false
+      });
+      console.log('Released old VIN:',vinAnterior);
+    }catch(e){console.warn('Could not release old VIN:',e);}
+  }
+
+  // Sync new VIN with current estado
+  const vinToSync = vin || vinAnterior;
   if(vinToSync) await syncVinWithInventario(vinToSync, estado, asesorId);
 
   // 1b. Notify on Separado ONLY when estado changes TO Separado (not on every edit)
