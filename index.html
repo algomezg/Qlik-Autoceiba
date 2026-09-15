@@ -705,7 +705,7 @@ body.edit-mode .dash-section-edit{display:flex}
               <div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.5rem;cursor:pointer;display:flex;align-items:center;gap:4px" onclick="toggleGaugeDesglose()">
                 <span id="gaugeDesgloseIcon">▶</span> Ver quiénes suman al velocímetro
               </div>
-              <div id="gaugeDesglose" style="display:none;max-height:220px;overflow-y:auto"></div>
+              <div id="gaugeDesglose" style="display:none;margin-top:.25rem;overflow-x:auto;width:100%"></div>
             </div>
           </div>
           <div class="chart-card">
@@ -5086,28 +5086,28 @@ function renderDashboard(){
       gaugeDesgloseEl.innerHTML='<div style="text-align:center;color:#ccc;font-size:12px;padding:.5rem">Sin registros para '+getDashMes()+'</div>';
     } else {
       gaugeDesgloseEl.innerHTML=`
-        <table style="width:100%;font-size:11px;border-collapse:collapse">
-          <thead><tr>
-            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #f0f0f0;color:#aaa;font-weight:600">#</th>
-            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #f0f0f0;color:#aaa;font-weight:600">Cliente</th>
-            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #f0f0f0;color:#aaa;font-weight:600">Asesor</th>
-            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #f0f0f0;color:#aaa;font-weight:600">Vehículo</th>
-            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #f0f0f0;color:#aaa;font-weight:600">VIN</th>
-            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #f0f0f0;color:#aaa;font-weight:600">Tipo</th>
-            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #f0f0f0;color:#aaa;font-weight:600">Fecha</th>
+        <table style="width:100%;font-size:12px;border-collapse:collapse;min-width:500px">
+          <thead><tr style="background:#f8f8f8">
+            <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e0e0e0;color:#888;font-weight:700">#</th>
+            <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e0e0e0;color:#888;font-weight:700">Cliente</th>
+            <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e0e0e0;color:#888;font-weight:700">Asesor</th>
+            <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e0e0e0;color:#888;font-weight:700">Vehículo</th>
+            <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e0e0e0;color:#888;font-weight:700">VIN</th>
+            <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e0e0e0;color:#888;font-weight:700">Tipo</th>
+            <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e0e0e0;color:#888;font-weight:700">Fecha</th>
           </tr></thead>
           <tbody>
             ${gaugeRecs.map((r,i)=>{
               const as=USERS.find(u=>u.id===r.asesorId);
               const color=r._tipo.includes('Facturado')?'#CC0001':'#2d6011';
-              return `<tr style="border-bottom:1px solid #fafafa">
-                <td style="padding:4px 6px;color:#aaa">${i+1}</td>
-                <td style="padding:4px 6px;font-weight:600">${r.nombre||'—'}</td>
-                <td style="padding:4px 6px;color:#555">${as?as.nombre.split(' ').slice(0,2).join(' '):'—'}</td>
-                <td style="padding:4px 6px">${r.vehiculo||'—'}</td>
-                <td style="padding:4px 6px;font-family:monospace;color:#1457a0;font-size:10px">${r.vin||'—'}</td>
-                <td style="padding:4px 6px"><span style="background:${color}22;color:${color};padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700">${r._tipo}</span></td>
-                <td style="padding:4px 6px;color:#888">${r._fecha||'—'}</td>
+              return `<tr style="border-bottom:1px solid #f0f0f0" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
+                <td style="padding:7px 8px;color:#aaa;font-size:11px">${i+1}</td>
+                <td style="padding:7px 8px;font-weight:700;color:#1a1a1a">${r.nombre||'—'}</td>
+                <td style="padding:7px 8px;color:#555">${as?as.nombre.split(' ').slice(0,2).join(' '):'—'}</td>
+                <td style="padding:7px 8px;font-size:12px">${r.vehiculo||'—'}</td>
+                <td style="padding:7px 8px;font-family:monospace;color:#1457a0;font-size:11px">${r.vin||'—'}</td>
+                <td style="padding:7px 8px"><span style="background:${color}22;color:${color};padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700">${r._tipo}</span></td>
+                <td style="padding:7px 8px;color:#888;font-size:11px">${r._fecha||'—'}</td>
               </tr>`;
             }).join('')}
           </tbody>
