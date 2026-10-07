@@ -135,6 +135,12 @@ tr:hover td{background:#fafafa}
 .chart-card{position:relative;transition:box-shadow .2s}
 body.edit-mode .chart-card{cursor:default}
 body.edit-mode .chart-card:hover{box-shadow:0 0 0 2px #CC0001;border-radius:13px}
+.resize-handle{position:absolute;background:#CC0001;border-radius:2px;z-index:100;opacity:0;transition:opacity .2s}
+body.edit-mode .chart-card:hover .resize-handle{opacity:1}
+.resize-handle.se{bottom:0;right:0;width:14px;height:14px;cursor:se-resize;border-radius:0 0 8px 0}
+.resize-handle.e{right:0;top:50%;transform:translateY(-50%);width:8px;height:40px;cursor:e-resize;border-radius:4px}
+.resize-handle.s{bottom:0;left:50%;transform:translateX(-50%);height:8px;width:40px;cursor:s-resize;border-radius:4px}
+body.edit-mode .chart-card{position:relative;box-sizing:border-box}
 body.edit-mode .chart-card:hover .card-edit-overlay{opacity:1;pointer-events:all}
 
 .card-edit-overlay{position:absolute;inset:0;border-radius:13px;background:rgba(10,10,10,0.0);display:flex;flex-direction:column;align-items:flex-end;padding:.5rem;gap:4px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
@@ -676,7 +682,7 @@ body.edit-mode .dash-section-edit{display:flex}
 
         <!-- VELOCÍMETRO META -->
         <div class="chart-grid">
-          <div class="chart-card" style="max-height:320px;overflow:hidden">
+          <div class="chart-card" style="overflow:visible">
             <div class="chart-title" style="margin-bottom:.5rem">🎯 Velocímetro de cumplimiento
               <div style="margin-left:auto">
                 <div class="meta-input-wrap">
@@ -2615,17 +2621,11 @@ function renderEnts(){
         ?`<div style="font-size:11px;color:#2d6011;font-weight:600">📅 ${p.entregaProg.fecha}<br>${p.entregaProg.hora}</div>`
         :(listo?'<span class="b bg" style="font-size:10px">✅ Listo para programar</span>':'<span style="color:#ccc;font-size:11px">—</span>');
 
-      // Checkbox marcar entregado — solo admins y solo si tiene entrega programada
-      const chkEntregado=isAdm()&&p.entregaProg
-        ?`<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
-            <input type="checkbox" class="entrega-check" id="chk_${p._id}"
-              onchange="marcarEntregado('${p._id}',this.checked)"
-              title="Marcar como entregado">
-            <label for="chk_${p._id}" style="font-size:11px;color:#2d6011;cursor:pointer;font-weight:600">Marcar entregado</label>
-          </div>`:'';
+      // Checkbox marcar entregado — gerente y admin_sede pueden marcar sin importar etapas
+      const puedeMarcar=CU&&(CU.rol==='gerente'||CU.rol==='admin_sede');
 
       return `<tr>
-        <td style="width:32px">${isAdm()&&p.entregaProg?`<input type="checkbox" class="entrega-check" onchange="marcarEntregado('${p._id}',this.checked)" title="Marcar como entregado">`:''}</td>
+        <td style="width:32px">${puedeMarcar?`<input type="checkbox" class="entrega-check" onchange="marcarEntregado('${p._id}',this.checked)" title="Marcar como entregado">`:''}</td>
         <td><strong style="font-size:12px">${p.cliente}</strong></td>
         <td class="mono">${p.cedula}</td>
         <td style="font-size:11px">
@@ -2641,7 +2641,7 @@ function renderEnts(){
         <td>${entregaInfo}</td>
         <td style="white-space:nowrap">
           <button class="btn btns btnsm" onclick="verDet('${p._id}')">Ver etapas</button>
-          ${listo&&!p.entregaProg&&isAdm()?`<br><button class="btn btnp btnsm" onclick="openPE('${p._id}')" style="margin-top:3px">Prog. entrega</button>`:''}
+          ${puedeMarcar&&!p.entregaProg?`<br><button class="btn btnp btnsm" onclick="openPE('${p._id}')" style="margin-top:3px">Prog. entrega</button>`:''}
         </td>
       </tr>`;
     }).join('');
@@ -2679,50 +2679,45 @@ function renderEnts(){
   }
 }
 
-async function marcarEntregado(pid, checked){
+async function marcarEntregado(id, checked){
   if(!checked) return;
-  if(!confirm('¿Confirmas que el vehículo fue entregado al cliente? Esta acción lo moverá a la sección de entregados.')) {
-    // Uncheck the checkbox
-    const chk=document.querySelector(`input[onchange*="${pid}"]`);
-    if(chk) chk.checked=false;
-    return;
-  }
-  const p=PROCS.find(x=>x._id===pid);
+  const p=PROCS.find(x=>x._id===id);
   if(!p) return;
 
-  const updates={
-    entregado: true,
-    fechaEntregaReal: p.entregaProg?.fecha || today(),
-    horaEntregaReal: p.entregaProg?.hora || '',
-    fechaEntregadoAt: today()
-  };
+  const done=p.etapas?p.etapas.filter(e=>e.done).length:0;
+  const total=p.etapas?p.etapas.length:0;
+  const listo=done===total;
 
-  // Also mark ALL etapas as done
-  const etapas=p.etapas.map(e=>({...e,done:true,fecha:e.fecha||today()}));
-  updates.etapas=etapas;
-
-  await db.collection('procesos').doc(pid).update(updates);
-
-  // Update seguimiento estado to Matriculado if linked
-  if(p.vin){
-    const seg=SEGS.find(s=>s.vin===p.vin&&s.estado!=='Desistido');
-    if(seg){
-      await db.collection('seguimiento').doc(seg._id).update({
-        estado:'Matriculado',
-        fechaMat:today(),
-        updatedAt:today()
-      });
+  // Warn if not all stages done, but allow gerente and admin_sede to proceed
+  if(!listo){
+    const pendientes=p.etapas?p.etapas.filter(e=>!e.done).map(e=>e.nombre).join(', '):'';
+    if(!confirm(`⚠️ Faltan ${total-done} etapa(s) sin completar:\n${pendientes}\n\n¿Deseas marcar el vehículo como entregado de todas formas?`)){
+      // Uncheck the checkbox
+      const chk=document.querySelector(`[onchange*="${id}"]`);
+      if(chk) chk.checked=false;
+      return;
     }
-    // Also update inventario — mark as delivered and hidden
-    await db.collection('inventario').doc(p.vin).update({
-      estado:'MATRICULADO',
-      oculto:true,
-      fechaEntrega:today(),
-      sepObs:'ENTREGADO el '+today()
-    });
   }
 
-  toast('🎉 ¡Vehículo marcado como entregado! El cliente '+p.cliente+' ya tiene su Honda.');
+  const fechaHoy=today();
+  const horaAhora=new Date().toTimeString().slice(0,5);
+  try{
+    await db.collection('procesos').doc(id).update({
+      entregado:true,
+      fechaEntregaReal:fechaHoy,
+      horaEntregaReal:horaAhora,
+      entregadoPor:CU.id,
+      entregadoSinEtapas:!listo
+    });
+    // Update seguimiento estado to Entregado
+    const seg=SEGS.find(s=>s.vin===p.vin);
+    if(seg) await db.collection('seguimiento').doc(seg._id).update({estado:'Entregado',fechaEntrega:fechaHoy,updatedAt:fechaHoy});
+    toast('✅ Vehículo marcado como entregado'+(listo?'':' (etapas incompletas)'));
+  }catch(e){
+    toast('❌ Error: '+e.message);
+    const chk=document.querySelector(`[onchange*="${id}"]`);
+    if(chk) chk.checked=false;
+  }
 }
 
 async function revertirEntrega(pid){
@@ -4281,6 +4276,69 @@ let EDIT_MODE=false;
 
 // INLINE LAYOUT STATE — tracks order and size of each chart-card
 let INLINE_LAYOUT=null;
+
+// ── RESIZE HANDLES ──
+function addResizeHandles(card){
+  // Remove existing
+  card.querySelectorAll('.resize-handle').forEach(h=>h.remove());
+  ['se','e','s'].forEach(dir=>{
+    const h=document.createElement('div');
+    h.className='resize-handle '+dir;
+    h.title=dir==='se'?'Arrastrar diagonal':dir==='e'?'Arrastrar ancho':'Arrastrar alto';
+    h.addEventListener('mousedown',e=>startResize(e,card,dir));
+    card.appendChild(h);
+  });
+}
+
+function startResize(e,card,dir){
+  e.preventDefault();e.stopPropagation();
+  const startX=e.clientX,startY=e.clientY;
+  const startW=card.offsetWidth,startH=card.offsetHeight;
+  card.style.transition='none';
+  const onMove=ev=>{
+    const dx=ev.clientX-startX,dy=ev.clientY-startY;
+    if(dir==='se'||dir==='e') card.style.width=Math.max(200,startW+dx)+'px';
+    if(dir==='se'||dir==='s') card.style.minHeight=Math.max(80,startH+dy)+'px';
+    card.style.overflow='visible';
+    // Trigger chart resize
+    card.querySelectorAll('canvas').forEach(c=>{
+      const chart=Chart.getChart(c);
+      if(chart) chart.resize();
+    });
+  };
+  const onUp=()=>{
+    document.removeEventListener('mousemove',onMove);
+    document.removeEventListener('mouseup',onUp);
+    card.style.transition='';
+    // Save sizes to Firebase
+    saveCardSizes();
+  };
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onUp);
+}
+
+async function saveCardSizes(){
+  if(!db) return;
+  const sizes={};
+  document.querySelectorAll('.chart-card[data-card-id]').forEach(c=>{
+    sizes[c.dataset.cardId]={w:c.style.width||'',h:c.style.minHeight||''};
+  });
+  try{await db.collection('config').doc('card_sizes').set({sizes,updatedAt:today()});}catch(e){}
+}
+
+async function loadCardSizes(){
+  if(!db) return;
+  try{
+    const doc=await db.collection('config').doc('card_sizes').get();
+    if(doc.exists){
+      const {sizes}=doc.data();
+      Object.entries(sizes||{}).forEach(([id,sz])=>{
+        const card=document.querySelector(`.chart-card[data-card-id="${id}"]`);
+        if(card){if(sz.w)card.style.width=sz.w;if(sz.h)card.style.minHeight=sz.h;}
+      });
+    }
+  }catch(e){}
+}
 
 function toggleEditMode(){
   EDIT_MODE=!EDIT_MODE;
